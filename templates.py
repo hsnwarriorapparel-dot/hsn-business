@@ -10,11 +10,11 @@ EMAIL = "hsnwarriorapparel@gmail.com"
 
 # Spanish gym/club DM openers (varied so no two leads get the same message)
 DM_OPENERS = [
-    "Hola {name}! 👋 We're {company} — martial arts & sportswear manufacturers from Sialkot working with European clubs.",
-    "Hola {name} 👋 Greetings from {company}! We manufacture martial arts gear and custom team wear in Sialkot.",
+    "Hello {name}! 👋 We're {company} — martial arts & sportswear manufacturers from Sialkot working with European clubs.",
+    "Hi {name} 👋 Greetings from {company}! We manufacture martial arts gear and custom team wear in Sialkot.",
     "Hi {name}! 👋 {company} here — we produce uniforms, gis and fight gear for clubs across Europe.",
-    "Hola {name}! We're {company}, manufacturers of martial arts apparel. Just found your page — great work! 👏",
-    "Hola from {company} 👋 — we make custom martial arts gear and team wear for clubs like yours.",
+    "Hello {name}! We're {company}, manufacturers of martial arts apparel. Just found your page — great work! 👏",
+    "Hello from {company} 👋 — we make custom martial arts gear and team wear for clubs like yours.",
 ]
 
 DM_MID = [
@@ -56,11 +56,11 @@ def build_wa(name, detail):
     o = random.choice(DM_OPENERS).format(name=name, company=COMPANY)
     f = random.choice(DM_OFFERS)
     c = random.choice(DM_CTAS)
-    return f"Hola {name}! 👋\n\n{o.split(' — ',1)[-1] if ' — ' in o else o}\n\n{f}\n\n{c}\n\n— {COMPANY}"
+    return f"Hello {name}! 👋\n\n{o.split(' — ',1)[-1] if ' — ' in o else o}\n\n{f}\n\n{c}\n\n— {COMPANY}"
 
 def build_email(name, detail):
     subject = random.choice(EMAIL_SUBJECTS).format(name=name, company=COMPANY)
-    body = f"""Hola {name} team,
+    body = f"""Hello {name} team,
 
 We're {COMPANY} — martial arts and sportswear manufacturers based in Sialkot, Pakistan, producing for clubs and schools across Europe.
 
@@ -69,11 +69,11 @@ We noticed your {detail} and would love to introduce what we do:
 - Custom uniforms, gis, belts and protective gear with your club's own branding
 - OEM / private-label manufacturing at factory-direct prices
 - Small minimum order quantities designed for clubs, not just big distributors
-- 3-4 weeks production and delivery to Spain
+- 3-4 weeks production and delivery across Europe
 
 If you'd like, we can send our catalog and wholesale price list — no commitment, just so you have us on file for when you need custom gear.
 
-Gracias,
+Best regards,
 {COMPANY}
 {EMAIL}
 {PHONE}
