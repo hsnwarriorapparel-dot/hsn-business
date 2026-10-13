@@ -17,18 +17,19 @@ def load_leads():
     return leads
 
 def save_leads(leads):
-    header = ['Lead ID','Name','Type','Instagram','City','Country','Phone','Email','Website','Status','Notes']
+    header = ['Lead ID','Name','Type','IG Username','IG Profile Link','City','Country','Phone','Phone Type','Email','Website','Status','Profile Analysis','Products Needed','Notes']
     with open('/home/ubuntu/leads.csv', 'w', newline='') as f:
         w = csv.writer(f)
         w.writerow(header)
         for l in leads:
-            w.writerow([l.get('Lead ID',''), l.get('Name',''), l.get('Type',''), l.get('Instagram',''),
-                        l.get('City',''), l.get('Country',''), l.get('Phone',''), l.get('Email',''),
-                        l.get('Website',''), l.get('Status',''), l.get('Notes','')])
+            w.writerow([l.get('Lead ID',''), l.get('Name',''), l.get('Type',''), l.get('IG Username',''),
+                        l.get('IG Profile Link',''), l.get('City',''), l.get('Country',''),
+                        l.get('Phone',''), l.get('Phone Type',''), l.get('Email',''), l.get('Website',''),
+                        l.get('Status',''), l.get('Profile Analysis',''), l.get('Products Needed',''), l.get('Notes','')])
 
 def process_lead(lead):
     lid = lead['Lead ID']; name = lead['Name']
-    ig = (lead.get('Instagram') or '').lstrip('@')
+    ig = (lead.get('IG Username') or '').lstrip('@')
     phone = (lead.get('Phone') or '').replace('+','').replace(' ','')
     email = lead.get('Email') or ''
     detail = lead.get('Notes') or f"work at {name}"

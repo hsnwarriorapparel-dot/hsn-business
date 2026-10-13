@@ -102,14 +102,19 @@ def gmail_send(to, subject, body):
     cdp("Page.navigate", {"url": "https://mail.google.com/mail/u/0/#inbox"})
     time.sleep(4)
 
-    # dismiss any stale compose dialog
+    # dismiss any stale compose dialog: Escape first, then Save & close, then click discard in confirm
     js_eval(ws, """(async () => {
-      const dlg = document.querySelector('div[role="dialog"]');
-      if (dlg) {
-        const c = Array.from(dlg.querySelectorAll('[aria-label]')).find(e => /discard|close/i.test(e.getAttribute('aria-label')||''));
-        if (c) c.click();
-        await new Promise(r => setTimeout(r, 1500));
+      for (let round = 0; round < 3; round++) {
+        const dlg = document.querySelector('div[role="dialog"]');
+        if (!dlg) break;
+        // Escape removed - it MINIMIZES Gmail compose instead of closing
+        await new Promise(r => setTimeout(r, 800));
+        const saveClose = Array.from(dlg.querySelectorAll('[aria-label]')).find(e => /Save & close/i.test(e.getAttribute('aria-label')||''));
+        if (saveClose && document.querySelector('div[role="dialog"]')) { saveClose.click(); await new Promise(r => setTimeout(r, 1200)); }
       }
+      // if a confirm-discard prompt appears, click Discard
+      const discard = Array.from(document.querySelectorAll('[role="button"], button')).find(e => /^Discard$/i.test((e.innerText||'').trim()));
+      if (discard) { discard.click(); await new Promise(r => setTimeout(r, 800)); }
       return 'ok';
     })()""")
     time.sleep(1)
@@ -131,16 +136,33 @@ def gmail_send(to, subject, body):
     cdp("Input.dispatchMouseEvent", {"type": "mousePressed", "x": pos['x'], "y": pos['y'], "button": "left", "clickCount": 1})
     cdp("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": pos['x'], "y": pos['y'], "button": "left", "clickCount": 1})
 
-    # wait until focus is in the To INPUT
+    # wait until focus is in the To INPUT; if the dialog is minimized (h<100), expand it
     for _ in range(12):
         f = js_eval(ws, """(() => {
           const dlg = document.querySelector('div[role="dialog"]');
           if (!dlg) return 'nodlg';
+          const r = dlg.getBoundingClientRect();
+          if (r.height < 100) return 'minimized';
           const a = document.activeElement;
           return (a && a.tagName === 'INPUT' && /to/i.test(a.getAttribute('aria-label')||'')) ? 'ready' : 'wait';
         })()""")
         if f == 'ready':
             break
+        if f == 'minimized':
+            # click the minimized bar to expand it back
+            pos_m = js_eval(ws, """(() => {
+              const dlg = document.querySelector('div[role="dialog"]');
+              const r = dlg.getBoundingClientRect();
+              return JSON.stringify({x: r.x + r.width/2, y: r.y + r.height/2});
+            })()""")
+            try:
+                pm = json.loads(pos_m)
+                cdp("Input.dispatchMouseEvent", {"type": "mousePressed", "x": pm['x'], "y": pm['y'], "button": "left", "clickCount": 1})
+                cdp("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": pm['x'], "y": pm['y'], "button": "left", "clickCount": 1})
+            except Exception:
+                pass
+            time.sleep(1.5)
+            continue
         time.sleep(1)
     else:
         ws.close()

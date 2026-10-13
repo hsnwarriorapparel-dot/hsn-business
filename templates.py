@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Message templates for HSN Warrior Apparels outreach.
-Company: HSN Warrior Apparels | Phone: +92 337 33381 | NO free samples.
+Company: HSN Warrior Apparels | Phone: +92 337 3336381 | NO free samples.
 Sign-off: company name only (no personal name)."""
 import random
 
 COMPANY = "HSN Warrior Apparels"
-PHONE = "+92 337 33381"
+PHONE = "+92 337 3336381"
 EMAIL = "hsnwarriorapparel@gmail.com"
 
 # Spanish gym/club DM openers (varied so no two leads get the same message)
