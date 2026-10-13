@@ -97,6 +97,8 @@ def gmail_send(to, subject, body):
     ws = connect(tabs[0])
     cdp = make_cdp(ws)
     cdp("Page.enable")
+    cdp("Page.bringToFront")   # REQUIRED: background tabs ignore UI clicks
+    time.sleep(1)
 
     # clean state: inbox
     cdp("Page.navigate", {"url": "https://mail.google.com/mail/u/0/#inbox"})
@@ -305,6 +307,8 @@ def wa_send(phone, message):
     ws = connect(tab)
     cdp = make_cdp(ws)
     cdp("Page.enable")
+    cdp("Page.bringToFront")   # background tabs ignore UI clicks
+    time.sleep(0.5)
     cdp("Page.navigate", {"url": f"https://web.whatsapp.com/send?phone={phone}"})
     time.sleep(15)
     for attempt in range(5):
