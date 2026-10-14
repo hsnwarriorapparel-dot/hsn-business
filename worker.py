@@ -17,15 +17,35 @@ def load_leads():
     return leads
 
 def save_leads(leads):
+    """ROW-TARGETED: re-reads the CURRENT CSV from disk, updates Status only for leads
+    this worker processed (marked _status_dirty), and appends any of our leads missing
+    from disk. Never drops rows added by the main agent while worker runs."""
     header = ['Lead ID','Name','Type','IG Username','IG Profile Link','City','Country','Phone','Phone Type','Email','Website','Status','Profile Analysis','Products Needed','Notes']
+    try:
+        with open('/home/ubuntu/leads.csv') as f:
+            disk_rows = list(csv.reader(f))
+        disk_header = disk_rows[0]
+        status_i = disk_header.index('Status')
+        disk_by_id = {r[0]: list(r) for r in disk_rows[1:] if r}
+    except Exception:
+        disk_by_id = {}
+    mem_by_id = {l['Lead ID']: l for l in leads}
     with open('/home/ubuntu/leads.csv', 'w', newline='') as f:
         w = csv.writer(f)
         w.writerow(header)
-        for l in leads:
-            w.writerow([l.get('Lead ID',''), l.get('Name',''), l.get('Type',''), l.get('IG Username',''),
-                        l.get('IG Profile Link',''), l.get('City',''), l.get('Country',''),
-                        l.get('Phone',''), l.get('Phone Type',''), l.get('Email',''), l.get('Website',''),
-                        l.get('Status',''), l.get('Profile Analysis',''), l.get('Products Needed',''), l.get('Notes','')])
+        for lid, r in disk_by_id.items():
+            mem = mem_by_id.get(lid)
+            if mem and mem.get('_status_dirty'):
+                while len(r) < len(disk_header):
+                    r.append('')
+                r[status_i] = mem.get('Status', '')
+            w.writerow(r)
+        for lid, mem in mem_by_id.items():
+            if lid not in disk_by_id:
+                w.writerow([mem.get('Lead ID',''), mem.get('Name',''), mem.get('Type',''), mem.get('IG Username',''),
+                            mem.get('IG Profile Link',''), mem.get('City',''), mem.get('Country',''), mem.get('Phone',''),
+                            mem.get('Phone Type',''), mem.get('Email',''), mem.get('Website',''), mem.get('Status',''),
+                            mem.get('Profile Analysis',''), mem.get('Products Needed',''), mem.get('Notes','')])
 
 def process_lead(lead):
     lid = lead['Lead ID']; name = lead['Name']
@@ -96,6 +116,7 @@ def process_lead(lead):
     ok = all(v in ('sent', 'ok', 'clicked', None) or (v and 'sent' in str(v)) for v in results.values())
     status = f"COMPLETE: follow={results['follow']} dm={results['dm']} email={results['email']} wa={results['wa']}"
     lead['Status'] = status
+    lead['_status_dirty'] = True
     return results
 
 def main():
@@ -109,6 +130,7 @@ def main():
         except Exception as e:
             log(f"{lead['Lead ID']} ERROR: {e}")
             lead['Status'] = f"ERROR: {e}"
+            lead['_status_dirty'] = True
         save_leads(leads)
         # anti-block delay: 3-6 min between leads
         delay = random.randint(180, 360)
