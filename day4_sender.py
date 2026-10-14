@@ -98,3 +98,81 @@ def random_wait():
 
 if __name__ == '__main__':
     main()
+    log('MAIN DONE - running IG fallback pass for emailless leads...')
+    try:
+        ig_fallback_pass()
+    except Exception as e:
+        log(f'IG fallback error: {e}')
+    log('DAY 4 SENDER FULLY COMPLETE')
+
+# === IG EMAIL HUNT PASS (added per user instruction 2026-10-14) ===
+# Leads marked "NO EMAIL - IG fallback needed" get: hunt email via their IG profile, 
+# then email them if found; regardless: IG follow + DM.
+def ig_fallback_pass():
+    """For all Day-4 leads without sent emails: follow + DM (+ try to hunt email from IG)."""
+    from ig_email_extractor import extract_from_profile
+    from outreach import ig_open_profile, ig_follow, ig_dm
+    from templates import build_dm
+    from cdp_helper import get_tabs, connect
+    with open(CSV) as f:
+        rows = list(csv.reader(f))
+    idx = {h: i for i, h in enumerate(rows[0])}
+    targets = []
+    for r in rows[1:]:
+        if 'Day 4' in r[idx['Notes']] and ('IG fallback' in r[idx['Status']] or 'NO EMAIL' in r[idx['Status']] or 'EMAIL FAILED' in r[idx['Status']]):
+            targets.append(r)
+    log(f"IG FALLBACK: {len(targets)} leads to follow+DM")
+    for r in targets:
+        lid, name, country = r[0], r[1], r[idx['Country']]
+        handle = (r[idx['IG Username']] or '').lstrip('@')
+        status_new = []
+        # try email extraction from IG if handle exists
+        hunted_email = None
+        if handle:
+            try:
+                d = extract_from_profile(handle)
+                if d and d.get('email'):
+                    hunted_email = d['email']
+                    log(f"  IG-hunted email for {name}: {hunted_email}")
+            except Exception as e:
+                log(f"  IG extract fail {name}: {e}")
+        if hunted_email:
+            res = send_email_via_hermes(name, hunted_email, f"martial arts gym in {country or 'Europe'}")
+            if res == 'sent':
+                status_new.append('email sent (hunted from IG)')
+                # update email field
+                with open(CSV) as f2:
+                    rows2 = list(csv.reader(f2))
+                idx2 = {h: i for i, h in enumerate(rows2[0])}
+                for rr in rows2[1:]:
+                    if rr[0] == lid:
+                        rr[idx2['Email']] = hunted_email
+                with open(CSV, 'w', newline='') as f2:
+                    csv.writer(f2).writerows(rows2)
+            else:
+                status_new.append(f'email hunt failed: {res[:40]}')
+        # follow + DM regardless
+        if handle:
+            try:
+                ok = ig_open_profile(handle)
+                if ok:
+                    tab = [t for t in get_tabs() if f'instagram.com/{handle}' in t['url'] and t['type']=='page']
+                    ws = connect(tab[-1])
+                    fr = ig_follow(ws)
+                    time.sleep(3)
+                    dm = ig_dm(ws, build_dm(name, f"martial arts gym in {country or 'Europe'}"))
+                    ws.close()
+                    status_new.append(f'IG follow={fr} dm={dm}')
+                    log(f"  IG {name}: follow={fr} dm={dm}")
+                    time.sleep(20)
+            except Exception as e:
+                status_new.append(f'IG error: {str(e)[:40]}')
+        update_status(lid, 'COMPLETE: ' + ' | '.join(status_new) if status_new else 'COMPLETE: no channels')
+    log("IG FALLBACK PASS DONE")
+
+# run fallback at the end of main()
+_orig_main = main
+def main_with_fallback():
+    _orig_main()
+    log("Starting IG fallback pass...")
+    ig_fallback_pass()
