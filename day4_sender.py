@@ -96,14 +96,7 @@ def random_wait():
     import random
     return random.randint(25, 45)  # 25-45s between emails: ~50-70/hour — safe for Gmail
 
-if __name__ == '__main__':
-    main()
-    log('MAIN DONE - running IG fallback pass for emailless leads...')
-    try:
-        ig_fallback_pass()
-    except Exception as e:
-        log(f'IG fallback error: {e}')
-    log('DAY 4 SENDER FULLY COMPLETE')
+
 
 # === IG EMAIL HUNT PASS (added per user instruction 2026-10-14) ===
 # Leads marked "NO EMAIL - IG fallback needed" get: hunt email via their IG profile, 
@@ -176,3 +169,13 @@ def main_with_fallback():
     _orig_main()
     log("Starting IG fallback pass...")
     ig_fallback_pass()
+
+
+if __name__ == '__main__':
+    main()
+    log('MAIN DONE - running IG fallback pass for emailless leads...')
+    try:
+        ig_fallback_pass()
+    except Exception as e:
+        log(f'IG fallback error: {e}')
+    log('DAY 4 SENDER FULLY COMPLETE')

@@ -125,7 +125,7 @@ def main():
             urls = exa_search(q, 10)
             log(f"[{country}] '{q}' -> {len(urls)} urls")
             for url in urls:
-                if 'exa.ai' in url or 'classpass' in url or 'studiomaps' in url:
+                if 'exa.ai' in url or 'classpass' in url or 'studiomaps' in url or any(d in url for d in ['ffjudo.fr','ffkarate','fijlkam','judoinside','usaboxing','fkb.nl','wako','judobund','djb.de','ffboxe','kickboxen-deutschland','britishjudo','trouver-un-club','kombazen','ffsavate']):
                     continue
                 data = scrape(url)
                 if not data or not data['emails']:
