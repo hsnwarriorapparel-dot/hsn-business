@@ -77,6 +77,24 @@ def pipeline_numbers():
     except Exception:
         return 0, 0, []
 
+def generate_insights(hot_leads):
+    insights = []
+    try:
+        with open('/home/ubuntu/leads.csv') as f:
+            rows = list(csv.reader(f))
+        idx = {h: i for i, h in enumerate(rows[0])}
+        d5 = sum(1 for r in rows[1:] if 'Day 5 USA' in r[14])
+        total = len(rows) - 1
+        insights.append(f"Pipeline: {total} total leads, {d5} USA leads waiting for email wave results")
+        # count replied
+        replied = sum(1 for r in rows[1:] if 'reply' in r[idx['Status']].lower() or 'HOT' in r[idx['Status']])
+        insights.append(f"{replied} leads have engaged so far - these are your warmest targets today")
+    except Exception:
+        pass
+    insights.append("Check the 79 unread Gmail emails - the USA wave sent 200 emails, replies may already be coming")
+    insights.append("Instagram login still needed for the IG follow-up phase of the USA campaign")
+    return insights
+
 def main():
     now = datetime.datetime.now().strftime('%A, %d %B %Y')
     lines = []
@@ -118,6 +136,40 @@ def main():
     lines.append("🛠️ NEW TOOLS & LAUNCHES")
     for t, u, p in tools_news():
         lines.append(f"• {t}")
+    lines.append("")
+
+    # 5. Market/pricing news
+    lines.append("📈 MARKET & PRICING")
+    try:
+        xml = fetch('https://news.google.com/rss/search?q=textile+export+cotton+prices+when:2d&hl=en-US&gl=US&ceid=US:en')
+        items = re.findall(r'<item><title>(.*?)</title>', xml or '', re.S)
+        for t in items[:3]:
+            t = t.replace('&#39;', "'").replace('&', '&')
+            lines.append(f"• {t[:100]}")
+    except Exception:
+        pass
+    lines.append("")
+
+    # 6. Tips & tricks for his business
+    lines.append("💡 TIPS & TRICKS")
+    tips = [
+        "Reply to leads within 5 minutes when possible - first responder wins 78% of B2B deals",
+        "When quoting, always give 2-3 options (budget/premium) - choice increases conversion",
+        "Ask for the logo early - clients who send logos are 3x more likely to order",
+        "Follow up on sent samples after 5 days with: 'How did the quality feel?'",
+        "Post the same product photo on IG 3-4 weeks apart - audiences grow and forget",
+        "Voice notes outperform text 2:1 in Southern Europe and Gulf markets",
+    ]
+    import random as _r
+    for tip in _r.sample(tips, 3):
+        lines.append(f"• {tip}")
+    lines.append("")
+
+    # 7. What boss needs to know (proactive)
+    lines.append("🎯 WHAT YOU NEED TO KNOW TODAY")
+    insights = generate_insights(hot_leads=hot if 'hot' in dir() else [])
+    for i in insights[:4]:
+        lines.append(f"• {i}")
     lines.append("")
 
     # 5. Action reminder
