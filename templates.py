@@ -58,18 +58,19 @@ def build_wa(name, detail):
     c = random.choice(DM_CTAS)
     return f"Hello {name}! 👋\n\n{o.split(' — ',1)[-1] if ' — ' in o else o}\n\n{f}\n\n{c}\n\n— {COMPANY}"
 
-def build_email(name, detail):
+def build_email(name, detail, region="Europe"):
     subject = random.choice(EMAIL_SUBJECTS).format(name=name, company=COMPANY)
+    region_phrase = "across the United States" if region == "USA" else "across Europe"
     body = f"""Hello {name} team,
 
-We're {COMPANY} — martial arts and sportswear manufacturers based in Sialkot, Pakistan, producing for clubs and schools across Europe.
+We're {COMPANY} — martial arts and sportswear manufacturers based in Sialkot, Pakistan, producing for clubs and schools {region_phrase}.
 
 We noticed your {detail} and would love to introduce what we do:
 
 - Custom uniforms, gis, belts and protective gear with your club's own branding
 - OEM / private-label manufacturing at factory-direct prices
 - Small minimum order quantities designed for clubs, not just big distributors
-- 3-4 weeks production and delivery across Europe
+- 3-4 weeks production and delivery {region_phrase}
 
 If you'd like, we can send our catalog and wholesale price list — no commitment, just so you have us on file for when you need custom gear.
 

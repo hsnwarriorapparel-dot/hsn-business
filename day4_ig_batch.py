@@ -32,7 +32,10 @@ def main():
     idx = {h: i for i, h in enumerate(rows[0])}
     targets = [r for r in rows[1:] if 'Day 4' in r[idx['Notes']]
                and (r[idx['IG Username']] or '').strip()
-               and 'follow' not in r[idx['Status']].lower()]
+               and 'follow' not in r[idx['Status']].lower()
+               and 'DUPLICATE' not in r[idx['Status']]
+               and 'FEDERATION' not in r[idx['Status']]
+               and 'skipped' not in r[idx['Status']].lower()]
     log(f"IG BATCH START: {len(targets)} profiles to follow+DM")
     done, fails = 0, 0
     for r in targets:
