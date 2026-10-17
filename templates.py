@@ -10,9 +10,9 @@ EMAIL = "hsnwarriorapparel@gmail.com"
 
 # Spanish gym/club DM openers (varied so no two leads get the same message)
 DM_OPENERS = [
-    "Hello {name}! 👋 We're {company} — martial arts & sportswear manufacturers from Sialkot working with European clubs.",
+    "Hello {name}! 👋 We're {company} — martial arts & sportswear manufacturers from Sialkot working with clubs worldwide.",
     "Hi {name} 👋 Greetings from {company}! We manufacture martial arts gear and custom team wear in Sialkot.",
-    "Hi {name}! 👋 {company} here — we produce uniforms, gis and fight gear for clubs across Europe.",
+    "Hi {name}! 👋 {company} here — we produce uniforms, gis and fight gear for clubs and schools worldwide.",
     "Hello {name}! We're {company}, manufacturers of martial arts apparel. Just found your page — great work! 👏",
     "Hello from {company} 👋 — we make custom martial arts gear and team wear for clubs like yours.",
 ]
