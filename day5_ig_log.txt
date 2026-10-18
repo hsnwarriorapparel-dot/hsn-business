@@ -1,0 +1,25 @@
+00:29:42 DAY5 IG BATCH START: 165 USA profiles to follow+DM
+00:30:04   OK Centralparkboxing @centralparkboxing follow=ok dm=sent
+00:30:59   OK Gangupboxing @gangupboxinggym follow=ok dm=sent
+00:31:25 DAY5 IG BATCH START: 163 USA profiles to follow+DM
+00:31:46   OK Trinityboxing @trinityboxing follow=ok dm=sent
+00:32:29   OK Boutfightclub @boutfightclub follow=ok dm=sent
+00:33:21   OK Perennialboxing @perennialboxingnyc follow=ok dm=sent
+00:57:17 DAY5 IG BATCH START: 112 USA profiles to follow+DM
+00:57:36   OK Htdnyc @htdboxinggym follow=no-btn dm=sent
+00:58:24   OK Cityofangelsboxing @cityofangelsbox follow=ok dm=sent
+00:58:56   NOTFOUND Pacquiaoprimeboxinggym @yourpage
+00:59:26   OK Knuckleheadsboxing @knuckleheadsboxing follow=ok dm=sent
+01:00:21   OK Rollbook @dcommafitness follow=ok dm=sent
+01:00:50   NOTFOUND Bjjportland @ctaportland
+01:01:20   OK Powerkickboxers @power_kickboxing follow=ok dm=sent
+01:02:12   OK Crosskicktkd @crosskicktkd follow=ok dm=sent
+01:03:07   OK Masterbaez @masterbaezmartialarts follow=ok dm=sent
+01:03:50   OK Atamartialarts @ATAMartialArts follow=ok dm=sent
+01:04:38   OK Theamericangrapplingacademy @americangrapplingacademy follow=ok dm=sent
+01:05:10   NOTFOUND Thegrapplingacademy @TheGrapplingAcademyUPV
+01:05:40   OK Grindhousegrappling @grindjiujitsu follow=ok dm=sent
+01:06:28   OK Realamericangrappling @realamericangrappling follow=ok dm=sent
+01:07:23   OK Sanantoniograpplingacademy @sanantoniograpplingacademy follow=ok dm=sent
+01:08:21   OK Journeymangrappling @journeyman_grappling follow=ok dm=sent
+01:09:10   OK Baybreakersboxing @baybreakersboxing follow=ok dm=sent
