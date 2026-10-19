@@ -1,0 +1,16 @@
+22:09:56 DAY 7 HUNT START — ammo now 97, target 104
+22:11:35 DAY 7 HUNT START — ammo now 96, target 101
+22:11:36 [Italy/Milano] 'palestra boxe Milano contatti email' -> 10 usable results
+22:11:52 [Italy/Roma] 'boxing gym Roma contatto email' -> 8 usable results
+22:11:53   + L688 Gym-tonic-2-0 (Italy) contatto@esempio.it wa=- ig=@gymtonic17
+22:12:06 [Italy/Torino] 'pugilato Torino palestra contatti' -> 10 usable results
+22:12:17 [Italy/Napoli] 'muay thai Napoli palestra email' -> 7 usable results
+22:12:34 [Germany/München] 'Boxgym München Kontakt E-Mail' -> 8 usable results
+22:12:47 [Germany/Berlin] 'Boxschule Berlin Kontakt email' -> 9 usable results
+22:13:01 [Germany/Hamburg] 'Muay Thai Gym Hamburg Impressum email' -> 10 usable results
+22:13:01   + L689 D’Amato Gym e.V. (Germany) info@damatogym.de wa=- ig=-
+22:13:06   + L690 Unknown Gym (Germany) info@fightgymhamburg.de wa=- ig=-
+22:13:07   + L691 Nader’s Gym Hamburg (Germany) info@nadersgym.de wa=- ig=-
+22:13:08   + L692 GORILLA GYM HAMBURG (Germany) info@gorillagym.hamburg wa=- ig=-
+22:13:17 TARGET REACHED (ammo 101). Stopping.
+22:13:17 HUNT DONE: +5 leads | CSV rows 679 | last ID L692 | bad-col rows 0 | ammo 101

@@ -1,0 +1,6 @@
+22:16:24 Day 7 PIPELINE START
+22:16:24 email ammo: 100
+22:16:41   EMAIL L582 Boxing Lab Milano -> info@boxinglab.it: OK
+22:17:37   EMAIL L583 Underdog Boxing -> info@underdogboxing.it: OK
+22:18:32   EMAIL L584 USC School of Boxing -> schoolofboxing@uscsport.nl: OK
+22:19:27   EMAIL L585 Fight District Amsterd -> hello@fightdistrict.nl: OK
