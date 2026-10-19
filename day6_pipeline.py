@@ -39,6 +39,8 @@ ammo = [r for r in rows[1:] if (r[idx['Email']] or '').strip()
 log(f"email ammo: {len(ammo)}")
 
 # PHASE 1: email up to 100 (gmail safe pacing 30-45s)
+import traceback
+log(f"PHASE 1 start: {len(ammo[:100])} targets")
 sent = 0
 for r in ammo[:100]:
     lid = r[0]
@@ -54,7 +56,7 @@ for r in ammo[:100]:
     from outreach import gmail_send
     subject, body = build_email(name, f"martial arts and boxing gym in {country}")
     res = gmail_send(email, subject, body)
-    ok = res.get('ok')
+    ok = res.get('ok') if isinstance(res, dict) else ('sent' in str(res).lower())
     log(f"  EMAIL {lid} {name[:20]} -> {email}: {'OK' if ok else str(res)[:50]}")
     if ok:
         update_status(lid, f"COMPLETE: email sent (Day 6, {time.strftime('%Y-%m-%d')})")
