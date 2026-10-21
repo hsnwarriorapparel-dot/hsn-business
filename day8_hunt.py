@@ -8,7 +8,7 @@ import subprocess, re, csv, time, os, html as ihtml
 CSV = '/home/ubuntu/leads.csv'
 LOG = '/home/ubuntu/day8_hunt_log.txt'
 TARGET = 100
-TODAY_TAG = 'Hunted Day 8 (2026-10-20)'
+TODAY_TAG = 'Hunted Day 8 (2026-10-21)'
 
 def log(m):
     line = time.strftime('%H:%M:%S') + ' ' + m
@@ -45,7 +45,7 @@ def known_emails_phones():
 
 def next_id():
     rows = load_csv()
-    return max(int(r[0][1:]) for r in rows[1:] if r[0].startswith('L') and r[1:].isdigit()) + 1
+    return max(int(r[0][1:]) for r in rows[1:] if r[0].startswith('L') and r[0][1:].isdigit()) + 1
 
 def append_lead(lead):
     with open(CSV, 'a', newline='', encoding='utf-8') as f:
