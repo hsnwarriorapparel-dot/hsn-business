@@ -150,7 +150,9 @@ def normalize_phone(raw, prefix):
         return ''
     if not raw.strip().startswith('+') and prefix and len(digits) >= 9:
         return prefix + digits.lstrip('0')
-    return ('+' if not raw.strip().startswith('+') else '') + digits
+    if raw.strip().startswith('+'):
+        return '+' + digits
+    return digits
 
 def enrich_website(lead):
     """If gmaps didn't get an email, fetch the website + contact pages."""
@@ -188,6 +190,10 @@ def append_leads(leads):
         return idx.get(name)
     existing_emails = {(r[col('Email')] or '').strip().lower() for r in rows[1:] if col('Email') is not None}
     existing_phones = {re.sub(r'\D', '', r[col('Phone')] or '') for r in rows[1:] if col('Phone') is not None}
+    # next Lead ID = max existing numeric ID + 1 (row count collides with re-used IDs)
+    import re as _re
+    max_id = max((int(m.group(1)) for r in rows[1:] if (m := _re.match(r'^L(\d+)$', (r[0] or '').strip()))), default=0)
+    next_id = max_id + 1
     added = 0
     for lead in leads:
         em = lead["email"]
@@ -198,7 +204,8 @@ def append_leads(leads):
             continue
         if not em and not ph and not lead["website"]:
             continue
-        num = len(rows)
+        num = next_id
+        next_id += 1
         row = [''] * len(hdr)
         row[0] = f"L{num:03d}"
         for field, colname in [("name", "Name"), ("city", "City"), ("country", "Country"),
