@@ -100,26 +100,33 @@ def gmail_send(to, subject, body):
     cdp("Page.bringToFront")   # REQUIRED: background tabs ignore UI clicks
     time.sleep(1)
 
-    # clean state: inbox
-    cdp("Page.navigate", {"url": "https://mail.google.com/mail/u/0/#inbox"})
-    time.sleep(4)
-
-    # dismiss any stale compose dialog: Escape first, then Save & close, then click discard in confirm
-    js_eval(ws, """(async () => {
-      for (let round = 0; round < 3; round++) {
-        const dlg = document.querySelector('div[role="dialog"]');
-        if (!dlg) break;
-        // Escape removed - it MINIMIZES Gmail compose instead of closing
-        await new Promise(r => setTimeout(r, 800));
-        const saveClose = Array.from(dlg.querySelectorAll('[aria-label]')).find(e => /Save & close/i.test(e.getAttribute('aria-label')||''));
-        if (saveClose && document.querySelector('div[role="dialog"]')) { saveClose.click(); await new Promise(r => setTimeout(r, 1200)); }
+    # CLEAN STATE: discard ALL existing compose dialogs first (drafts auto-restore
+    # server-side and querySelector('div[role="dialog"]') would read the STALE draft
+    # instead of our new compose - the Day-10 wave failure). Discard, never Save.
+    cleaned = js_eval(ws, """(async () => {
+      let discarded = 0;
+      for (let round = 0; round < 5; round++) {
+        // any dialog whose To field already has content = stale draft from a previous send
+        const stale = Array.from(document.querySelectorAll('div[role="dialog"]')).filter(d => {
+          const to = Array.from(d.querySelectorAll('input, [email]')).find(x => /to/i.test(x.getAttribute('aria-label')||''));
+          return d.innerText && !/^Compose:/m.test('') && true;
+        });
+        // simpler + robust: if ANY compose dialog exists, close it via its trash/discard button
+        const dlgs = Array.from(document.querySelectorAll('div[role="dialog"]')).filter(d => /New Message|Compose/i.test(d.innerText.slice(0, 30)));
+        if (!dlgs.length) break;
+        for (const d of dlgs) {
+          const discard = Array.from(d.querySelectorAll('[role="button"], [aria-label]')).find(e => /trash|discard/i.test(e.getAttribute('aria-label')||'') || /^(Discard|Delete draft)$/i.test((e.innerText||'').trim()));
+          if (discard) { discard.click(); await new Promise(r => setTimeout(r, 500)); discarded++; }
+        }
+        await new Promise(r => setTimeout(r, 700));
       }
-      // if a confirm-discard prompt appears, click Discard
-      const discard = Array.from(document.querySelectorAll('[role="button"], button')).find(e => /^Discard$/i.test((e.innerText||'').trim()));
-      if (discard) { discard.click(); await new Promise(r => setTimeout(r, 800)); }
-      return 'ok';
-    })()""")
-    time.sleep(1)
+      // confirm-discard prompt if Gmail asks
+      const confirmBtn = Array.from(document.querySelectorAll('[role="button"], button, [role="dialog"] [aria-label]')).find(e => /^(Discard|OK)$/i.test((e.innerText||'').trim()));
+      if (confirmBtn && /discard/i.test(document.body.innerText.slice(-500))) { confirmBtn.click(); await new Promise(r => setTimeout(r, 600)); }
+      await new Promise(r => setTimeout(r, 400));
+      return 'discarded:' + discarded;
+    })()""", await_promise=True)
+    time.sleep(1.5)
 
     # click Compose button
     pos_r = js_eval(ws, """(() => {
@@ -138,7 +145,7 @@ def gmail_send(to, subject, body):
     cdp("Input.dispatchMouseEvent", {"type": "mousePressed", "x": pos['x'], "y": pos['y'], "button": "left", "clickCount": 1})
     cdp("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": pos['x'], "y": pos['y'], "button": "left", "clickCount": 1})
 
-    # wait until focus is in the To INPUT; if the dialog is minimized (h<100), expand it
+    # wait until focus is in the To INPUT; if the dialog is minimized (h<100), expand it back
     for _ in range(12):
         f = js_eval(ws, """(() => {
           const dlg = document.querySelector('div[role="dialog"]');
@@ -170,6 +177,24 @@ def gmail_send(to, subject, body):
         ws.close()
         return "compose-focus-never-ready"
 
+    # after the compose dialog opens, BIND to the dialog that actually has focus:
+    # Gmail keeps multiple compose dialogs in the DOM; querySelector returns the FIRST
+    # (often a stale auto-saved draft), while our typing goes to the focused one.
+    # Every later read must use the same dialog we typed into.
+    dlg_ref = js_eval(ws, """(() => {
+      const dlgs = Array.from(document.querySelectorAll('div[role="dialog"]'));
+      const active = dlgs.find(d => d.contains(document.activeElement));
+      // fallback: the dialog whose To input is empty (a fresh compose)
+      const fresh = dlgs.find(d => {
+        const to = Array.from(d.querySelectorAll('input')).find(x => /to/i.test(x.getAttribute('aria-label')||''));
+        return to && !to.value;
+      });
+      const d = active || fresh || dlgs[dlgs.length-1];
+      // tag it with a unique attribute we can re-find
+      d.setAttribute('data-hsn-compose', '1');
+      return 'bound:' + dlgs.length;
+    })()""")
+
     # 1. type recipient + Tab (commits recipient, lands in subject)
     cdp("Input.insertText", {"text": to})
     time.sleep(1.0)
@@ -177,8 +202,9 @@ def gmail_send(to, subject, body):
     cdp("Input.dispatchKeyEvent", {"type": "keyUp", "key": "Tab", "code": "Tab", "windowsVirtualKeyCode": 9, "nativeVirtualKeyCode": 9})
     time.sleep(0.8)
 
-    # verify recipient chip registered
-    got = js_eval(ws, """(() => JSON.stringify({ok: document.querySelector('div[role="dialog"]').innerText.includes(%s)}))()""" % repr(to))
+    # verify recipient chip registered - SCOPED to OUR dialog, case-insensitive
+    # (Gmail canonicalizes chips, e.g. 'sifumarcdavis@' -> 'SifuMarcDavis@')
+    got = js_eval(ws, """(() => JSON.stringify({ok: (document.querySelector('div[data-hsn-compose]') || {innerText:''}).innerText.toLowerCase().includes(%s.toLowerCase())}))()""" % repr(to))
     try:
         chk = _j.loads(got)
     except Exception:
@@ -188,7 +214,7 @@ def gmail_send(to, subject, body):
         cdp("Input.dispatchKeyEvent", {"type": "rawKeyDown", "key": "Enter", "code": "Enter", "windowsVirtualKeyCode": 13, "nativeVirtualKeyCode": 13})
         cdp("Input.dispatchKeyEvent", {"type": "keyUp", "key": "Enter", "code": "Enter", "windowsVirtualKeyCode": 13, "nativeVirtualKeyCode": 13})
         time.sleep(0.8)
-        got = js_eval(ws, """(() => JSON.stringify({ok: document.querySelector('div[role="dialog"]').innerText.includes(%s)}))()""" % repr(to))
+        got = js_eval(ws, """(() => JSON.stringify({ok: (document.querySelector('div[data-hsn-compose]') || {innerText:''}).innerText.toLowerCase().includes(%s.toLowerCase())}))()""" % repr(to))
         try:
             chk = _j.loads(got)
         except Exception:
@@ -204,9 +230,11 @@ def gmail_send(to, subject, body):
     # 2. subject: focus should be in subject input now
     f = js_eval(ws, """(() => { const a = document.activeElement; return (a && /subject|asunto/i.test(a.getAttribute('aria-label')||'')) ? 'ready' : 'no'; })()""")
     if f != 'ready':
-        # click subject input directly
+        # click subject input directly (scoped to our dialog)
         pos_r2 = js_eval(ws, """(() => {
-          const i = Array.from(document.querySelectorAll('div[role="dialog"] input')).find(x => /subject|asunto/i.test(x.getAttribute('aria-label')||''));
+          const d = document.querySelector('div[data-hsn-compose]');
+          if (!d) return null;
+          const i = Array.from(d.querySelectorAll('input')).find(x => /subject|asunto/i.test(x.getAttribute('aria-label')||''));
           if (!i) return null;
           const rc = i.getBoundingClientRect();
           return JSON.stringify({x: rc.x + rc.width/2, y: rc.y + rc.height/2});
@@ -222,9 +250,9 @@ def gmail_send(to, subject, body):
     cdp("Input.insertText", {"text": subject})
     time.sleep(0.8)
 
-    # 3. body: click the message body area
+    # 3. body: click the message body area (scoped to our dialog)
     pos_r3 = js_eval(ws, """(() => {
-      const b = document.querySelector('div[role="dialog"] div[aria-label="Message Body"]') || document.querySelector('div[role="dialog"] div[role="textbox"]');
+      const b = document.querySelector('div[data-hsn-compose] div[aria-label="Message Body"]') || document.querySelector('div[data-hsn-compose] div[role="textbox"]');
       if (!b) return null;
       const rc = b.getBoundingClientRect();
       return JSON.stringify({x: rc.x + Math.min(rc.width/2, 200), y: rc.y + Math.min(rc.height/2, 60)});
@@ -248,11 +276,12 @@ def gmail_send(to, subject, body):
     cdp("Input.insertText", {"text": body})
     time.sleep(1.0)
 
-    # 4. verify all three fields, then send with Ctrl+Enter
+    # 4. verify all three fields, then send with Ctrl+Enter (scoped to our dialog)
     chk3 = js_eval(ws, """(() => {
-      const dlg = document.querySelector('div[role="dialog"]');
+      const dlg = document.querySelector('div[data-hsn-compose]');
+      if (!dlg) return JSON.stringify({to: false, subj: false, body: false});
       const t = dlg.innerText;
-      return JSON.stringify({to: t.includes(%s), subj: t.includes(%s.slice(0, 20)), body: t.includes('Sialkot')});
+      return JSON.stringify({to: t.toLowerCase().includes(%s.toLowerCase()), subj: t.includes(%s.slice(0, 20)), body: t.includes('Sialkot')});
     })()""" % (repr(to), repr(subject)))
     try:
         c3 = _j.loads(chk3)
@@ -262,9 +291,10 @@ def gmail_send(to, subject, body):
         ws.close()
         return "fields-missing:" + str(c3)
 
-    # send: click the Send button with real mouse events
+    # send: click the Send button with real mouse events (scoped to our dialog)
     send_pos = js_eval(ws, """(() => {
-      const dlg = document.querySelector('div[role="dialog"]');
+      const dlg = document.querySelector('div[data-hsn-compose]');
+      if (!dlg) return null;
       const btn = dlg.querySelector('div[data-tooltip^="Send"], div[aria-label^="Send"]');
       if (!btn) return null;
       const rc = btn.getBoundingClientRect();
@@ -281,12 +311,13 @@ def gmail_send(to, subject, body):
     cdp("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": sp['x'], "y": sp['y'], "button": "left", "clickCount": 1})
     time.sleep(5)
 
-    # verify: dialog closed = sent (Gmail closes compose on send)
+    # verify: OUR dialog closed = sent (Gmail closes compose on send);
+    # a still-present OTHER dialog (stale draft) must not confuse the check
     v = js_eval(ws, """(() => {
-      const dlg = document.querySelector('div[role="dialog"]');
+      const ours = document.querySelector('div[data-hsn-compose]');
       const err = /specify at least one recipient/i.test(document.body.innerText);
       const toast = /Message sent/i.test(document.body.innerText);
-      return JSON.stringify({dialogGone: !dlg, err, toast});
+      return JSON.stringify({dialogGone: !ours, err, toast});
     })()""")
     ws.close()
     try:
