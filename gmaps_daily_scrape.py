@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Daily 2PM PKT lead scraper: Google Maps engine (with email extraction) + website enrichment.
 Feeds leads.csv for the 1AM outreach pipeline. Rotates 2 cities/day."""
-import json, csv, os, re, time, tempfile, urllib.request, datetime, subprocess, sys
+import json, csv, os, re, time, tempfile, urllib.request, datetime, subprocess, sys, shutil
 
 GMAPS = "http://localhost:8080/api/v1/jobs"
 LEADS = "/home/ubuntu/leads.csv"
@@ -120,7 +120,7 @@ def run_city(city, lat, lon, country, prefix, max_time=900):
             continue
         leads.append({
             "name": title, "category": g('category')[:60], "phone_raw": g('phone'),
-            "website": g('website'), "email": g('email').lower(), "address": g('address')[:100],
+            "website": g('website'), "email": (g('emails') or g('email')).lower(), "address": g('address')[:100],
             "city": city, "country": country, "prefix": prefix,
         })
     log(f"{city}: {len(leads)} leads scraped")
@@ -262,11 +262,27 @@ def rebuild_excel():
         return -1
 
 def git_commit():
+    # Refresh backup copies FIRST — business-backup/leads.csv is a separate file, not a
+    # symlink, so git add -A alone commits nothing (silent no-op push).
+    for src in ("/home/ubuntu/leads.csv", "/home/ubuntu/HWA_Lead_Tracker.xlsx"):
+        try:
+            shutil.copy2(src, os.path.join("/home/ubuntu/business-backup", os.path.basename(src)))
+        except Exception as e:
+            log(f"backup copy failed {os.path.basename(src)}: {str(e)[:60]}")
     subprocess.run(["git", "add", "-A"], cwd="/home/ubuntu/business-backup", capture_output=True)
-    subprocess.run(["git", "commit", "-m", f"gmaps 2PM scrape {DATE}"], cwd="/home/ubuntu/business-backup", capture_output=True)
-    subprocess.run(["bash", "-c",
-                     "GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/hsn_backup_key -o IdentitiesOnly=yes' git push -q origin main"],
-                    cwd="/home/ubuntu/business-backup", capture_output=True)
+    c = subprocess.run(["git", "commit", "-m", f"gmaps 2PM scrape {DATE}"],
+                       cwd="/home/ubuntu/business-backup", capture_output=True, text=True)
+    if c.returncode == 0:
+        log(f"git committed: {c.stdout.strip().splitlines()[0] if c.stdout.strip() else 'ok'}")
+    else:
+        log(f"git commit skipped/failed: {(c.stdout + c.stderr).strip()[:120]}")
+    p = subprocess.run(["bash", "-c",
+                        "GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/hsn_backup_key -o IdentitiesOnly=yes' git push origin main"],
+                       cwd="/home/ubuntu/business-backup", capture_output=True, text=True)
+    if p.returncode == 0:
+        log("git push OK")
+    else:
+        log(f"git push FAILED: {(p.stdout + p.stderr).strip()[:200]}")
 
 def main():
     log(f"=== GMAPS 2PM SCRAPE START {DATE} ===")
