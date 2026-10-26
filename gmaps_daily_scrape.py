@@ -41,6 +41,12 @@ KEYWORD_TYPES = ["boxing gym", "MMA gym", "jiu jitsu academy", "muay thai gym", 
 BLOCKED_EMAIL = ['sentry', 'wixpress', 'example.com', 'schema', 'abuse@', 'postmaster@', 'privacy@',
                  'godaddy', 'domain', 'youremail', 'email@', 'name@', 'test@']
 
+WEBMAIL_DOMAINS = {'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'yahoo.fr', 'yahoo.it',
+                    'yahoo.es', 'yahoo.de', 'live.com', 'msn.com', 'aol.com', 'mail.com', 'gmx.de',
+                    'gmx.net', 'gmx.ch', 'web.de', 't-online.de', 'orange.fr', 'free.fr', 'laposte.net',
+                    'libero.it', 'virgilio.it', 'tiscali.it', 'protonmail.com', 'proton.me',
+                    'icloud.com', 'me.com', 'zoho.com', 'bluewin.ch'}
+
 def log(m):
     line = time.strftime('%H:%M:%S') + ' ' + m
     print(line, flush=True)
@@ -172,6 +178,84 @@ def enrich_website(lead):
         time.sleep(0.5)
     return lead["email"]
 
+def clean_email(cell, website='', name=''):
+    """The engine's `emails` column can be a comma-separated list mixing a real
+    address with junk (image-filename pseudo-addresses, placeholder domains,
+    third-party platform addresses). Store ONE clean address or '' so the row
+    is not auto-excluded later. Rule (mirrors repair_tighten.py):
+      - reject image/placeholder/hash/third-party/PEC candidates
+      - accept an exact or base-domain match with the lead's own website
+      - accept a webmail address whose local part matches the lead name/site
+      - accept a business domain whose slug matches the lead name/site slug
+      - otherwise '' (the lead is still stored with its phone/website)
+    """
+    cands = [c.strip().lower() for c in (cell or '').split(',') if c.strip()]
+    if not cands:
+        return ''
+    cands = [re.sub(r'^(u003e|%20|u00a0|\s)+', '', c).lstrip('-.') for c in cands]
+    site = (website or '').strip()
+    m = re.match(r'^https?://([^/]+)', site)
+    sd = m.group(1).lower() if m else ''
+    if sd.startswith('www.'):
+        sd = sd[4:]
+    sbase = '.'.join(sd.split('.')[-2:]) if sd.count('.') >= 1 else sd
+    toks = set()
+    for src in (name or '', site):
+        for w in re.split(r'[^a-z0-9]+', src.lower()):
+            if len(w) >= 4 and w not in ('gym', 'club', 'academy', 'school', 'team',
+                                         'martial', 'arts', 'boxing', 'jiu', 'jitsu',
+                                         'karate', 'fitness', 'sports', 'center', 'centre'):
+                toks.add(w)
+    best = ''
+    best_score = 0
+    for c in cands:
+        if not re.match(r'^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$', c):
+            continue
+        dom = c.split('@')[1]
+        local = c.split('@')[0]
+        if re.search(r'\.(jpg|jpeg|png|gif|webp|svg|pdf|html?|css|js)$', dom) or '2x' in dom:
+            continue
+        if any(b in dom for b in ('sentry', 'wixpress', 'domain.com', 'dominio.com',
+                                  'dominio.pt', 'mysite.com', 'example.com', 'exemplo',
+                                  'beispiel', 'email.com', 'framer', 'webador')):
+            continue
+        if any(t in dom for t in ('schedulista', 'ayudapanel', 'fitkit', 'bookizon',
+                                   'squarespace', 'wixsite', 'facebook.com', 'instagram.com',
+                                   'calendly', 'eventbrite', 'mindbody', 'gymdesk',
+                                   'wordpress', 'blogspot', 'weebly', 'jimdo', 'tripadvisor')):
+            continue
+        if re.fullmatch(r'[0-9a-f]{16,}', local) or re.fullmatch(r'[0-9a-f]{8}-[0-9a-f\-]{8,}', local):
+            continue
+        if dom.endswith('pec.it'):
+            continue
+        # score: exact site domain > base-domain match > name-matched webmail
+        # > business-domain slug match. Pick the BEST candidate, not the first.
+        score = 0
+        if sd and dom == sd:
+            score = 100
+        elif sd and (base_domain(dom) == sbase or dom in sd or sd in dom):
+            score = 90
+        elif dom in WEBMAIL_DOMAINS:
+            for t in toks:
+                if len(t) >= 4 and (t in local or (len(local) >= 4 and local in t)):
+                    score = max(score, 60)
+                    break
+        else:
+            dslug = dom.split('.')[0]
+            for t in toks:
+                if len(t) >= 5 and (t in dslug or dslug in t):
+                    score = max(score, 50)
+                    break
+        if score > best_score:
+            best, best_score = c, score
+    return best
+
+
+def base_domain(dom):
+    p = dom.split('.')
+    return '.'.join(p[-2:]) if len(p) >= 2 else dom
+
+
 def ig_from_website(site):
     m = re.search(r'instagram\.com/([A-Za-z0-9_.]{2,40})', site or '')
     if m:
@@ -196,7 +280,7 @@ def append_leads(leads):
     next_id = max_id + 1
     added = 0
     for lead in leads:
-        em = lead["email"]
+        em = clean_email(lead["email"], lead.get("website", ""), lead.get("name", ""))
         ph = normalize_phone(lead["phone_raw"], lead["prefix"])
         if em and em in existing_emails:
             continue
