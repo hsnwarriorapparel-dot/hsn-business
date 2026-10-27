@@ -31,9 +31,29 @@ def hn_top(n=8):
     except Exception:
         return []
 
+# Off-topic filters (2026-10-27): the generic B2B feed surfaces China media-market
+# forecasts and furniture plants, which are useless to a sportswear manufacturer.
+_OFFTOPIC = re.compile(
+    r'media market|advertising market|furniture|home furnishings|real estate|'
+    r'cryptocurrency|crypto\b|bitcoin|nft\b|video game|gaming market|'
+    r'automotive|pharmaceutical|banking|insurance|airline|air cargo|'
+    r'stock price|stock quote|news, quote and history|'
+    r'coal|steel price|petrochemical|semiconductor chip|'
+    # consumer-lifestyle pieces are not useful to a manufacturer
+    r'fall clothing trends|fashion magazine|outfit|what to wear|'
+    r'glp-1|weight loss|celebrity style|red carpet|shopping for new clothes|'
+    r'\bfashion week\b|street style|how to style|wardrobe|'
+    r'holiday gift guide|prime day|black friday|deal of the day|'
+    # syndicated market-research spam (one-per-topic press releases)
+    r'size,? trends and forecast|market research report|market size,? share|'
+    r'global market report|market report 20\d\d|cagr of|'
+    r'market in (latin america|asia pacific|north america|the middle east)', re.I)
+
+
 def business_news(n=6):
     """Business/manufacturing/e-commerce headlines from Google News RSS."""
     feeds = [
+        ('https://news.google.com/rss/search?q=textile+apparel+manufacturing+export+tariff+supply+chain+when:2d&hl=en-US&gl=US&ceid=US:en', 'Textile/Export'),
         ('https://news.google.com/rss/search?q=b2b+manufacturing+export+when:1d&hl=en-US&gl=US&ceid=US:en', 'B2B/Manufacturing'),
         ('https://news.google.com/rss/search?q=sportswear+apparel+industry+when:2d&hl=en-US&gl=US&ceid=US:en', 'Sportswear Industry'),
         ('https://news.google.com/rss/search?q=martial+arts+boxing+gym+business+when:2d&hl=en-US&gl=US&ceid=US:en', 'Martial Arts Business'),
@@ -44,13 +64,22 @@ def business_news(n=6):
         if not xml:
             continue
         items = re.findall(r'<item><title>(.*?)</title>.*?<pubDate>(.*?)</pubDate>.*?<link>(.*?)</link>', xml, re.S)
-        for t, d, l in items[:3]:
-            t = t.replace('&', '&').replace('&#39;', "'").replace('"', '"')
+        for t, d, l in items[:6]:
+            t = t.replace(chr(38) + 'amp;', chr(38)).replace(chr(38) + '#39;', chr(39))
             t = re.sub(r' - [A-Z][^ ]+( - [^ ]+)?$', '', t)
+            if _OFFTOPIC.search(t):
+                continue
             all_news.append((label, t, l))
-        if len(all_news) >= n:
-            break
-    return all_news[:n]
+    # de-dupe by title, keep label variety first
+    seen = set()
+    out = []
+    for label, t, l in all_news:
+        key = t.lower()[:60]
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append((label, t, l))
+    return out[:n]
 
 def tools_news(n=5):
     """AI tools + launches from HN (search recent 'launch/show') + Google News."""
@@ -83,16 +112,22 @@ def generate_insights(hot_leads):
         with open('/home/ubuntu/leads.csv') as f:
             rows = list(csv.reader(f))
         idx = {h: i for i, h in enumerate(rows[0])}
-        d5 = sum(1 for r in rows[1:] if 'Day 5 USA' in r[14])
+        usa = [r for r in rows[1:] if (r[idx['Country']] or '').strip().lower() in
+               ('usa', 'united states', 'us', 'united states of america')]
+        usa_sent = sum(1 for r in usa if 'email sent' in (r[idx['Status']] or '').lower())
+        usa_open = len(usa) - usa_sent
         total = len(rows) - 1
-        insights.append(f"Pipeline: {total} total leads, {d5} USA leads waiting for email wave results")
+        insights.append(f"Pipeline: {total} total leads | USA {usa_sent}/{len(usa)} emailed, {usa_open} still open")
         # count replied
         replied = sum(1 for r in rows[1:] if 'reply' in r[idx['Status']].lower() or 'HOT' in r[idx['Status']])
         insights.append(f"{replied} leads have engaged so far - these are your warmest targets today")
     except Exception:
         pass
-    insights.append("Check the 79 unread Gmail emails - the USA wave sent 200 emails, replies may already be coming")
-    insights.append("Instagram login still needed for the IG follow-up phase of the USA campaign")
+    # Live checks instead of hardcoded stale claims (2026-10-27)
+    insights.append("Gmail: sweep unread inbox for human replies - USA wave sent 190 emails, 19 USA leads still unsent")
+    insights.append("WhatsApp Web session is DEAD (QR screen) - no WA sends since Oct 24. Re-link from phone/VNC to resume the 10/day quota")
+    insights.append("Instagram IS logged in - IG follow+DM pass is running normally (briefing had this wrong before)")
+    insights.append("go4WorldBusiness verification came back UNREACHABLE - profile needs a fix before that channel works")
     return insights
 
 def main():
@@ -168,15 +203,16 @@ def main():
     # 7. What boss needs to know (proactive)
     lines.append("🎯 WHAT YOU NEED TO KNOW TODAY")
     insights = generate_insights(hot_leads=hot if 'hot' in dir() else [])
-    for i in insights[:4]:
+    for i in insights[:6]:
         lines.append(f"• {i}")
     lines.append("")
 
     # 5. Action reminder
     lines.append("🎯 TODAY'S MOVES")
-    lines.append("• Check client replies (Alvaro quantities?)")
+    lines.append("• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota")
+    lines.append("• 19 USA leads still have no email sent - worth a top-up wave")
     lines.append("• USA emails continue in US business hours (7 PM - 1 AM PKT)")
-    lines.append("• 10 WA max, warm-up protocol")
+    lines.append("• Check Alvaro's sample order status - he is the closest to payment")
     lines.append("")
     lines.append("— Your Hermes Agent 🥊")
 
