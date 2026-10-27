@@ -9,26 +9,28 @@ PHONE = "+92 337 3336381"
 EMAIL = "hsnwarriorapparel@gmail.com"
 
 # Spanish gym/club DM openers (varied so no two leads get the same message)
+# Spam rules applied (spam-word-checker): no greeting prefix before the first
+# name (no Hi/Hello/Hey) and no em dashes anywhere in outbound copy.
 DM_OPENERS = [
-    "Hello {name}! 👋 We're {company} — martial arts & sportswear manufacturers from Sialkot working with clubs worldwide.",
-    "Hi {name} 👋 Greetings from {company}! We manufacture martial arts gear and custom team wear in Sialkot.",
-    "Hi {name}! 👋 {company} here — we produce uniforms, gis and fight gear for clubs and schools worldwide.",
-    "Hello {name}! We're {company}, manufacturers of martial arts apparel. Just found your page — great work! 👏",
-    "Hello from {company} 👋 — we make custom martial arts gear and team wear for clubs like yours.",
+    "{name}! 👋 We're {company}, martial arts and sportswear manufacturers from Sialkot working with clubs worldwide.",
+    "{name} 👋 {company} here, we manufacture martial arts gear and custom team wear in Sialkot.",
+    "{name}! 👋 {company} here, we produce uniforms, gis and fight gear for clubs and schools worldwide.",
+    "{name}! We're {company}, manufacturers of martial arts apparel. Just found your page, great work! 👏",
+    "From {company} 👋, we make custom martial arts gear and team wear for clubs like yours.",
 ]
 
 DM_MID = [
-    "Saw your {detail} — really solid program you've built.",
-    "Been checking out your {detail} — impressive!",
+    "Saw your {detail}, really solid program you've built.",
+    "Been checking out your {detail}, impressive!",
     "Your {detail} caught our eye, nice community you have.",
     "Love what you're doing with {detail}!",
 ]
 
 DM_OFFERS = [
-    "We do OEM/private label production — uniforms, gloves and team wear with your club's branding, factory-direct with small minimums.",
+    "We do OEM/private label production: uniforms, gloves and team wear with your club's branding, factory-direct with small minimums.",
     "We offer private-label manufacturing: gear and uniforms with your own branding, direct from our factory. Low minimums for clubs.",
-    "Our specialty is custom club gear — your branding on uniforms, gis and fight equipment, at manufacturer prices with club-friendly minimums.",
-    "We produce branded uniforms and equipment for clubs — your logo, our factory, small order quantities welcome.",
+    "Our specialty is custom club gear: your branding on uniforms, gis and fight equipment, at manufacturer prices with club-friendly minimums.",
+    "We produce branded uniforms and equipment for clubs: your logo, our factory, small order quantities welcome.",
 ]
 
 DM_CTAS = [
@@ -56,14 +58,14 @@ def build_wa(name, detail):
     o = random.choice(DM_OPENERS).format(name=name, company=COMPANY)
     f = random.choice(DM_OFFERS)
     c = random.choice(DM_CTAS)
-    return f"Hello {name}! 👋\n\n{o.split(' — ',1)[-1] if ' — ' in o else o}\n\n{f}\n\n{c}\n\n— {COMPANY}"
+    return f"{name}! 👋\n\n{o.split(', ', 1)[-1] if ', ' in o else o}\n\n{f}\n\n{c}\n\n- {COMPANY}"
 
 def build_email(name, detail, region="Europe"):
     subject = random.choice(EMAIL_SUBJECTS).format(name=name, company=COMPANY)
     region_phrase = "across the United States" if region == "USA" else "across Europe"
-    body = f"""Hello {name} team,
+    body = f"""{name} team,
 
-We're {COMPANY} — martial arts and sportswear manufacturers based in Sialkot, Pakistan, producing for clubs and schools {region_phrase}.
+We're {COMPANY}, martial arts and sportswear manufacturers based in Sialkot, Pakistan, producing for clubs and schools {region_phrase}.
 
 We noticed your {detail} and would love to introduce what we do:
 
@@ -72,7 +74,7 @@ We noticed your {detail} and would love to introduce what we do:
 - Small minimum order quantities designed for clubs, not just big distributors
 - 3-4 weeks production and delivery {region_phrase}
 
-If you'd like, we can send our catalog and wholesale price list — no commitment, just so you have us on file for when you need custom gear.
+If it's useful, we can send our catalog and wholesale price list, no commitment, just so you have us on file for when you need custom gear.
 
 Best regards,
 {COMPANY}
