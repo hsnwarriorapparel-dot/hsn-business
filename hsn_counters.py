@@ -3,11 +3,27 @@
 Counts a channel as DONE only when the status carries an explicit completion
 marker for that channel (never a 'not found' / 'failed' / 'skipped' marker)."""
 import csv
+import os
 import re
 
 CSV = '/home/ubuntu/leads.csv'
-# Day tag used for the "today" block below; keep it in sync with the daily run.
-TODAY_TAG = '2026-10-26'
+# Day tag used for the "today" block below. Auto-detected as the most recent
+# calendar date present in any Status (was hardcoded and went stale daily).
+# Override with the HSN_TODAY_TAG env var if a manual re-run needs a fixed day.
+TODAY_TAG = os.environ.get('HSN_TODAY_TAG') or None
+
+
+def _detect_today_tag():
+    """Most recent YYYY-MM-DD date stamped in any row's Status."""
+    global TODAY_TAG
+    if TODAY_TAG:
+        return TODAY_TAG
+    found = set()
+    for r in rows[1:]:
+        for m in re.findall(r'20\d\d-\d\d-\d\d', g(r, 'Status') or ''):
+            found.add(m)
+    TODAY_TAG = max(found) if found else ''
+    return TODAY_TAG
 
 # IG done: an explicit follow/DM completion token
 IG_DONE_PAT = re.compile(r'(ig follow=(ok|clicked|no-btn))|(dm=sent)|(ig followed)|(ig dm sent)', re.I)
@@ -64,7 +80,7 @@ if __name__ == '__main__':
     print("with phone:", sum(1 for r in rows[1:] if g(r, 'Phone').strip()))
     print("failed rows:", sum(1 for r in rows[1:] if 'failed' in g(r, 'Status').lower()))
     print("excluded rows:", sum(1 for r in rows[1:] if 'excluded' in g(r, 'Status').lower()))
-    today = [r for r in rows[1:] if TODAY_TAG in g(r, 'Status')]
+    today = [r for r in rows[1:] if _detect_today_tag() in g(r, 'Status')]
     print("--- today", TODAY_TAG, "---")
     print("rows touched:", len(today))
     print("emails sent today:", sum(1 for r in today if email_ok(r)))
