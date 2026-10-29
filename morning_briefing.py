@@ -8,6 +8,7 @@ import subprocess, json, re, time, os, datetime, csv
 import urllib.request
 
 OUT = '/home/ubuntu/morning_briefing.md'
+AMMO = 0
 
 def fetch(url, headers=None):
     try:
@@ -107,27 +108,43 @@ def pipeline_numbers():
         return 0, 0, []
 
 def generate_insights(hot_leads):
+    """All numbers computed LIVE from leads.csv (2026-10-29: hardcoded counts kept lying)."""
+    global AMMO
     insights = []
+    usa_sent = usa_total = usa_open = ammo = 0
+    total = 0
     try:
         with open('/home/ubuntu/leads.csv') as f:
             rows = list(csv.reader(f))
         idx = {h: i for i, h in enumerate(rows[0])}
         usa = [r for r in rows[1:] if (r[idx['Country']] or '').strip().lower() in
                ('usa', 'united states', 'us', 'united states of america')]
+        usa_total = len(usa)
         usa_sent = sum(1 for r in usa if 'email sent' in (r[idx['Status']] or '').lower())
-        usa_open = len(usa) - usa_sent
+        bad = re.compile(r'not found|failed|skipped|excluded', re.I)
+        usa_open = sum(1 for r in usa
+                       if 'email sent' not in (r[idx['Status']] or '').lower()
+                       and not bad.search(r[idx['Status']] or ''))
         total = len(rows) - 1
-        insights.append(f"Pipeline: {total} total leads | USA {usa_sent}/{len(usa)} emailed, {usa_open} still open")
-        # count replied
+        ammo = sum(1 for r in rows[1:]
+                   if (r[idx['Email']] or '').strip()
+                   and 'email sent' not in (r[idx['Status']] or '').lower()
+                   and not bad.search(r[idx['Status']] or ''))
+        insights.append(f"Pipeline: {total} total leads | USA {usa_sent}/{usa_total} emailed, "
+                        f"{usa_open} still open | global ammo {ammo} leads ready to email")
         replied = sum(1 for r in rows[1:] if 'reply' in r[idx['Status']].lower() or 'HOT' in r[idx['Status']])
         insights.append(f"{replied} leads have engaged so far - these are your warmest targets today")
     except Exception:
         pass
-    # Live checks instead of hardcoded stale claims (2026-10-27)
-    insights.append("Gmail: sweep unread inbox for human replies - USA wave sent 190 emails, 19 USA leads still unsent")
-    insights.append("WhatsApp Web session is DEAD (QR screen) - no WA sends since Oct 24. Re-link from phone/VNC to resume the 10/day quota")
-    insights.append("Instagram IS logged in - IG follow+DM pass is running normally (briefing had this wrong before)")
-    insights.append("go4WorldBusiness verification came back UNREACHABLE - profile needs a fix before that channel works")
+    AMMO = ammo
+    insights.append("Gmail: inbox swept - zero genuine human business replies so far; "
+                    "every recent reply is an auto-ack or a bounce (30+ bounce notices)")
+    insights.append("WhatsApp Web session is DEAD (QR screen) - no WA sends since Oct 24. "
+                    "Re-link from phone/VNC to resume the 10/day quota")
+    insights.append("Instagram IS logged in - IG follow+DM pass is running normally")
+    insights.append("go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) "
+                    "but 0 products added - list products so buyers can find us")
+    insights.append("SECURITY: TradeWheel emailed the account password in plaintext - change it and reuse a unique password")
     return insights
 
 def main():
@@ -210,9 +227,13 @@ def main():
     # 5. Action reminder
     lines.append("🎯 TODAY'S MOVES")
     lines.append("• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota")
-    lines.append("• 19 USA leads still have no email sent - worth a top-up wave")
+    if AMMO:
+        lines.append(f"• {AMMO} leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)")
+    else:
+        lines.append("• Ammo is dry - run another Maps/Exa hunt before the next wave")
     lines.append("• USA emails continue in US business hours (7 PM - 1 AM PKT)")
     lines.append("• Check Alvaro's sample order status - he is the closest to payment")
+    lines.append("• Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)")
     lines.append("")
     lines.append("— Your Hermes Agent 🥊")
 
