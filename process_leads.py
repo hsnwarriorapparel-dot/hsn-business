@@ -5,6 +5,42 @@ import os
 with open('/home/ubuntu/gmaps-output/leads_day1_full_clean.json', 'r') as f:
     leads = json.load(f)
 
+TRACKER = '/home/ubuntu/gmaps-output/outreach_tracker.csv'
+
+# PRESERVE existing send markers. This script rewrites the tracker from scratch,
+# which used to wipe every 'SENT'/'PENDING' marker and make the next automation
+# run re-send emails that had already gone out (11 duplicate sends on 2026-10-31).
+# Load the old tracker first and carry the per-email status forward.
+old_status = {}
+if os.path.exists(TRACKER):
+    with open(TRACKER, newline='', encoding='utf-8') as f:
+        for row in csv.DictReader(f):
+            em = (row.get('Email') or '').strip().lower()
+            if not em:
+                continue
+            cur = {
+                'Email Sent': row.get('Email Sent', '') or '',
+                'Email Date': row.get('Email Date', '') or '',
+                'IG DM Sent': row.get('IG DM Sent', '') or '',
+                'IG DM Date': row.get('IG DM Date', '') or '',
+                'WA Sent': row.get('WA Sent', '') or '',
+                'WA Date': row.get('WA Date', '') or '',
+                'Reply Received': row.get('Reply Received', '') or '',
+                'Reply Date': row.get('Reply Date', '') or '',
+            }
+            prev = old_status.get(em)
+            if prev is None:
+                old_status[em] = cur
+                continue
+            # An address can appear on several tracker rows (same gym, different
+            # phone/site). A SENT marker on ANY row wins, otherwise the last row
+            # would silently downgrade an already-sent address back to READY.
+            for k in cur:
+                if cur[k] and cur[k] not in ('READY_TO_SEND', 'PENDING', 'NO', 'NEW', ''):
+                    prev[k] = cur[k]
+                elif not prev.get(k):
+                    prev[k] = cur[k]
+
 # Create outreach-ready CSV
 with open('/home/ubuntu/gmaps-output/leads_outreach_ready.csv', 'w', newline='') as f:
     writer = csv.writer(f)
@@ -31,6 +67,17 @@ with open('/home/ubuntu/gmaps-output/outreach_tracker.csv', 'w', newline='') as 
                     'Muay Thai' if 'muay thai' in title_lower else \
                     'martial arts' if any(x in title_lower for x in ['martial arts', 'karate', 'taekwondo', 'kung fu']) else \
                     'combat sports'
+            # carry forward any prior send marker for this address
+            prev = old_status.get(email.strip().lower(), {})
+            es = prev.get('Email Sent') or 'READY_TO_SEND'
+            ed = prev.get('Email Date') or ''
+            igs = prev.get('IG DM Sent') or 'PENDING'
+            igd = prev.get('IG DM Date') or ''
+            was = prev.get('WA Sent') or 'NO'
+            wad = prev.get('WA Date') or ''
+            rr = prev.get('Reply Received') or 'NO'
+            rd = prev.get('Reply Date') or ''
+            st = 'SENT' if es == 'SENT' else 'NEW'
             writer.writerow([
                 datetime.now().strftime('%Y-%m-%d'),
                 'Google Maps Scraper',
@@ -43,15 +90,15 @@ with open('/home/ubuntu/gmaps-output/outreach_tracker.csv', 'w', newline='') as 
                 l['state'],
                 l['country'],
                 sport,
-                'READY_TO_SEND',
-                '',
-                'PENDING',
-                '',
-                'PENDING',
-                '',
-                'NO',
-                '',
-                'NEW',
+                es,
+                ed,
+                igs,
+                igd,
+                was,
+                wad,
+                rr,
+                rd,
+                st,
                 'Day 1 scrape - 137 clean leads'
             ])
 

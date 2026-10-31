@@ -155,15 +155,19 @@ async def send_email_cdp(gmail_tab, to_email, subject, body):
         return True
 
 async def send_emails_batch(max_emails=50):
-    """Send batch of emails"""
+    """Send batch of emails.
+
+    Uses outreach.py's gmail_send(), which is the PROVEN, VERIFIED sender:
+    it discards stale compose dialogs, scopes reads to its own dialog
+    (data-hsn-compose), and verifies the send landed before returning "sent".
+
+    The old inline send_email_cdp() below returned True UNCONDITIONALLY, so
+    every "Sent x/50" line was fiction: on 2026-10-31 it logged 50 sends
+    while Gmail's Sent folder contained ZERO of those emails (they died as
+    drafts / never sent). Only mark a lead SENT when the sender confirms.
+    """
     print(f"📧 Sending emails (max {max_emails})...")
-    
-    pages = await get_tabs()
-    gmail_tab = await find_tab(pages, 'mail.google.com')
-    if not gmail_tab:
-        print("❌ Gmail tab not found")
-        return 0
-    
+
     # Read pending emails from tracker
     pending = []
     with open(TRACKER_FILE, 'r') as f:
@@ -173,10 +177,12 @@ async def send_emails_batch(max_emails=50):
                 pending.append((row['Email'], row['Club Name']))
                 if len(pending) >= max_emails:
                     break
-    
+
     print(f"Found {len(pending)} pending emails")
-    
+
+    import outreach
     sent = 0
+    failed = 0
     for to_email, club_name in pending:
         try:
             subject = f'Custom gear for {club_name} -- factory-direct pricing'
@@ -189,22 +195,36 @@ We make custom gear with your logo, colors, and specs -- direct from our factory
 Same-day quote with mockup. Just reply with your logo/colors & quantities.
 
 -- HSN Warrior Apparels
-+92 337 3336381 | hsnwarriorapparels@gmail.com
++92 337 3336381 | hsnwarriorapparel@gmail.com
 https://hsnwarriorapparels.vercel.app'''
-            
-            await send_email_cdp(gmail_tab, to_email, subject, body)
-            
-            # Update tracker
-            update_tracker_email(to_email, 'SENT')
-            sent += 1
-            print(f"✅ Sent {sent}/{len(pending)}: {to_email}")
-            
-            await asyncio.sleep(5)  # Rate limit
-            
+
+            # gmail_send returns a STRING ('sent', 'recipient-not-registered', ...)
+            res = outreach.gmail_send(to_email, subject, body)
+            ok = isinstance(res, str) and res.strip().lower() == 'sent'
+            if not isinstance(res, str):
+                ok = bool(isinstance(res, dict) and res.get('ok'))
+
+            if ok:
+                # Update tracker
+                update_tracker_email(to_email, 'SENT')
+                sent += 1
+                print(f"✅ Sent {sent}/{len(pending)}: {to_email}")
+            else:
+                failed += 1
+                print(f"❌ Failed {to_email}: {res}")
+                # Do NOT mark SENT. Leave READY_TO_SEND so it can be retried,
+                # but remember the attempt so the next run skips it.
+                update_tracker_email_failed(to_email, str(res)[:120])
         except Exception as e:
+            failed += 1
             print(f"❌ Failed {to_email}: {e}")
-            continue
-    
+            try:
+                update_tracker_email_failed(to_email, str(e)[:120])
+            except Exception:
+                pass
+        await asyncio.sleep(12)
+
+    print(f"📧 Email batch done: {sent} sent, {failed} failed (of {len(pending)} attempted)")
     return sent
 
 async def send_ig_dms_batch(max_dms=20):
@@ -429,6 +449,33 @@ def update_tracker_email(email, status):
         writer = csv.writer(f)
         writer.writerows(rows)
 
+
+def update_tracker_email_failed(email, reason):
+    """Record a FAILED send without marking it SENT.
+
+    The lead stays out of the READY_TO_SEND queue (so a retry does not
+    re-hammer a dead address) but is clearly not counted as sent.
+    """
+    rows = []
+    with open(TRACKER_FILE, 'r') as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+    if len(rows) < 2:
+        return
+    changed = False
+    for row in rows[1:]:
+        if len(row) > 19 and row[4] == email and row[11] != 'SENT':
+            row[11] = 'FAILED'
+            row[12] = datetime.now().strftime('%Y-%m-%d')
+            row[19] = f'FAILED: {reason}'[:200]
+            changed = True
+            break
+    if not changed:
+        return
+    with open(TRACKER_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(rows)
+
 def update_tracker_ig(email, status):
     """Update IG DM status in tracker"""
     rows = []
@@ -504,8 +551,14 @@ async def main():
     print("=" * 60)
     
     # Step 1: Scrape new leads
+    # timeout=1800 was too short: a 2-city run needs ~40 min (measured 2198s-4194s),
+    # so the scrape was killed mid-flight every day BEFORE append_leads() ran --
+    # the engine jobs finished "ok" but leads.csv got 0 new rows.
+    # Use 5400s (90 min) and the PINNED interpreter (a bare `python3` can resolve to
+    # an interpreter without openpyxl, breaking the Excel rebuild).
     print("\n📍 STEP 1: Google Maps Scraping")
-    run_cmd("python3 gmaps_daily_scrape.py", timeout=1800)
+    run_cmd("/home/ubuntu/.hermes/tools/python-3.14.7+20260901-linux-arm64/bin/python3 "
+            "/home/ubuntu/gmaps_daily_scrape.py", timeout=5400)
     
     # Step 2: Clean and enrich
     print("\n🧹 STEP 2: Clean & Enrich Leads")
