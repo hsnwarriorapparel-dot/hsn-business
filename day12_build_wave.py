@@ -133,7 +133,7 @@ if os.path.exists(VERIFY):
     for v in csv.DictReader(open(VERIFY, newline='', encoding='utf-8')):
         onsite[v['Lead ID']] = v['Result'] == 'ON-SITE'
 
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 idx = {h: i for i, h in enumerate(hdr)}
 iE, iS, iW, iN, iC, iCi = (idx['Email'], idx['Status'], idx['Website'],
@@ -264,7 +264,7 @@ if status_updates:
         csv.writer(f).writerows(rows)
     os.replace(tmp, CSV)
     # read-back
-    chk = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+    chk = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
     print('csv rows after exclusion write:', len(chk) - 1, '| excluded marks applied:', len(status_updates))
 
 with open(WAVE_TXT, 'w') as f:

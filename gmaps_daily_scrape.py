@@ -266,7 +266,7 @@ def ig_from_website(site):
 
 def append_leads(leads):
     """Dedupe + append to leads.csv. Returns count added."""
-    with open(LEADS) as f:
+    with open(LEADS, encoding='utf-8-sig', newline='') as f:
         rows = list(csv.reader(f))
     hdr = rows[0]
     idx = {h: k for k, h in enumerate(hdr)}
@@ -311,7 +311,7 @@ def append_leads(leads):
         if ph: existing_phones.add(re.sub(r'\D', '', ph))
         added += 1
     fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='') as f:
+    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
         csv.writer(f).writerows(rows)
     with open(tmp) as f:
         assert len(list(csv.reader(f))) == len(rows)
@@ -322,7 +322,7 @@ def rebuild_excel():
     try:
         import openpyxl
         from openpyxl.styles import Font, PatternFill
-        with open(LEADS) as f:
+        with open(LEADS, encoding='utf-8-sig', newline='') as f:
             rows = list(csv.reader(f))
         wb = openpyxl.Workbook()
         ws = wb.active

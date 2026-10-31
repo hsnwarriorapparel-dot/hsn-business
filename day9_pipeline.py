@@ -22,7 +22,7 @@ def log(m):
         f.write(line + '\n')
 
 def load():
-    with open(CSV, newline='', encoding='utf-8') as f:
+    with open(CSV, newline='', encoding='utf-8-sig') as f:
         return list(csv.reader(f))
 
 def update_status(lead_id, new_status):

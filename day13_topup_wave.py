@@ -80,7 +80,7 @@ if os.path.exists(VERIFY):
     for v in csv.DictReader(open(VERIFY, newline='', encoding='utf-8')):
         onsite[v['Lead ID']] = v['Result'] == 'ON-SITE'
 
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iE, iS, iW, iN, iC = (idx['Email'], idx['Status'], idx['Website'], idx['Name'], idx['Country'])
 

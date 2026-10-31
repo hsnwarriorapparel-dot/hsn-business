@@ -31,7 +31,7 @@ def norm_email(e):
     return re.sub(r'^(%20|u00a0|u003e|\s)+', '', (e or '').strip().lower()).lstrip('-.')
 
 
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 cands = []
 for r in rows:
     st = (r.get('Status') or '').lower()

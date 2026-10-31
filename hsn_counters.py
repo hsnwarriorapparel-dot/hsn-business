@@ -32,7 +32,7 @@ WA_DONE_PAT = re.compile(r'(whatsapp sent)|(\bwa sent\b)|(wa sent \(verified)', 
 EMAIL_DONE_PAT = re.compile(r'email sent', re.I)
 FAIL_PAT = re.compile(r'email failed|wa failed|ig err|recipient-not-registered', re.I)
 
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 H = {h: i for i, h in enumerate(hdr)}
 

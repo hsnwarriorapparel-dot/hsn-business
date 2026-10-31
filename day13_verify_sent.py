@@ -56,7 +56,7 @@ def main():
 
     print()
     print('--- duplicate probe (to:<email>, expect 1 each) ---')
-    rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+    rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
     marked = [r for r in rows if 'email sent (Daily 2026-10-27)' in (r.get('Status') or '')]
     print('  CSV-marked as sent today:', len(marked))
     sample = marked[:8] + marked[-4:] if len(marked) > 12 else marked

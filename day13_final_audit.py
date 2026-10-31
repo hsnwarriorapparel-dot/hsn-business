@@ -36,7 +36,7 @@ def search(q, wait=4.0):
 
 
 print('=== 1. DUPLICATE PROBE over all 100 wave recipients ===')
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 d = {r['Lead ID']: r for r in rows}
 wave = [l.strip() for l in open(WAVE) if l.strip()]
 dups, missing = [], []

@@ -14,7 +14,7 @@ audit = json.load(open(AUDIT))
 confirmed = {lid: n for lid, n in audit.items() if n == 1}
 print('audit entries:', len(audit), '| confirmed sent (=1):', len(confirmed))
 
-rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iS = idx['Status']
 fixed = []
@@ -32,7 +32,7 @@ if fixed:
         csv.writer(f).writerows(rows)
     os.replace(tmp, CSV)
 
-chk = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+chk = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 c = {h: i for i, h in enumerate(chk[0])}
 sent_today = sum(1 for r in chk[1:] if 'email sent (' + DAY + ')' in (r[c['Status']] or ''))
 wave = [l.strip() for l in open('/home/ubuntu/day13_wave.txt') if l.strip()]

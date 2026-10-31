@@ -4,7 +4,7 @@ import csv
 from collections import Counter
 
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 
 def norm(e):
     return (e or '').strip().lower()

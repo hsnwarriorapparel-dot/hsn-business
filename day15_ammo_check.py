@@ -4,7 +4,7 @@ import csv, re, sys
 from collections import Counter
 
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 H = {h: i for i, h in enumerate(hdr)}
 

@@ -15,7 +15,7 @@ import hsn_counters as counters
 CSV = '/home/ubuntu/leads.csv'
 OUT = '/home/ubuntu/HWA_Lead_Tracker.xlsx'
 
-with open(CSV, encoding='utf-8', errors='replace') as f:
+with open(CSV, encoding='utf-8-sig', errors='replace') as f:
     reader = csv.reader(f)
     header = next(reader)
     rows = [r for r in reader]

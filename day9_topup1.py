@@ -6,7 +6,7 @@ from outreach import gmail_send
 from templates import build_email
 
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iE, iS, iC, iN = idx['Email'], idx['Status'], idx['Country'], idx['Name']
 ACTIVE = ['follow-up', 'hot lead', 'negotiat', 'sample quote', 'awaiting', 'replied']
@@ -39,7 +39,7 @@ ok = res.get('ok') if isinstance(res, dict) else ('sent' in str(res).lower())
 print("send:", "OK" if ok else str(res)[:80])
 if ok:
     import tempfile, os
-    rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+    rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
     idx = {h: i for i, h in enumerate(rows[0])}
     for r in rows[1:]:
         if r[0] == lid:
@@ -49,6 +49,6 @@ if ok:
         csv.writer(f).writerows(rows)
     os.replace(tmp, CSV)
     # read-back
-    rows2 = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+    rows2 = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
     got = [r[0] for r in rows2[1:] if r[0] == lid and 'email sent (Day 9' in r[idx['Status']]]
     print("marked+verified:", got)

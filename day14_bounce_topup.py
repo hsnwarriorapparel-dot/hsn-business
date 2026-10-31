@@ -24,7 +24,7 @@ PLACEHOLDER = ('beispiel', 'example.com', 'domain.com', 'dominio.com', 'mysite.c
                'test.com', 'sample.com', 'yourdomain', 'mydomain', 'exemplo',
                'placeholder', 'mustermann', 'dummy')
 
-rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 hdr = rows[0]
 idx = {h: i for i, h in enumerate(hdr)}
 iE, iS, iN, iC, iW = idx['Email'], idx['Status'], idx['Name'], idx['Country'], idx['Website']
@@ -121,7 +121,7 @@ if pick:
 # FRESH RE-READ immediately before the write: the IG pass may have marked rows
 # while this script was running, and a stale in-memory copy would clobber
 # those markers (Day-13 lesson: never write a stale full-file copy).
-fresh = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+fresh = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 fidx = {h: i for i, h in enumerate(fresh[0])}
 for r in fresh[1:]:
     if not r:
@@ -137,7 +137,7 @@ with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
     csv.writer(f).writerows(fresh)
 os.replace(tmp, CSV)
 
-chk = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+chk = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 c = {h: i for i, h in enumerate(chk[0])}
 sent = sum(1 for r in chk[1:] if f'email sent ({DAY})' in (r[c['Status']] or ''))
 fail = sum(1 for r in chk[1:] if f'EMAIL FAILED ({DAY})' in (r[c['Status']] or ''))

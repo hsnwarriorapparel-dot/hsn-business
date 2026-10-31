@@ -12,7 +12,7 @@ from cdp_helper import get_tabs, connect, js_eval
 
 LEAD_ID = sys.argv[1] if len(sys.argv) > 1 else None
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iE, iS, iN, iC, iCi = (idx['Email'], idx['Status'], idx['Name'], idx['Country'], idx['City'])
 

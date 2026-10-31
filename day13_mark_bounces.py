@@ -14,7 +14,7 @@ BOUNCES = [
     ('info@windycityboxing.com', 'address not found (Windy City Boxing)'),
 ]
 
-rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iE, iS, iN = idx['Email'], idx['Status'], idx['Name']
 
@@ -37,7 +37,7 @@ with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
     csv.writer(f).writerows(rows)
 os.replace(tmp, CSV)
 
-chk = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+chk = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 c = {h: i for i, h in enumerate(chk[0])}
 sent_today = sum(1 for r in chk[1:] if 'email sent (' + DAY + ')' in (r[c['Status']] or ''))
 fail_today = sum(1 for r in chk[1:] if 'EMAIL FAILED (' + DAY + ')' in (r[c['Status']] or ''))

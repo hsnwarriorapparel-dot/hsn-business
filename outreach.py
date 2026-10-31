@@ -100,6 +100,21 @@ def gmail_send(to, subject, body):
     cdp("Page.bringToFront")   # REQUIRED: background tabs ignore UI clicks
     time.sleep(1)
 
+    # BLOCKER (2026-10-30): Google's "Send feedback to Google" panel is a
+    # FULL-VIEWPORT iframe (tools/feedback/aloha_frame) that overlays the page
+    # and swallows the Compose click -> every send failed with
+    # 'compose-focus-never-ready'. It has no visible close button in the DOM
+    # (0x0), so the only reliable fix is to REMOVE the iframe before clicking.
+    killed = js_eval(ws, """(() => {
+      let n = 0;
+      for (const f of document.querySelectorAll('iframe')) {
+        if (/aloha_frame|feedback\\/i.test(f.src || '')) { f.remove(); n++; }
+      }
+      return n;
+    })()""", await_promise=False)
+    if killed:
+        time.sleep(1)
+
     # CLEAN STATE: discard ALL existing compose dialogs first (drafts auto-restore
     # server-side and querySelector('div[role="dialog"]') would read the STALE draft
     # instead of our new compose - the Day-10 wave failure). Discard, never Save.

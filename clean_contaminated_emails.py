@@ -35,7 +35,7 @@ def looks_contaminated(em: str) -> bool:
 
 
 def main():
-    with open(LEADS, encoding='utf-8', errors='replace') as f:
+    with open(LEADS, encoding='utf-8-sig', errors='replace') as f:
         rows = list(csv.reader(f))
     idx = {h.strip(): i for i, h in enumerate(rows[0])}
     ec, sc = idx['Email'], idx['Status']
@@ -65,7 +65,7 @@ def main():
         print('  ', lid, em)
 
     # read-back verification
-    with open(LEADS, encoding='utf-8', errors='replace') as f:
+    with open(LEADS, encoding='utf-8-sig', errors='replace') as f:
         rr = list(csv.DictReader(f))
     n = sum(1 for r in rr if 'EXCLUDED (scrape contamination' in (r.get('Status') or ''))
     print('READ-BACK: contamination-excluded =', n, '| total rows =', len(rr))

@@ -3,7 +3,7 @@
 import csv, re, sys
 
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 print('total rows:', len(rows))
 
 def norm(e):

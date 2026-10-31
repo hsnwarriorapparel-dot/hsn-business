@@ -91,7 +91,7 @@ for sv in SUBJECT_VARIANTS:
 print('  TOTAL by subject variants:', total_sent)
 
 # ---------- 2. per-recipient duplicate probe ----------
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 d = {r['Lead ID']: r for r in rows}
 wave = [l.strip() for l in open(WAVE) if l.strip()]
 print()

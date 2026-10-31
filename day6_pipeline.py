@@ -15,6 +15,8 @@ LOG = '/home/ubuntu/daily_pipeline_log.txt'
 DAY = f"Daily {time.strftime('%Y-%m-%d')}"
 MAX_EMAILS = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 MAX_WA = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+# Hard user quota: max 100 cold emails per calendar day, across ALL scripts.
+DAILY_EMAIL_QUOTA = 100
 
 def log(m):
     line = time.strftime('%H:%M:%S') + ' ' + m
@@ -23,7 +25,7 @@ def log(m):
         f.write(line + '\n')
 
 def load():
-    with open(CSV, newline='', encoding='utf-8') as f:
+    with open(CSV, newline='', encoding='utf-8-sig') as f:
         return list(csv.reader(f))
 
 def update_status(lead_id, new_status):
@@ -117,6 +119,27 @@ for r in rows[1:]:
         continue
     ammo.append(r)
 log(f"email ammo: {len(ammo)}")
+
+# ---------------- SAME-DAY QUOTA GUARD ----------------
+# The user's hard quota is 100 emails/day. This script has no same-day cap,
+# so a second run on the same day (e.g. a stale session firing it again)
+# would breach the quota and get the sending domain flagged. Count what
+# already went out TODAY (any status carrying today's date) and only send
+# the remaining allowance. If the day is already full, exit immediately.
+_already_today = 0
+for r in rows[1:]:
+    if DAY in (r[iS] or ''):
+        sl = (r[iS] or '').lower()
+        if 'email sent' in sl:
+            _already_today += 1
+_remaining = max(0, DAILY_EMAIL_QUOTA - _already_today)
+log(f"emails already sent today: {_already_today} | daily quota {DAILY_EMAIL_QUOTA} | remaining allowance: {_remaining}")
+if _remaining <= 0:
+    log(f"DAILY EMAIL QUOTA ALREADY REACHED ({_already_today}/{DAILY_EMAIL_QUOTA}) - nothing sent, exiting")
+    sys.exit(0)
+MAX_EMAILS = min(MAX_EMAILS, _remaining)
+log(f"email target capped to {MAX_EMAILS}")
+
 sent = failed = 0
 for r in ammo[:MAX_EMAILS]:
     lid, name = r[0], r[iN].replace('&', 'and')

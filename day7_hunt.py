@@ -17,7 +17,7 @@ def log(m):
         f.write(line + '\n')
 
 def load_csv():
-    with open(CSV, newline='', encoding='utf-8') as f:
+    with open(CSV, newline='', encoding='utf-8-sig') as f:
         return list(csv.reader(f))
 
 IDX = {h: i for i, h in enumerate(load_csv()[0])}

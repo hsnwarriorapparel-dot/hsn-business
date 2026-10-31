@@ -42,7 +42,7 @@ def log(m):
 
 
 def load():
-    with open(CSV, newline='', encoding='utf-8') as f:
+    with open(CSV, newline='', encoding='utf-8-sig') as f:
         return list(csv.reader(f))
 
 

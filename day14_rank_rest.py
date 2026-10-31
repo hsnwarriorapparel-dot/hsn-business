@@ -23,7 +23,7 @@ WEBMAIL = ('gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'yahoo.fr',
            'sbcglobal.net', 'bellsouth.net', 'earthlink.net', 'yandex.com',
            'mail.ru', 'qq.com', '163.com', 'naver.com')
 
-rows = list(csv.reader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.reader(open(CSV, newline='', encoding='utf-8-sig')))
 hdr = rows[0]
 idx = {h: i for i, h in enumerate(hdr)}
 iE, iS, iW, iN, iC = idx['Email'], idx['Status'], idx['Website'], idx['Name'], idx['Country']

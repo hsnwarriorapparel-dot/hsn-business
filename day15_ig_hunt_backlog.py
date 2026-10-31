@@ -30,7 +30,7 @@ def fetch(url, timeout=10):
         return ''
 
 
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 idx = {h: i for i, h in enumerate(rows[0])}
 iIG, iLINK, iW, iS = idx['IG Username'], idx['IG Profile Link'], idx['Website'], idx['Status']
 
@@ -101,7 +101,7 @@ if updates:
     with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
         csv.writer(f).writerows(rows)
     os.replace(tmp, CSV)
-    chk = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+    chk = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
     print('csv rows after IG write:', len(chk) - 1, '| IG handles written:', len(updates), flush=True)
 
 print('done. backlog IG handles discovered:', len(updates), flush=True)

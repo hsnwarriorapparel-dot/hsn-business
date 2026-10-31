@@ -10,7 +10,7 @@ sys.path.insert(0, '/home/ubuntu')
 import hsn_counters as C
 
 CSV = '/home/ubuntu/leads.csv'
-rows = list(csv.reader(open(CSV, encoding='utf-8', errors='replace')))
+rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 H = {h: i for i, h in enumerate(hdr)}
 

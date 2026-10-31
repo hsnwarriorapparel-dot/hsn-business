@@ -31,7 +31,7 @@ def search(q):
     return int(json.loads(v or '{}').get('count') or 0)
 
 
-rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8')))
+rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 d = {r['Lead ID']: r for r in rows}
 wave = [l.strip() for l in open(WAVE) if l.strip()]
 suspects = []
