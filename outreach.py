@@ -94,7 +94,27 @@ def gmail_send(to, subject, body):
     tabs = [t for t in get_tabs() if 'mail.google' in t['url'] and t['type'] == 'page']
     if not tabs:
         return "no-gmail-tab"
-    ws = connect(tabs[0])
+    # TAB SELECTION (fixed 2026-10-31): a Gmail tab left on a stale
+    # '?compose=<id>' URL keeps its compose container inside a display:none
+    # holder, so clicking Compose does nothing and every send fails with
+    # 'compose-focus-never-ready'. Prefer a CLEAN tab (no compose= param);
+    # if only a dirty one exists, navigate it to a clean inbox first.
+    def _dirty(t):
+        return 'compose=' in (t.get('url') or '')
+    clean = [t for t in tabs if not _dirty(t)]
+    if clean:
+        tab = clean[0]
+    else:
+        tab = tabs[0]
+        try:
+            _ws = connect(tab)
+            _cdp = make_cdp(_ws)
+            _cdp('Page.navigate', {'url': 'https://mail.google.com/mail/u/0/#inbox'})
+            time.sleep(9)
+            _ws.close()
+        except Exception:
+            pass
+    ws = connect(tab)
     cdp = make_cdp(ws)
     cdp("Page.enable")
     cdp("Page.bringToFront")   # REQUIRED: background tabs ignore UI clicks
@@ -161,22 +181,36 @@ def gmail_send(to, subject, body):
     cdp("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": pos['x'], "y": pos['y'], "button": "left", "clickCount": 1})
 
     # wait until focus is in the To INPUT; if the dialog is minimized (h<100), expand it back
+    # VISIBLE-DIALOG SELECTOR (fixed 2026-10-31): querySelector('div[role="dialog"]')
+    # returns the FIRST dialog, which can be a HIDDEN stale compose sitting in a
+    # display:none holder. That made the loop read height 0 forever and abort
+    # with 'compose-focus-never-ready'. Always pick the dialog that is actually
+    # rendered (w>100 and h>100), preferring the one holding focus.
+    VISIBLE_DLG_JS = """(() => {
+      const dlgs = Array.from(document.querySelectorAll('div[role="dialog"]'));
+      const vis = dlgs.filter(d => { const r = d.getBoundingClientRect();
+                                     return r.width > 100 && r.height > 100; });
+      const focused = vis.find(d => d.contains(document.activeElement));
+      const d = focused || vis[vis.length - 1] || null;
+      if (!d) return 'nodlg';
+      const r = d.getBoundingClientRect();
+      const a = document.activeElement;
+      if (r.height < 100) return 'minimized';
+      return (a && a.tagName === 'INPUT' && /to/i.test(a.getAttribute('aria-label')||'')) ? 'ready' : 'wait';
+    })()"""
     for _ in range(12):
-        f = js_eval(ws, """(() => {
-          const dlg = document.querySelector('div[role="dialog"]');
-          if (!dlg) return 'nodlg';
-          const r = dlg.getBoundingClientRect();
-          if (r.height < 100) return 'minimized';
-          const a = document.activeElement;
-          return (a && a.tagName === 'INPUT' && /to/i.test(a.getAttribute('aria-label')||'')) ? 'ready' : 'wait';
-        })()""")
+        f = js_eval(ws, VISIBLE_DLG_JS)
         if f == 'ready':
             break
         if f == 'minimized':
             # click the minimized bar to expand it back
             pos_m = js_eval(ws, """(() => {
-              const dlg = document.querySelector('div[role="dialog"]');
-              const r = dlg.getBoundingClientRect();
+              const dlgs = Array.from(document.querySelectorAll('div[role="dialog"]'));
+              const vis = dlgs.filter(d => { const r = d.getBoundingClientRect();
+                                             return r.width > 100 && r.height > 100; });
+              const d = vis[vis.length - 1];
+              if (!d) return null;
+              const r = d.getBoundingClientRect();
               return JSON.stringify({x: r.x + r.width/2, y: r.y + r.height/2});
             })()""")
             try:
