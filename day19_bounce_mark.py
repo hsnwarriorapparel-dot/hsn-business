@@ -76,10 +76,22 @@ for subj, em, reason in bounces:
         print('   NO LEAD for', em)
         continue
     st = r.get('Status') or ''
-    if 'failed' in st.lower():
+    sl = st.lower()
+    if 'failed' in sl:
         print('   already failed', r['Lead ID'], em)
         continue
-    ok = update_status(r['Lead ID'], f"EMAIL FAILED ({DAY}): bounce - {reason[:60]}")
+    # EXCLUDED rows were never supposed to be emailed (junk/telemetry address
+    # the QA filter already rejected). A bounce on one of them is not a lead
+    # failure - marking it EMAIL FAILED just pollutes the counters.
+    if 'excluded' in sl:
+        print('   EXCLUDED row (junk address, not a lead failure) - skipping', r['Lead ID'], em)
+        continue
+    # Never append the same marker twice (the sweep can list one bounce twice).
+    marker = f"EMAIL FAILED ({DAY}): bounce - {reason[:60]}"
+    if marker in st:
+        print('   marker already present', r['Lead ID'], em)
+        continue
+    ok = update_status(r['Lead ID'], marker)
     marked += 1
     print(f"   MARK {r['Lead ID']} {em} written={ok}")
 
