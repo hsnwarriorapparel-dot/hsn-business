@@ -133,17 +133,76 @@ def generate_insights(hot_leads):
         insights.append(f"Pipeline: {total} total leads | USA {usa_sent}/{usa_total} emailed, "
                         f"{usa_open} still open | global ammo {ammo} leads ready to email")
         replied = sum(1 for r in rows[1:] if 'reply' in r[idx['Status']].lower() or 'HOT' in r[idx['Status']])
-        insights.append(f"{replied} leads have engaged so far - these are your warmest targets today")
+        insights.append(f"{replied} tracker rows carry a reply/HOT marker (includes declines, "
+                        "auto-acks and STOP rows - see the HUMAN reply line below for the real count)")
     except Exception:
         pass
     AMMO = ammo
-    insights.append("Gmail: inbox swept - zero genuine human business replies so far; "
-                    "every recent reply is an auto-ack or a bounce (30+ bounce notices)")
-    insights.append("WhatsApp Web session is DEAD (QR screen) - no WA sends since Oct 24. "
-                    "Re-link from phone/VNC to resume the 10/day quota")
-    insights.append("Instagram IS logged in - IG follow+DM pass is running normally")
+
+    # --- HUMAN replies: computed LIVE from the tracker (2026-11-03 fix) ---
+    # A row counts as a HUMAN reply when its Status carries an explicit reply marker
+    # that is NOT an auto-ack ("AUTO-REPLY", "auto-acknowledgement", "auto-reply").
+    human_replies = []
+    declines = []
+    try:
+        with open('/home/ubuntu/leads.csv') as f:
+            rows = list(csv.reader(f))
+        idx = {h: i for i, h in enumerate(rows[0])}
+        decline_markers = ('not looking for new supplier', 'permanently closed', 'no longer',
+                           'not interested', 'not interested at this time', 'closed - no contact')
+        for r in rows[1:]:
+            st = (r[idx['Status']] or '')
+            low = st.lower()
+            if 'reply' not in low:
+                continue
+            if any(k in low for k in ('auto-reply', 'auto reply', 'auto-acknowledgement',
+                                       'automatische antwort', 'automatic reply')):
+                continue
+            if 'do not contact' in low:      # STOP = not a sales reply
+                continue
+            if any(d in low for d in decline_markers):
+                declines.append((r[idx['Lead ID']], r[idx['Name']]))
+                continue
+            human_replies.append((r[idx['Lead ID']], r[idx['Name']], st))
+    except Exception:
+        pass
+    if human_replies:
+        names = ', '.join(f"{lid} {nm}" for lid, nm, _ in human_replies[:3])
+        insights.append(f"HUMAN business replies on the board: {len(human_replies)} ({names}) - "
+                        "reply is DRAFT-ONLY until the user says send")
+    else:
+        insights.append("No human business reply markers in the tracker - every recent Gmail/IG "
+                        "reply is an auto-ack, an out-of-office or a bounce")
+    if declines:
+        dn = ', '.join(f"{lid} {nm}" for lid, nm in declines[:3])
+        insights.append(f"Polite declines / closed accounts (do NOT follow up): {len(declines)} ({dn})")
+
+    # --- Session health: read the live CDP sweep, never assert it statically ---
+    sweep = {}
+    try:
+        with open('/home/ubuntu/morning_sweep.json') as f:
+            sweep = json.load(f)
+        age = (os.path.getmtime('/home/ubuntu/morning_sweep.json'))
+        fresh_min = (time.time() - age) / 60
+    except Exception:
+        fresh_min = 999
+    if fresh_min <= 45:
+        if sweep.get('wa_alive'):
+            insights.append("WhatsApp Web session is ALIVE (live CDP sweep) - WA sends can run")
+        elif sweep.get('wa_qr'):
+            insights.append("WhatsApp Web session is DEAD (QR screen, live CDP sweep) - "
+                            "no WA sends since Oct 24. Re-link from phone/VNC to resume the 10/day quota")
+        else:
+            insights.append("WhatsApp Web state unknown this run (no QR, no pane)")
+        if not sweep.get('ig_error') and sweep.get('ig_head'):
+            insights.append("Instagram IS logged in (live CDP sweep) - IG follow+DM pass is running normally")
+        else:
+            insights.append("Instagram state unknown this run - check the CDP sweep")
+    else:
+        insights.append(f"Session health NOT verified this run (sweep file is {int(fresh_min)} min old)")
+
     insights.append("go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) "
-                    "but 0 products added - list products so buyers can find us")
+                    "but 0 products added (verified live 2026-11-03) - list products so buyers can find us")
     insights.append("SECURITY: TradeWheel emailed the account password in plaintext - change it and reuse a unique password")
     return insights
 
