@@ -25,6 +25,30 @@ def _detect_today_tag():
     TODAY_TAG = max(found) if found else ''
     return TODAY_TAG
 
+
+def marker_today(r, *needles):
+    """Return the Status marker that carries TODAY_TAG AND one of the needles.
+
+    WHY (2026-11-02): the naive "row contains today's date AND contains
+    'email sent'" test counts a lead that was emailed on Day-18 but received an
+    IG marker today as an email sent today, and a row whose only 'wa sent'
+    marker is from Day 9 but which got an IG marker today as a WA sent today.
+    Both inflated the Day-19 report (55 emails / 1 WA vs the true 50 / 0).
+    Markers are ' | '-separated, so the day tag must live in the SAME marker
+    as the completion token.
+    """
+    tag = _detect_today_tag()
+    if not tag:
+        return None
+    for part in (g(r, 'Status') or '').split('|'):
+        p = part.strip()
+        if tag not in p:
+            continue
+        low = p.lower()
+        if any(n.lower() in low for n in needles):
+            return p
+    return None
+
 # IG done: an explicit follow/DM completion token
 IG_DONE_PAT = re.compile(r'(ig follow=(ok|clicked|no-btn))|(dm=sent)|(ig followed)|(ig dm sent)', re.I)
 # WA done: an explicit send confirmation
@@ -83,8 +107,16 @@ if __name__ == '__main__':
     today = [r for r in rows[1:] if _detect_today_tag() in g(r, 'Status')]
     print("--- today", TODAY_TAG, "---")
     print("rows touched:", len(today))
-    print("emails sent today:", sum(1 for r in today if email_ok(r)))
-    print("IG done today:", sum(1 for r in today if ig_ok(r)))
-    print("WA sent today:", sum(1 for r in today if wa_ok(r)))
+    # per-channel "today" counts must come from a SINGLE marker that carries
+    # today's date AND that channel's completion token (see marker_today).
+    print("emails sent today:", sum(1 for r in today
+                                     if marker_today(r, 'email sent')))
+    print("IG done today:", sum(1 for r in today
+                                if marker_today(r, 'ig follow=', 'dm=sent',
+                                                'ig followed', 'ig dm sent')))
+    print("WA sent today:", sum(1 for r in today
+                                if marker_today(r, 'whatsapp sent', 'wa sent')))
     from collections import Counter
-    print("countries:", dict(Counter(g(r, 'Country') or '?' for r in today if email_ok(r))))
+    print("countries:", dict(Counter(g(r, 'Country') or '?'
+                                     for r in today
+                                     if marker_today(r, 'email sent'))))

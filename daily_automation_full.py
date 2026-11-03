@@ -563,18 +563,22 @@ async def main():
     # Step 2: Clean and enrich
     print("\n🧹 STEP 2: Clean & Enrich Leads")
     run_cmd("python3 process_leads.py", timeout=300)
-    
-    # Step 3: Send emails
-    print("\n📧 STEP 3: Send Emails")
-    sent_email = await send_emails_batch(50)
-    
-    # Step 4: Send IG DMs
-    print("\n📱 STEP 4: Send IG DMs")
-    sent_ig = await send_ig_dms_batch(20)
-    
-    # Step 5: Send WhatsApp
-    print("\n💬 STEP 5: Send WhatsApp")
-    sent_wa = await send_whatsapp_batch(10)
+
+    # STEPS 3-5 DISABLED (2026-11-02): this path sent 50 emails on 2026-11-02
+    # WITHOUT the QA pipeline, and 46 of them went to junk telemetry addresses
+    # (sentry.wixpress.com / sentry.io) because the tracker rows were built by
+    # splitting a raw comma-joined scrape cell into one row per address. It also
+    # wrote "Hi <name>," greeting copy (banned by spam-word-checker) and
+    # re-sent 2 leads already emailed on 2026-10-29. The real send path is the
+    # dayNN wave chain (site-verify -> QA -> wave -> send) which enforces the
+    # 100/day quota, the per-domain cap and the copy rules. This path now only
+    # harvests leads; it never sends. Re-enable only with the QA chain in front.
+    print("\n📧 STEP 3: email sends - DISABLED (handled by the dayNN wave chain)")
+    sent_email = 0
+    print("\n📱 STEP 4: IG DMs - DISABLED (handled by the dayNN IG pass)")
+    sent_ig = 0
+    print("\n💬 STEP 5: WhatsApp - DISABLED (handled by the dayNN WA phase)")
+    sent_wa = 0
     
     # Step 6: Git backup
     print("\n💾 STEP 6: Git Backup")

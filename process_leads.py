@@ -1,9 +1,74 @@
-import csv, json
+import csv, json, re, sys
 from datetime import datetime
 import os
 
+sys.path.insert(0, '/home/ubuntu')
+from gmaps_daily_scrape import clean_email
+
 with open('/home/ubuntu/gmaps-output/leads_day1_full_clean.json', 'r') as f:
     leads = json.load(f)
+
+# JUNK-FILTER FIX (2026-11-02): the raw scrape cells are COMMA-SEPARATED and
+# mix a real address with telemetry noise (sentry.wixpress.com, sentry.io,
+# example.com, 32-hex image hashes). This script used to split every cell on
+# commas and write ONE TRACKER ROW PER ADDRESS, so the 09:00 automation cron
+# emailed ~46 junk telemetry addresses on 2026-11-02 (47 of 50 sends were
+# noise; 2 were duplicate re-sends of leads already emailed on 2026-10-29).
+# Fix: run every cell through the SAME clean_email() the live scrape uses
+# (it rejects sentry/wixpress/placeholder/hash/3rd-party domains and scores
+# the rest against the lead's own website + name), so only ONE real address
+# per lead ever reaches the tracker.
+JUNK_DOMAIN_HINTS = ('sentry', 'wixpress', 'example.com', 'domain.com',
+                      'dominio.com', 'mysite.com', 'abuse@', 'postmaster@')
+
+
+def _clean_cell(l):
+    """Return the single usable address for a lead ('' when none is)."""
+    cell = (l.get('email') or '').strip()
+    if not cell:
+        return ''
+    site = (l.get('website') or '').strip()
+    name = (l.get('title') or '').strip()
+    picked = clean_email(cell, site, name)
+    if picked:
+        return picked
+    # clean_email() is strict (needs a site/name signal). Fall back to a
+    # single address that is itself clean, so we never lose a valid lead.
+    for c in cell.split(','):
+        c = c.strip().lower()
+        if not c or not re.match(r'^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$', c):
+            continue
+        if any(h in c for h in JUNK_DOMAIN_HINTS):
+            continue
+        if re.fullmatch(r'[0-9a-f]{16,}', c.split('@')[0]):
+            continue
+        if re.search(r'\.(jpg|jpeg|png|gif|webp|svg|pdf|html?)$', c):
+            continue
+        return c
+    return ''
+
+
+for l in leads:
+    l['email'] = _clean_cell(l)
+
+# Never re-send an address that leads.csv already records as emailed.
+LEADS_CSV = '/home/ubuntu/leads.csv'
+already_sent = set()
+if os.path.exists(LEADS_CSV):
+    with open(LEADS_CSV, newline='', encoding='utf-8-sig', errors='replace') as f:
+        for row in csv.DictReader(f):
+            em = (row.get('Email') or '').strip().lower()
+            st = (row.get('Status') or '').lower()
+            if em and ('email sent' in st or 'failed' in st):
+                already_sent.add(em)
+if already_sent:
+    kept = 0
+    for l in leads:
+        if (l.get('email') or '').strip().lower() in already_sent:
+            l['email'] = ''
+        else:
+            kept += 1
+    print(f'tracker: dropped {len(leads)-kept} lead(s) whose email was already sent/failed in leads.csv')
 
 TRACKER = '/home/ubuntu/gmaps-output/outreach_tracker.csv'
 
@@ -60,6 +125,8 @@ with open('/home/ubuntu/gmaps-output/outreach_tracker.csv', 'w', newline='') as 
     for l in leads:
         for email in l['email'].split(','):
             email = email.strip()
+            if not email:
+                continue
             title_lower = l['title'].lower()
             sport = 'wrestling' if 'wrestling' in title_lower else \
                     'boxing' if 'boxing' in title_lower else \
@@ -107,7 +174,9 @@ os.makedirs('/home/ubuntu/gmaps-output/drafts', exist_ok=True)
 for l in leads:
     title = l['title']
     email = l['email'].split(',')[0].strip()
-    sport = 'wrestling' if 'wrestling' in l['title'].lower() else \
+    if not email:
+        continue
+    sport = 'wrestling' if 'wrestling' in title.lower() else \
             'boxing' if 'boxing' in l['title'].lower() else \
             'BJJ' if any(x in l['title'].lower() for x in ['bjj', 'jiu jitsu', 'jiu-jitsu']) else \
             'Muay Thai' if 'muay thai' in l['title'].lower() else \
