@@ -25,7 +25,8 @@ def log(m):
         f.write(line + '\n')
 
 
-def run(cmd, label, timeout=14400):
+# Per-step timeout: the IG follow+DM pass alone measured 2h21m (2026-11-05).
+def run(cmd, label, timeout=21600):  # 6h
     log(f"--- {label} ---")
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)

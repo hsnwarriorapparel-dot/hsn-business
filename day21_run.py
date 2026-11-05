@@ -26,7 +26,9 @@ def log(m):
         f.write(line + '\n')
 
 
-def run(cmd, label, timeout=14400):
+# Per-step timeout. The IG follow+DM pass over 240 candidates measured 2h21m
+# (2026-11-05) and the reply sweep adds more, so 4h per step was too tight.
+def run(cmd, label, timeout=21600):  # 6h
     log(f'--- {label} ---')
     t0 = time.time()
     try:

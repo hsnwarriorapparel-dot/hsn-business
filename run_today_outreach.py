@@ -201,13 +201,19 @@ def main():
         log(f"lock acquired (pid {os.getpid()})")
 
     py = find_python()
-    log(f"launching: {py} {orchestrator}")
+    # TIMING (measured 2026-11-05): site-verify + wave build 75s, email wave
+    # 100 leads @38s = 87 min, IG handle hunts 11 min, IG follow+DM pass over
+    # 240 candidates = 2h21m, tracker rebuild ~1s. Total ~6h25m - so the old
+    # 4h cap killed the run during the IG pass, every night. The cap must
+    # cover the whole chain plus the reply sweep.
+    timeout_s = int(os.environ.get("OUTREACH_TIMEOUT_S", "36000"))  # 10h
+    log(f"launching: {py} {orchestrator} (timeout {timeout_s}s)")
     try:
-        rc = subprocess.run([py, orchestrator], cwd=HOME,
-                            timeout=int(os.environ.get("OUTREACH_TIMEOUT_S", "14400"))).returncode
+        rc = subprocess.run([py, orchestrator], cwd=HOME, timeout=timeout_s).returncode
         log(f"orchestrator exited rc={rc}")
     except subprocess.TimeoutExpired:
-        log("orchestrator TIMEOUT - the wave is resumable; re-run this launcher to continue")
+        log(f"orchestrator TIMEOUT after {timeout_s}s - the work is resumable; "
+            f"re-run this launcher to continue")
         rc = 124
     finally:
         try:
