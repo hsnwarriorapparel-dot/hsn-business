@@ -122,9 +122,30 @@ def ammo():
 
 
 def pipeline_alive():
-    out = subprocess.run(["ps", "aux"], capture_output=True, text=True).stdout
-    return ("day" in out and "_run.py" in out and "run_today_outreach" not in out
-            and "day21_run.py" in out)
+    """True when an orchestrator for this day is actually running.
+
+    Match on the dayNN_run.py PROCESS, not on a substring of `ps aux`: a
+    wrapper shell that merely MENTIONS the filename (a terminal call, a grep,
+    this script's own command line) would otherwise look like a live pipeline.
+    """
+    try:
+        out = subprocess.run(["ps", "-eo", "pid,args"], capture_output=True,
+                             text=True).stdout
+    except Exception:
+        return False
+    for line in out.splitlines()[1:]:
+        parts = line.strip().split(None, 1)
+        if len(parts) != 2:
+            continue
+        pid, args = parts
+        if not pid.isdigit():
+            continue
+        if int(pid) == os.getpid():
+            continue
+        # The real orchestrator: python <path>/dayNN_run.py
+        if re.search(r"python\S*\s+\S*/day\d+_run\.py(\s|$)", args):
+            return True
+    return False
 
 
 def main():
