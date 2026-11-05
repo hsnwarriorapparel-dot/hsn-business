@@ -13,15 +13,41 @@ CSV = '/home/ubuntu/leads.csv'
 TODAY_TAG = os.environ.get('HSN_TODAY_TAG') or None
 
 
+# Lead-SOURCE stamps: they record WHEN a lead was found, not when outreach
+# happened. They must NOT decide the campaign day - the gmaps scrape runs on
+# the UTC date while the outreach wave is tagged with the PKT campaign day, so
+# a scrape stamp is often a day AHEAD of the sends and would otherwise win
+# "most recent date" and report 0 sends for a day that sent 99 emails.
+SOURCE_MARKER_RE = re.compile(r'HUNTED\s*\(')
+
+
 def _detect_today_tag():
-    """Most recent YYYY-MM-DD date stamped in any row's Status."""
+    """Most recent date stamped by an OUTREACH marker (a real send day).
+
+    FIX (2026-11-05): the old version took max() over EVERY date in Status,
+    including 'HUNTED (gmaps 2PM <date>)' lead-source stamps. The gmaps
+    scrape stamps the UTC date while the outreach wave carries the PKT
+    campaign-day tag, so the scrape date won and the counters reported
+    "emails sent today: 0" on a day that actually sent 99 emails and 188 IG
+    DMs. Now only markers that record an actual outreach action count.
+    """
     global TODAY_TAG
     if TODAY_TAG:
         return TODAY_TAG
     found = set()
+    outreach_markers = ('email sent', 'ig follow', 'dm=sent', 'ig done',
+                         'whatsapp sent', 'wa sent', 'email failed', 'replied')
     for r in rows[1:]:
-        for m in re.findall(r'20\d\d-\d\d-\d\d', g(r, 'Status') or ''):
-            found.add(m)
+        status = g(r, 'Status') or ''
+        for part in status.split('|'):
+            # SKIP lead-source stamps ('HUNTED (gmaps 2PM <date>)'): they say
+            # when a lead was FOUND, not when outreach happened.
+            if SOURCE_MARKER_RE.search(part):
+                continue
+            if not any(k in part.lower() for k in outreach_markers):
+                continue
+            for m in re.findall(r'20\d\d-\d\d-\d\d', part):
+                found.add(m)
     TODAY_TAG = max(found) if found else ''
     return TODAY_TAG
 
@@ -104,7 +130,11 @@ if __name__ == '__main__':
     print("with phone:", sum(1 for r in rows[1:] if g(r, 'Phone').strip()))
     print("failed rows:", sum(1 for r in rows[1:] if 'failed' in g(r, 'Status').lower()))
     print("excluded rows:", sum(1 for r in rows[1:] if 'excluded' in g(r, 'Status').lower()))
-    today = [r for r in rows[1:] if _detect_today_tag() in g(r, 'Status')]
+    # Resolve the tag ONCE. Calling _detect_today_tag() inside the loop made
+    # every row re-scan every Status (4019 rows x full scan) and the script
+    # took >2 minutes.
+    _tag = _detect_today_tag()
+    today = [r for r in rows[1:] if _tag and _tag in g(r, 'Status')]
     print("--- today", TODAY_TAG, "---")
     print("rows touched:", len(today))
     # per-channel "today" counts must come from a SINGLE marker that carries
