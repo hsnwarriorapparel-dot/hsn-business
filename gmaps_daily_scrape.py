@@ -361,7 +361,7 @@ def git_commit():
     else:
         log(f"git commit skipped/failed: {(c.stdout + c.stderr).strip()[:120]}")
     p = subprocess.run(["bash", "-c",
-                        "GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/hsn_backup_key -o IdentitiesOnly=yes' git push origin main"],
+                        "GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/hsn_backup_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no' git push origin main"],
                        cwd="/home/ubuntu/business-backup", capture_output=True, text=True)
     if p.returncode == 0:
         log("git push OK")
