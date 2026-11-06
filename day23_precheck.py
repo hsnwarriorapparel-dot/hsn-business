@@ -15,8 +15,12 @@ import urllib.parse
 sys.path.insert(0, '/home/ubuntu')
 from cdp_helper import get_tabs, connect, make_cdp, js_eval
 
-TODAY = '2026/11/05'
-YESTERDAY = '2026/11/04'
+# Compute the dates - a hardcoded literal goes stale every day and reports
+# the WRONG ground truth (it reported 2026-11-05 sends on 2026-11-07).
+import datetime as _dt
+_today = _dt.datetime.now(_dt.timezone.utc).date()
+TODAY = _today.strftime('%Y/%m/%d')
+YESTERDAY = (_today - _dt.timedelta(days=1)).strftime('%Y/%m/%d')
 
 
 def main():

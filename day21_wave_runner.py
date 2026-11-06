@@ -105,8 +105,16 @@ except Exception:
 _today_sent = 0
 for _r in _rows0[1:]:
     _st = (_r[_idx0['Status']] if _idx0['Status'] < len(_r) else '') or ''
-    if DAY in _st and 'email sent' in _st.lower():
-        _today_sent += 1
+    # COUNT ONLY REAL SEND MARKERS (fix 2026-11-06): the old check was
+    # `DAY in _st`, which matched the date ANYWHERE in the Status string - so
+    # the lead-source stamp 'HUNTED (gmaps 2PM <day>)' counted as a send for
+    # that day. The wave then saw 100 'already sent' and refused to send
+    # anything on a day with 0 emails sent. A row counts as sent today ONLY
+    # when the SAME marker carries both the send action and the day tag.
+    for _part in _st.split('|'):
+        if 'email sent' in _part.lower() and DAY in _part:
+            _today_sent += 1
+            break
 _already = max(PRE_SENT_TODAY, _today_sent)
 _remaining = max(0, DAILY_EMAIL_QUOTA - _already)
 log(f"DAY21 WAVE START: {len(ids)} leads from {WAVE}")
