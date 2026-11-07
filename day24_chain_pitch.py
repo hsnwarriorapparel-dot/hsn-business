@@ -123,7 +123,7 @@ Prices are the same for every location:
 - Boxing Headgear (cowhide): EUR 24
 - Hoodie: EUR 14.50
 
-Minimum is 10 pieces per item, so a single location can test a style before
+Minimum is 30 units per style, so a single location can test a style before
 the whole network commits. We build a mockup with your logo and colours first,
 and we handle shipping and customs so the total that lands has no added fees.
 

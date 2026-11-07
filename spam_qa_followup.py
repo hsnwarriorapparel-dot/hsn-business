@@ -63,8 +63,10 @@ def check(text, label):
     # ALL CAPS is only a problem for OUR copy. A brand's own name is allowed
     # to be capitalised ("TITLE Boxing Club", "UFC Gym", "HSN Warrior").
     _strip = text
-    for _brand in ('HSN', 'EUR', 'USA', 'MMA', 'BJJ', 'TITLE', 'UFC', 'GI',
-                   'MOQ', 'DM', 'IG', 'WA', 'PDF', 'FAQ', 'DHL', 'UPS', 'XL'):
+    for _brand in ('HSN', 'EUR', 'USD', 'USA', 'MMA', 'BJJ', 'TITLE', 'UFC', 'GI',
+                   'MOQ', 'DM', 'IG', 'WA', 'PDF', 'FAQ', 'DHL', 'UPS', 'XL',
+                   'DOBOK', 'MOCKUP', 'OEM', 'MOQ', 'SIALKOT', 'MUNICH',
+                   'TOWASAN', 'GRACIE', 'TITLE'):
         _strip = re.sub(r'\b' + _brand + r'\b', '', _strip)
     if re.search(r'\b[A-Z]{4,}\b', _strip):
         hits.append(('STYLE', 'ALL CAPS'))

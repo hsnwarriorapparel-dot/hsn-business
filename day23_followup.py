@@ -231,7 +231,7 @@ Best regards,
 One thing we hear from clubs like yours: large manufacturers push 100-piece
 minimums, and that is too much to try on a first order.
 
-Our minimum is 10 pieces per item. That lets a club start with a few pieces
+Our minimum is 30 units per style. That lets a club start with a few pieces
 per size, check the fit and the stitching on real people, then order for the
 whole group once it works.
 
