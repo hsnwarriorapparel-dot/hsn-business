@@ -48,7 +48,8 @@ PRODUCT_WORDS = re.compile(
     r'sports equipment|sports ?items|team uniform|uniform|headgear|head guard|'
     r'shin guard|protective (gear|equipment)|training gear|self defence|self defense|'
     r'kickboxing|kick ?pad|muay thai|kung fu|aikido|boxing wear|mma wear|'
-    r'combat sport|fitness equipment|sporting good|t-shirt|polo shirt|'
+    r'combat sport|fitness equipment|sporting good|sport equipment|'
+    r'sport goods|sports gear|t-shirt|polo shirt|'
     r'sports kit|custom kit|team kit|football kit|jersey)', re.I)
 
 # Sports that are NOT our line. A golf results site ('golfscale.com' -
@@ -59,6 +60,18 @@ OTHER_SPORTS = re.compile(
     r'cricket|football league|rugby|tennis|swimming|diving|surfing|'
     r'cycling|bike|skateboard|snowboard|skiing|fishing|hunting|'
     r'badminton|volleyball|table tennis|bowling)', re.I)
+
+# A WordPress/Elementor DEMO template. The stock filler is 'A small river
+# named Duden flows by their place' (the classic Elementor lorem ipsum) and
+# the contact block is a placeholder with a US +1 (859) number on a non-US
+# domain. arapparels.pk was such a site - not a real company.
+TEMPLATE_SITE = re.compile(
+    r'(a small river named duden|flows by their place|'
+    r'lorem ipsum dolor sit amet|consectetur adipiscing elit|'
+    r'lorem ipsum|'
+    r'\+1 \(859\)|'
+    r'\[email\s*&#160;protected\]|\[email[^\]]*protected\]|'
+    r'lorem-ipsum|placeholder\s*email)', re.I)
 
 # Sites that are never a buying company. 'definitions.net' is a dictionary -
 # it matched two Omani buyers because the word 'kit' appears in every
@@ -79,6 +92,14 @@ NOT_A_COMPANY = re.compile(
     r'checkpeople|veripages\.com|pipl\.com|leadiq\.com|'
     r'dnb\.com|apollo\.io|zoominfo\.com|clearbit\.com)', re.I)
 
+# Gambling / betting sites are never buyers of our products. galaxysports.com
+# is a sportsbook ("Galaxy Sportsbook's live betting software").
+GAMBLING_SITE = re.compile(
+    r'(sportsbook|sports betting|live betting|betting software|casino|'
+    r'poker room|gambling|odds? betting|sports lottery|'
+    r'place your bets|bet on all)', re.I)
+
+# A site selling to end customers is not a wholesale buyer.
 # End-customer retail -> not an importer.
 RETAIL_WORDS = re.compile(
     r'(add to cart|add to wishlist|shopping cart|my account|checkout|'
@@ -394,6 +415,10 @@ def process(comp):
         # only now mark the domain seen - we have a page from it
         seen_domains.add(d)
         if DEAD_SITE.search(html):
+            continue
+        if TEMPLATE_SITE.search(html):
+            continue
+        if GAMBLING_SITE.search(html):
             continue
         text = strip_tags(html)
         low = text.lower()

@@ -215,7 +215,41 @@ were matched to `definitions.net` with one stray number.
    `company_reach.py` and `buyer_reach.py` now take an exclusive lock
    (`company_reach.lock` / `buyer_reach.lock`).
 
-## THE STRONGEST SIGNAL - the buyer's own category
+## MORE FALSE POSITIVES - AND ONE THAT WAS ACTUALLY REAL
+
+| Site | What it was | Fix |
+|---|---|---|
+| `arapparels.pk` | a **WordPress/Elementor DEMO template** - "A small river named Duden flows by their place", phone `+1 (859) 254-6589` on a `.pk` domain, contact shown as `[email protected]` | `TEMPLATE_SITE` regex |
+| `galaxysports.com` | a **sportsbook** - "Galaxy Sportsbook's live betting software" | `GAMBLING_SITE` regex |
+| `sportsmode.us` | a **US retail clothing store** ("FREE SHIPPING ON ALL ORDERS $150+") | `RETAIL_WORDS` (already caught it once the retail check saw the cart) |
+| `fohuniforms.com` | a **New York casino-uniform maker**, not the UAE company | verify the site's own country/identity, not just the product |
+| `cobrasports.com.my` | **REAL** - "Cobra Sports Sdn Bhd \| Sport equipment supplier in Malaysia" | the singular "sport equipment" was missing from `PRODUCT_WORDS` |
+
+**`cobrasports.com.my` was wrongly rejected** because `PRODUCT_WORDS` had
+"fitness equipment" and "sporting good" but not the singular **"sport
+equipment"** / "sport goods" / "sports gear". When a check rejects a company
+that LOOKS right, check the regex before discarding the lead.
+
+### VERIFY THE SITE IS THE SAME COMPANY, NOT JUST THE SAME TRADE
+`fohuniforms.com` sells uniforms, but it is a New York casino maker - not
+the Dubai company the directory listed. The product check cannot catch that.
+Check the site's own country/city/identity text before accepting it.
+
+### CLOUDFLARE-BLOCKED SITES
+`galaxysports.com` returns 403 to curl and the browser sees a Cloudflare
+wall. The phone came from a search listing. Such a lead is marked
+`CLOUDFLARE-BLOCKED ... needs manual check` and KEPT, not deleted - it may
+well be genuine, it just cannot be fetched from this host.
+
+## A KILLED RUN WRITES NOTHING - BUT A LIVE RUN WRITES AT THE END
+
+A run killed with SIGTERM never reaches its final write, so it adds no rows
+(confirmed: a SIGTERM at buyer 15/20 left leads.csv untouched). But a LIVE
+run rewrites the whole file at the end, so **any manual edit made while it
+is running is overwritten**. Stop the job first, then edit.
+
+This is why every live writer now goes through `leads_safe_write.py`
+(see `references/leads-csv-safe-writes.md`).
 
 The buyer's "Buyer Of ..." line is what THEY call their business. It is
 far more precise than the directory tag: the site's `martial-arts-mats`
