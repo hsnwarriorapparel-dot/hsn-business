@@ -30,7 +30,19 @@ Both are DRAFT-ONLY until the user says send.
 
 ## go4WorldBusiness STOREFRONT (profile fixed 2026-11-07) — read `references/go4worldbusiness-storefront.md`
 
-Member `hsnwarriorapparel_9` (JUNIOR). Profile now CORRECT and saved: PK phone +92 337 3336381, Sialkot Industrial Estate address, est. 2011, sales band, brand name + tagline, OEKO-TEX/REACH, export markets list, and a 1461-char company introduction. **Country still reads KUWAIT — the field is `country-readonly-field` (display-only, NOT editable) and needs a support request.** After saving, the page shows "changes are under review" and every field goes `disabled` — that is moderation, not failure.
+Member `hsnwarriorapparel_9` (JUNIOR). Profile now CORRECT and saved: PK phone +92 337 3336381, Sialkot Industrial Estate address, est. 2011, sales band, brand name + tagline, OEKO-TEX/REACH, export markets list, and a 1461-char company introduction.
+
+**✅ FIRST BUYER INQUIRY SENT 2026-11-07: Karate Black Master Belt, 400 pcs, Krav Maga Federation (Israel) — status Open, tracked as L5261.** Verify at `/member/dashboard/inquiries/sent`.
+
+**THE THREE RULES:** (1) a buylead can only be inquired about **5 DAYS after it was posted** — the freshest RFQs are locked; (2) some RFQs are **PREMIUM MEMBERS ONLY** — locked regardless of age; (3) JUNIOR gets **1 buyer inquiry/day free, max 2 per week** (Premium = 100/day, 60 days, no auto-renewal). So target OLDER free RFQs.
+
+**COUNTRY: PAKISTAN DOES NOT EXIST ON THIS SITE** (238 countries, no PK — even Iran is missing). That is why the profile defaulted to KUWAIT; it was never deliberate. The profile country field is read-only (`country-readonly-field`) but the inquiry form has a country select from `codeToIdMap` — use **India (99)** and state the real country in the message. Kuwait = 112. Ask support to add Pakistan.
+
+**CAPTCHA IS TWO-PHASE:** the image regenerates on every page load, so reading it in one tab and submitting in another fails with a generic "Error processing your request!". Phase 1 opens the tab + screenshots `#form_captcha_image` + saves the targetId; Phase 2 reattaches to that SAME tab, fills, and clicks "Inquire Now". Script: `g4wb_inquiry_send.py <path> <captcha>` — run it in the BACKGROUND (60-90s per phase).
+
+**FIND BUYERS:** `/list/latest/buyleads` is the live feed. The search box is `input[name="searchText"]` and the form submits to `/find?searchText=<term>` — a `?keyword=` param does NOT filter. Script: `g4wb_find_buyleads.py`. Best live match: **Soccer/Football Jerseys, 2,000 units, USA, Nov-06-26, HS 610910 (L5258)** — locked until Nov-11-26.
+
+**CATEGORIES (max 10)** are set via `POST /signup/ajax/category-selection/supplier` with `{"categories":[ids],"compname","phone","state","countryId"}` — script `g4wb_set_categories.py`. Setting them RESETS some profile fields, so re-run `g4wb_fill_profile.py profile` after.
 
 **The 5 free daily buyer inquiries are worth more than product listings.** As a JUNIOR member you get 1 buyer inquiry/day free (2/week max); Premium gets 100/day for 60 days, no auto-renewal, money-back guarantee. BUT matching shows **"Total 0 Buy Leads Matching Your Profile"** and asks for Industries and Products to be set — the "I am a supplier of" field is a **disabled textarea driven by a category/chip picker**. **Find that picker before adding products.**
 
