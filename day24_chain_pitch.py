@@ -180,6 +180,50 @@ def mark_sent(brand, to, subject):
     return n
 
 
+def _newest_state():
+    import glob
+    states = sorted(glob.glob('/home/ubuntu/day*_quota_state.json'))
+    for s in reversed(states):
+        try:
+            d = json.load(open(s))
+            if d.get('date'):
+                return d
+        except Exception:
+            continue
+    return {}
+
+
+def _day_tag_str():
+    d = _newest_state().get('date')
+    return str(d) if d else time.strftime('%Y-%m-%d', time.gmtime())
+
+
+# SHARED QUOTA LEDGER + GMAIL LOCK (2026-11-07) - see outreach_quota.py.
+# The ledger counts EMAILS, not tracker rows. `mark_sent()` stamps
+# 'chain pitch sent' on EVERY tracked location of the brand (Brooklyn
+# Fitboxing = 21 rows for ONE email), so counting rows inflated the day's
+# total up to 13x and could make the quota look full when nothing went out.
+import sys as _sys
+_sys.path.insert(0, '/home/ubuntu')
+from outreach_quota import (claim_slot, release, record_send, sent_today,
+                            chain_allowance, allocation, lock_holder)
+
+
+def _count_sent_today():
+    """ACTUAL emails sent today by any engine."""
+    return sent_today()
+
+
+def _chain_cap():
+    """How many more chain pitches this engine may send today."""
+    return chain_allowance()
+
+
+def _count_chain_today():
+    """Chain pitches actually sent today (emails, not rows)."""
+    return sent_today(engine='chain')
+
+
 def main():
     rows = load_rows()
     hdr = rows[0]
@@ -241,14 +285,33 @@ def main():
             print('nothing ready to send')
             return
         from outreach import gmail_send
+        # GMAIL TAB LOCK (2026-11-07): the first-touch wave may still be
+        # running (72 emails at ~38s = ~46 minutes). Both engines click
+        # Compose on the SAME tab, so they corrupt each other's drafts.
+        if not claim_slot('chain', wait_s=60, log=print):
+            print('GMAIL TAB BUSY (held by %s) - deferring to the next tick' % lock_holder())
+            return
         sent = 0
         for i, p in enumerate(ready, 1):
-            print(f"  [{i}/{len(ready)}] {p['brand']} -> {p['to']}")
+            # PER-SEND QUOTA RE-CHECK (2026-11-07). The shell wrapper checks the
+            # quota once BEFORE the script starts, but the first-touch wave
+            # runs for ~87 minutes and overlaps this job - so the allowance
+            # can shrink while we are sending. Re-read the live CSV before
+            # every send and stop the moment the day's quota is reached.
+            # The chain engine is also capped at chain_reserve so it cannot
+            # eat the follow-up engine's reserved slice.
+            _sent_today = _count_sent_today()
+            _cap = _chain_cap()
+            if _sent_today >= _cap:
+                print(f"  QUOTA/CAP REACHED ({_sent_today}/{_cap}) - stopping, {len(ready)-i+1} pitch(es) deferred")
+                break
+            print(f"  [{i}/{len(ready)}] {p['brand']} -> {p['to']}  (sent today {_sent_today}/{_cap})")
             res = gmail_send(p['to'], p['subject'], p['body'])
             print('      ', res)
             if res == 'sent':
                 sent += 1
                 p['status'] = 'SENT'
+                record_send('chain', p['brand'], p['to'])
                 marked = mark_sent(p['brand_key'], p['to'], p['subject'])
                 print(f'       marked {marked} location rows')
                 time.sleep(40)
@@ -256,6 +319,7 @@ def main():
                 p['status'] = 'FAILED: %s' % res
         with open(OUT, 'w', encoding='utf-8') as f:
             json.dump(pitches, f, indent=2, ensure_ascii=False)
+        release()   # free the Gmail tab
         print(f'chain pitches sent: {sent}/{len(ready)}')
 
 

@@ -104,6 +104,15 @@ _idx0 = {h: i for i, h in enumerate(_rows0[0])}
 # still count against the quota and against the sending-domain reputation.
 # Count what went out today (any status carrying today's date) and cap the wave
 # at the remaining allowance. Never exceed it.
+# SHARED QUOTA LEDGER + GMAIL LOCK (2026-11-07). See outreach_quota.py for
+# the four bugs this fixes. The wave no longer counts CSV rows - it counts
+# actual emails in send_ledger.jsonl, and it takes the exclusive Gmail lock
+# so it cannot collide with the chain-pitch or follow-up engines.
+import sys as _sys
+_sys.path.insert(0, '/home/ubuntu')
+from outreach_quota import (claim_slot, release, record_send, sent_today,
+                            wave_allowance, allocation, lock_holder)
+
 QUOTA_STATE = '/home/ubuntu/day24_quota_state.json'
 try:
     import json as _json
@@ -127,10 +136,26 @@ for _r in _rows0[1:]:
         if 'email sent' in _part.lower() and DAY in _part:
             _today_sent += 1
             break
-_already = max(PRE_SENT_TODAY, _today_sent)
-_remaining = max(0, DAILY_EMAIL_QUOTA - _already)
+# QUOTA RESERVATION (2026-11-07): the first-touch wave used to be allowed to
+# eat the ENTIRE 100/day allowance. Then the chain pitch (20:25) and the
+# follow-up engine (20:40) both checked the quota, saw 100/100, and ALWAYS
+# deferred - so the follow-up engine (938 eligible leads, the only thing that
+# earns a reply) never ran, not once.
+#
+# The wave now only gets the allowance MINUS the reserved slices:
+#   followup_reserve = 20  (follow-up engine - the reply engine)
+#   chain_reserve    =  8  (chain/franchise corporate pitches - 8 brands)
+# All three engines read the SAME allocation from ONE place and count the
+# SAME ledger, so they can never drift or overshoot together.
+_alloc = allocation()
+FOLLOWUP_RESERVE = _alloc['followup_reserve']
+CHAIN_RESERVE = _alloc['chain_reserve']
+RESERVED = FOLLOWUP_RESERVE + CHAIN_RESERVE
+# count from the shared ledger (actual emails), not CSV rows
+_already = sent_today()
+_remaining = max(0, _alloc['wave'] - _already)
 log(f"DAY24 WAVE START: {len(ids)} leads from {WAVE}")
-log(f"QUOTA: {_already} sent today (incl. {PRE_SENT_TODAY} pre-wave) | limit {DAILY_EMAIL_QUOTA} | allowance {_remaining}")
+log(f"QUOTA: {_already} sent today (incl. {PRE_SENT_TODAY} pre-wave) | limit {DAILY_EMAIL_QUOTA} | reserved {RESERVED} (followup {FOLLOWUP_RESERVE} + chain {CHAIN_RESERVE}) | wave allowance {_remaining}")
 if _remaining <= 0:
     log(f"DAILY EMAIL QUOTA ALREADY REACHED ({_already}/{DAILY_EMAIL_QUOTA}) - nothing sent")
     raise SystemExit(0)
@@ -189,6 +214,16 @@ idx = {h: i for i, h in enumerate(rows[0])}
 iE, iN, iC, iCi, iS = (idx['Email'], idx['Name'], idx['Country'], idx['City'], idx['Status'])
 meta = {r[0]: r for r in rows[1:] if r and r[0] in ids}
 
+# GMAIL TAB LOCK (2026-11-07): the chain-pitch engine (20:25) and the
+# follow-up engine (20:40) drive the SAME Gmail tab by clicking Compose. The
+# wave sends 72 emails at ~38s pacing = ~46 minutes, so it is still running
+# when the chain pitch fires. Without this lock the two processes corrupt
+# each other's drafts. The wave holds the tab for its whole run.
+if not claim_slot('wave', log=log):
+    log(f"  GMAIL TAB BUSY (held by {lock_holder()}) - exiting, the wave resumes from the next tick")
+    raise SystemExit(0)
+log('  gmail send lock acquired')
+
 sent = failed = skipped = 0
 def _rows_now():
     """Fresh read of leads.csv - the send loop re-checks the live quota, and
@@ -219,16 +254,11 @@ for pos, lid in enumerate(ids, 1):
     # both passed the same check and the day went to 101/100. Re-reading the
     # CSV here means the second runner sees the first runner's new markers
     # and stops instead of overshooting.
-    _live = 0
-    for _r in _rows_now():
-        _st = (_r[_idx0['Status']] if _idx0['Status'] < len(_r) else '') or ''
-        for _part in _st.split('|'):
-            if 'email sent' in _part.lower() and DAY in _part:
-                _live += 1
-                break
-    _live = max(_live, PRE_SENT_TODAY)
-    if _live >= DAILY_EMAIL_QUOTA:
-        log(f"  QUOTA REACHED ({_live}/{DAILY_EMAIL_QUOTA}) at {lid} - stopping, remaining stay queued")
+    # The ledger counts ACTUAL emails sent by ALL engines today.
+    _live = sent_today()
+    _wave_cap = max(0, DAILY_EMAIL_QUOTA - RESERVED)
+    if _live >= _wave_cap:
+        log(f"  WAVE CAP REACHED ({_live}/{_wave_cap} = quota {DAILY_EMAIL_QUOTA} minus reserved {RESERVED}) at {lid} - stopping, remaining stay queued")
         log(f"PAUSED after {sent} sent, {failed} failed, {skipped} skipped")
         break
 
@@ -245,6 +275,7 @@ for pos, lid in enumerate(ids, 1):
         log(f"  [{pos}/{len(ids)}] EMAIL {lid} {name[:22]} -> {email}: {'OK' if ok else str(res)[:60]}")
         if ok:
             update_status(lid, f"COMPLETE: email sent ({DAY})")
+            record_send('wave', lid, name[:40])
             sent += 1
         else:
             update_status(lid, f"EMAIL FAILED ({DAY}): {str(res)[:40]}")
@@ -255,6 +286,7 @@ for pos, lid in enumerate(ids, 1):
         failed += 1
     time.sleep(PACE)
 
+release()   # free the Gmail tab for the chain-pitch / follow-up engines
 log(f"DAY24 WAVE COMPLETE: {sent} sent, {failed} failed, {skipped} skipped")
 
 # release the lock so the guard can resume a truncated wave later

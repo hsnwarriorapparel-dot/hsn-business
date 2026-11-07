@@ -31,6 +31,12 @@ from outreach import gmail_send
 from templates import COMPANY, EMAIL, PHONE
 
 CSV = '/home/ubuntu/leads.csv'
+# SHARED QUOTA LEDGER + GMAIL LOCK (2026-11-07) - see outreach_quota.py.
+import sys as _sys
+_sys.path.insert(0, '/home/ubuntu')
+from outreach_quota import (claim_slot, release, record_send, sent_today,
+                            followup_allowance, allocation, lock_holder)
+
 STATE = '/home/ubuntu/day24_quota_state.json'
 LOG = '/home/ubuntu/day24_followup_log.txt'
 PACE = 40
@@ -297,31 +303,18 @@ def update_status(lead_id, new_status):
 
 
 def sent_today_count():
-    """Count emails marked sent TODAY by any sender (first-touch + follow-up).
-    A row counts only when the SAME marker carries the action and the day."""
-    rows = load_rows()
-    hdr = rows[0]
-    idx = {h: i for i, h in enumerate(hdr)}
-    n = 0
-    for r in rows[1:]:
-        if len(r) <= idx['Status']:
-            continue
-        st = r[idx['Status']] or ''
-        for part in st.split('|'):
-            low = part.lower()
-            if ('email sent' in low or 'follow-up sent' in low) and DAY_DATE in part:
-                n += 1
-                break
-    return n
+    """ACTUAL emails sent today, from the shared send ledger.
+
+    The ledger counts EMAILS, not tracker rows. The old CSV counter counted
+    rows, and a chain pitch stamps 'chain pitch sent' on every tracked
+    location of a brand (Brooklyn Fitboxing = 21 rows for ONE email), so the
+    day's total was inflated up to 13x."""
+    return sent_today()
 
 
 def quota_remaining():
-    try:
-        s = json.load(open(newest_state()))
-        daily = int(s.get('daily_email_quota', 100))
-    except Exception:
-        daily = 100
-    return max(0, daily - sent_today_count())
+    """How many more emails the follow-up engine may send today."""
+    return followup_allowance()
 
 
 def main():
@@ -347,6 +340,12 @@ def main():
             print(f"  {lead['id']} | {lead['age']}d | {lead['name'][:28]:<28} | {lead['email'][:34]} | {lead['country'][:18]}")
         return
 
+    # GMAIL TAB LOCK (2026-11-07): the wave may still be running (it holds
+    # the tab for ~46 minutes). Wait for it rather than corrupting its drafts.
+    if not claim_slot('followup', wait_s=90, log=log):
+        log(f'  GMAIL TAB BUSY (held by {lock_holder()}) - deferring to the next tick')
+        return
+
     sent = 0
     failed = 0
     for i, lead in enumerate(leads[:limit], 1):
@@ -367,6 +366,7 @@ def main():
         if res == 'sent':
             sent += 1
             update_status(lead['id'], 'follow-up sent (%s, %s)' % (DAY, angle['key']))
+            record_send('followup', lead['id'], (lead.get('name') or '')[:40])
             log(f'      OK')
         else:
             failed += 1
@@ -376,6 +376,7 @@ def main():
                 break
         if i < limit:
             time.sleep(PACE)
+    release()   # free the Gmail tab
     log(f'=== FOLLOW-UP ENGINE DONE: {sent} sent, {failed} failed ===')
 
 
