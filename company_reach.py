@@ -61,6 +61,16 @@ OTHER_SPORTS = re.compile(
     r'cycling|bike|skateboard|snowboard|skiing|fishing|hunting|'
     r'badminton|volleyball|table tennis|bowling)', re.I)
 
+# A Cloudflare / bot-challenge wall. The page shows 'Attention Required!' or
+# 'Just a moment...' but the rest of the HTML can still contain the real
+# site's content - so the product/name checks pass while the phone comes
+# from the challenge page. classicfootballshirts.com and galaxysports.com
+# both did this. Treat the page as unusable.
+CHALLENGE_WALL = re.compile(
+    r'(attention required|just a moment|performing security verification|'
+    r'checking your browser|enable javascript and cookies to continue|'
+    r'__cf_chl|cf-browser-verification|ray id)', re.I)
+
 # A WordPress/Elementor DEMO template. The stock filler is 'A small river
 # named Duden flows by their place' (the classic Elementor lorem ipsum) and
 # the contact block is a placeholder with a US +1 (859) number on a non-US
@@ -259,8 +269,13 @@ def company_tokens(name, distinctive_only=False):
     return toks
 
 
-PHONE_RE = re.compile(r'(?:\+\d{1,4}[\s.-]?)?(?:\(\d{1,4}\)[\s.-]?)?\d{3,4}[\s.-]\d{3,4}[\s.-]?\d{0,4}')
-
+# A phone number must not run into the NEXT number on the page. The old
+# pattern was greedy enough to match '+971-55-299-7170 2006 1000' as one
+# blob ('29971702006'), which produced nonsense dialled numbers.
+# Phone extraction works on SEPARATED runs: a run of digits/spaces/hyphens
+# is split into groups, and each group of 2-4 digits is a candidate.
+# The old single regex was greedy enough to swallow two adjacent numbers
+# ('+971-55-299-7170 2006 1000' became one blob '717020061000').
 # International prefix -> country, for the phone we publish.
 COUNTRY_DIAL = {
     'oman': '+968', 'malaysia': '+60', 'egypt': '+20', 'portugal': '+351',
@@ -275,30 +290,112 @@ COUNTRY_DIAL = {
     'pakistan': '+92',
 }
 
+PHONE_RUN_RE = re.compile(r'[+(]?\d[\d\s()./-]{6,}\d[)\s.-]*')
+PHONE_GROUP_RE = re.compile(r'\d{2,4}')
 
-def find_phones(text, country):
-    """Pull a plausible business phone number out of page text.
+def phones_from_links(html):
+    """Extract phone numbers from structured links on the page.
 
-    The site may already print the country code ('+968-99205884') or not
-    ('99205884'). Either way the result must not double the prefix.
+    A site's own contact links carry the number in full international form:
+        <a href="https://wa.me/60163648600">016-3648600</a>
+        <a href="tel:+60-16-2215480">016-2215480</a>
+        <a href="tel:03-62417296">03-62417296 (Office)</a>
+    These are far more reliable than scraping the page text, which mixes in
+    licence numbers, years and two adjacent numbers.
+    Returns (numbers, whatsapp_numbers).
     """
-    dial = COUNTRY_DIAL.get((country or '').lower())
-    out = []
-    for m in PHONE_RE.finditer(text):
-        raw = m.group(0).strip()
+    nums = []
+    wa = []
+    for m in re.finditer(r'href="(?:https?://wa\.me/|tel:)([+0-9\s()./-]{6,20})"',
+                         html, re.I):
+        raw = m.group(1).strip()
         digits = re.sub(r'\D', '', raw)
         if not 8 <= len(digits) <= 15:
             continue
+        # a wa.me link is always a FULL international number (60163648600)
+        # - prefix it with '+'. A tel: link may be local ('03-62417296') -
+        # leave it without a country code, never invent one.
         if raw.startswith('+'):
-            pass
-        elif dial:
-            dc = dial.lstrip('+')
-            # strip a duplicated prefix first, then add the country code
-            while digits.startswith(dc) and len(digits) > len(dc) + 6:
-                digits = digits[len(dc):]
-            raw = dial + ' ' + digits
-        if raw not in out:
-            out.append(raw)
+            norm = '+' + digits
+        elif 'wa.me' in m.group(0).lower():
+            norm = '+' + digits
+        else:
+            norm = digits
+        if norm not in nums:
+            nums.append(norm)
+    # wa.me links are, by definition, WhatsApp-reachable mobiles
+    for m in re.finditer(r'href="https?://wa\.me/([0-9]{8,15})"', html, re.I):
+        d = '+' + m.group(1)
+        if d not in wa:
+            wa.append(d)
+    return nums, wa
+
+
+def find_phones(text, country):
+    """Pull plausible business phone numbers out of page text.
+
+    NEVER invent a country code. The old logic blindly prefixed the buyer's
+    directory country, turning a UAE mobile into '+966 12914637' and a
+    Maryland number into '+966 4105550127' - both wrong, and both would have
+    been dialled.
+
+    The page text is scanned for runs of digits; each run is split into
+    2-4 digit groups so two adjacent numbers are never merged into one blob.
+
+    Rules:
+      * a number that already carries '+' or '00' is used as-is
+      * a NANP number becomes +1
+      * a bare local number is only prefixed when the page names that
+        country; otherwise it is returned UNPREFIXED and flagged as local
+    """
+    dial = COUNTRY_DIAL.get((country or '').lower())
+    names_country = bool(country) and bool(re.search(re.escape(country), text, re.I))
+    out = []
+    for m in PHONE_RUN_RE.finditer(text):
+        run = m.group(0)
+        # the '+' / country code belongs to the FIRST group of the run
+        prefix = ''
+        body_run = run
+        pm = re.match(r'\+\d{1,4}[-.\s]?', run)
+        if pm:
+            prefix = '+' + re.sub(r'\D', '', pm.group(0))
+            body_run = run[pm.end():]
+        groups = PHONE_GROUP_RE.findall(body_run)
+        if not groups:
+            continue
+        # A run may hold several numbers. If the groups total more than 12
+        # digits, they are more than one number - take the FIRST sensible
+        # combination and stop.
+        combos = []
+        if len(groups) == 1:
+            combos = [groups]
+        elif len(groups) == 2:
+            combos = [[groups[0], groups[1]]]
+        elif len(groups) == 3:
+            combos = [[groups[0], groups[1], groups[2]], [groups[0], groups[1]]]
+        else:
+            combos = [groups[:3], groups[:2]]
+        for combo in combos:
+            digits = ''.join(combo)
+            if not 8 <= len(digits) <= 15:
+                continue
+            if prefix:
+                raw = prefix + ' ' + digits
+            elif re.match(r'^\(\d{3}\)\s*\d{3}', run):
+                raw = '+1 ' + digits
+            elif dial:
+                dc = dial.lstrip('+')
+                if digits.startswith(dc) and len(digits) > len(dc) + 6:
+                    raw = dial + ' ' + digits[len(dc):]
+                elif names_country:
+                    raw = dial + ' ' + digits
+                else:
+                    raw = digits + ' (local - country unconfirmed)'
+            else:
+                raw = digits
+            if raw not in out:
+                out.append(raw)
+            break
         if len(out) >= 3:
             break
     return out
@@ -420,6 +517,8 @@ def process(comp):
             continue
         if GAMBLING_SITE.search(html):
             continue
+        if CHALLENGE_WALL.search(html):
+            continue
         text = strip_tags(html)
         low = text.lower()
         if not PRODUCT_WORDS.search(text):
@@ -472,28 +571,43 @@ def process(comp):
             continue
         emails = emails_from(href, country)
         # a phone number is just as usable as an email - it opens the WhatsApp
-        # channel, and these buyers often publish a phone but no email. The
-        # number is usually on the CONTACT page, not the homepage.
-        phones = find_phones(text, country)
-        if not phones:
-            # only look for the phone on pages that are ON THE SAME DOMAIN -
-            # a guessed '/contacts' path can redirect to an unrelated site,
-            # and that is how 'definitions.net' (a dictionary) was matched to
-            # two Omani buyers with the same stray number.
-            for cand in (href.rstrip('/') + '/contacts',
-                         href.rstrip('/') + '/contact',
-                         href.rstrip('/') + '/contact-us'):
-                if site_domain(cand) != d:
-                    continue
-                ch = curl(cand, timeout=16)
-                if not ch:
-                    continue
-                if site_domain(cand) != d:
-                    continue
-                got = find_phones(strip_tags(ch), country)
-                if got:
-                    phones = got
+        # channel, and these buyers often publish a phone but no email.
+        #
+        # PREFER THE CONTACT PAGE: the homepage carries a footer switchboard
+        # and the contact page carries the sales/mobile number. For Cobra
+        # Sports the homepage gave +60 36217296 (a landline) while the
+        # contact page also lists the mobile +60 16-2215480.
+        # PREFER STRUCTURED LINKS over page text. A site's own wa.me / tel:
+        # hrefs carry the full international number, so there is nothing to
+        # guess and nothing to merge. Only fall back to text scraping.
+        phones = []
+        for cand in (href.rstrip('/') + '/contact-us',
+                     href.rstrip('/') + '/contact',
+                     href.rstrip('/') + '/contacts',
+                     href):
+            if site_domain(cand) != d:
+                continue
+            ch = curl(cand, timeout=16)
+            if not ch:
+                continue
+            if site_domain(cand) != d:
+                continue
+            if CHALLENGE_WALL.search(ch) or TEMPLATE_SITE.search(ch):
+                continue
+            link_nums, wa_nums = phones_from_links(ch)
+            if wa_nums:
+                phones = wa_nums          # a WhatsApp mobile is the best target
+                break
+            if link_nums:
+                phones = link_nums
+                if cand.rstrip('/') != href.rstrip('/'):
                     break
+                continue
+            got = find_phones(strip_tags(ch), country)
+            if got:
+                phones = got
+                if cand.rstrip('/') != href.rstrip('/'):
+                    break          # the contact page wins
         if not emails and not phones:
             continue
         # The email MUST be on the company's own domain, OR on a domain the

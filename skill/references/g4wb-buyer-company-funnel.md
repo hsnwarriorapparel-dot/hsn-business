@@ -241,6 +241,60 @@ wall. The phone came from a search listing. Such a lead is marked
 `CLOUDFLARE-BLOCKED ... needs manual check` and KEPT, not deleted - it may
 well be genuine, it just cannot be fetched from this host.
 
+## PHONE NUMBERS - NEVER GUESS A COUNTRY CODE
+
+Scraping a phone from page text produced three wrong numbers in one run:
+
+| Scraped | Actual | Problem |
+|---|---|---|
+| `+966 12914637` | UAE mobile `+971 12 914 637` | the buyer's directory country (Saudi) was bolted onto a UAE number |
+| `+966 4105550127` | Maryland, USA `+1 410 555 0127` | same bug |
+| `+60 199001016068` | a Malaysian COMPANY REGISTRATION number | scraped from the address line "NO. 199001016068" |
+
+**A wrong country code means dialling a stranger.**
+
+### THE FIX - prefer the site's own structured links
+
+A site publishes its contact number in full international form:
+
+```html
+<a href="https://wa.me/60163648600">016-3648600</a>
+<a href="tel:+60-16-2215480">016-2215480</a>
+```
+
+`phones_from_links(html)` returns `(tel_numbers, whatsapp_numbers)`. A
+**wa.me link is by definition a WhatsApp-reachable mobile** - always take it
+first. A `tel:` link that starts with `+` is already E.164; one without is
+local, and its country code is NOT invented.
+
+### FALLBACK: `find_phones(text, country)`
+
+Only used when there are no structured links. Rules:
+- `+` or `00` prefix -> used as-is
+- NANP `(555) 123-4567` -> `+1`
+- bare local number -> prefixed ONLY if the page text itself names that
+  country; otherwise returned unprefixed and flagged
+  `local - country unconfirmed`
+- the old single regex was greedy enough to merge two adjacent numbers
+  (`+971-55-299-7170 2006 1000` -> `717020061000`). The text fallback now
+  scans digit RUNS and splits them into 2-4 digit groups.
+
+### PREFER THE CONTACT PAGE
+The homepage carries a footer switchboard; the contact page carries the
+sales/mobile number. For Cobra Sports the homepage gave the office landline
+while `/contact-us` also listed the WhatsApp mobile.
+
+## CLOUDFLARE CHALLENGE PAGES LOOK LIKE REAL CONTENT
+
+`classicfootballshirts.com` and `galaxysports.com` return a Cloudflare
+wall ("Attention Required!", "Just a moment...") - but the rest of the HTML
+still contains the real site's content, so the product/name checks PASS and
+the phone came from the challenge page.
+
+`CHALLENGE_WALL` regex now rejects those pages outright. A Cloudflare
+lead is marked `CLOUDFLARE-BLOCKED ... needs manual check` and KEPT - it may
+well be genuine, it just cannot be fetched from this host.
+
 ## A KILLED RUN WRITES NOTHING - BUT A LIVE RUN WRITES AT THE END
 
 A run killed with SIGTERM never reaches its final write, so it adds no rows
