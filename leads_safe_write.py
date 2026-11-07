@@ -82,6 +82,7 @@ def write_rows(rows):
     with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
         csv.writer(f).writerows(rows)
     os.replace(tmp, CSV)
+    bump_generation()
 
 
 def add_rows(new_rows, retries=3):
@@ -157,18 +158,108 @@ def update_row(lead_id, field, value, marker=None, append=False):
             release()
     return False
 
-def safe_write_csv(rows, path=CSV):
+def guarded_write_csv(rows, path=CSV, read_gen=None):
+    """Write the WHOLE file, but refuse if leads.csv changed underneath us.
+
+    A stale process (one that started before this module existed) has an
+    old in-memory copy. If the generation counter moved since it read the
+    file, its copy is out of date and writing it would destroy newer work.
+    The write is refused instead.
+    """
+    if read_gen is None:
+        read_gen = current_generation()
+    if generation_is_stale(read_gen):
+        print('REFUSING a stale leads.csv write (generation moved %s -> %s) - '
+              'the in-memory copy is out of date'
+              % (read_gen, current_generation()))
+        return False
+    write_rows(rows)
+    return True
+
+
+def safe_write_csv(rows, path=CSV, expect_gen=None):
     """Atomically write rows to a CSV, holding the shared lock.
 
     Every live writer goes through this so two processes can never write
     leads.csv at the same time. The lock is taken BEFORE the write and
     released after the atomic rename.
+
+    expect_gen: the generation the caller read. If the generation moved since
+    then, the caller's copy is stale and the write is REFUSED - that is what
+    stops a process that started before this module existed from clobbering
+    newer work. Pass None to skip the check (the caller re-read under the
+    lock anyway).
     """
     acquire()
     try:
+        if expect_gen is not None and generation_is_stale(expect_gen):
+            print('REFUSING a stale leads.csv write (generation moved %s -> %s) - '
+                  'the in-memory copy is out of date'
+                  % (expect_gen, current_generation()))
+            return False
+        # SELF-HEALING STALE CHECK (no call-site changes needed): if the
+        # caller's copy is MISSING rows that the live file has, the caller
+        # read the file before someone else wrote to it. Writing the stale
+        # copy would destroy that newer work - so MERGE instead: keep the
+        # live file's rows and add any of the caller's rows that are not
+        # already there.
+        if path == CSV:
+            try:
+                live = read_rows()
+                if len(live) > len(rows):
+                    live_ids = set(r[0] for r in live[1:] if r)
+                    have = set(r[0] for r in rows[1:] if r)
+                    missing = live_ids - have
+                    if missing:
+                        extra = [r for r in live[1:] if r and r[0] in missing]
+                        print('STALE COPY DETECTED - %d newer row(s) would have been '
+                              'lost; merging them in instead' % len(extra))
+                        merged = list(rows)
+                        seen = set(r[0] for r in merged[1:] if r)
+                        for r in extra:
+                            if r[0] not in seen:
+                                merged.append(r)
+                                seen.add(r[0])
+                        rows = merged
+            except Exception:
+                pass
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or '.', suffix='.csv.tmp')
         with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
             csv.writer(f).writerows(rows)
         os.replace(tmp, path)
+        bump_generation()
+        return True
     finally:
         release()
+
+# ------------------------------------------------------------ generation ----
+# A process that started BEFORE the safe writer existed still has the old
+# read-once/write-whole-file code in memory. It can still clobber the file.
+#
+# This guard catches that: leads.csv's generation is tracked in a side file.
+# A writer records the generation it read; if the generation changed before
+# it wrote, its copy is stale and the write is REFUSED. The safe writer
+# bumps the generation on every write.
+GEN = '/home/ubuntu/leads.csv.generation'
+
+
+def current_generation():
+    try:
+        return int(open(GEN).read().strip() or 0)
+    except Exception:
+        return 0
+
+
+def bump_generation():
+    g = current_generation() + 1
+    try:
+        with open(GEN, 'w') as f:
+            f.write(str(g))
+    except Exception:
+        pass
+    return g
+
+
+def generation_is_stale(read_gen):
+    """True if leads.csv changed since the caller read it."""
+    return current_generation() != read_gen

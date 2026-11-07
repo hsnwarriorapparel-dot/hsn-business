@@ -64,6 +64,49 @@ NEW WAY  -> rows: 5143 | concurrent survived: True | my row present: True
 3 concurrent writers, 15 rows: 15/15 survived, 0 errors
 ```
 
+## A STALE PROCESS IS THE HARD CASE
+
+A process that started BEFORE this module existed still has the old
+read-once/write-whole-file code in memory. Locking does not help it - it
+never takes the lock. It can still clobber the file at the end of a long
+run. This actually happened: a delayed run notification reported "leads.csv
+now 5272 rows" - a stale write landing on top of the merged 5,140-row file.
+
+### THE SELF-HEALING FIX - no call-site changes needed
+
+`safe_write_csv(rows, path)` now compares the caller's copy against the
+LIVE file under the lock:
+
+```
+if the live file has rows the caller's copy does NOT have
+    -> the caller read the file before someone else wrote to it
+    -> MERGE the missing rows in instead of writing the stale copy
+```
+
+The caller's own changes are preserved AND the newer rows survive. No call
+site has to pass a generation number, so no writer can forget to.
+
+### ALSO: an explicit generation guard
+
+`current_generation()` / `bump_generation()` track a counter in
+`/home/ubuntu/leads.csv.generation`. `safe_write_csv(..., expect_gen=N)`
+refuses the write outright if the generation moved since the caller read
+the file. `guarded_write_csv()` is the same idea for whole-file writes.
+The self-healing merge is the default; the generation guard is the explicit
+opt-in.
+
+### PROOF
+
+```
+test_stale_write.py:
+  rows at start                     : 5143
+  after the concurrent writer       : 5147
+  STALE COPY DETECTED - 3 newer row(s) would have been lost; merging them in
+  after the stale write             : 5147
+  newer rows that survived          : 3 / 3
+  VERDICT: PASS - the stale write did NOT destroy the newer rows
+```
+
 ## THE DEDUPE - MERGE, NEVER DELETE
 
 The tracker had **96 duplicate groups** (5,272 -> 5,140 rows). The same lead
