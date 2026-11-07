@@ -427,7 +427,8 @@ def main():
     except Exception:
         pass
     print()
-    print('added %d new contactable buyers | leads.csv now %d rows' % (added, len(rows)))
+    from leads_safe_write import read_rows as _live_rows
+    print('added %d new contactable buyers | leads.csv now %d rows' % (added, len(_live_rows())))
 
 
 if __name__ == '__main__':

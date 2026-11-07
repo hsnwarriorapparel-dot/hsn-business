@@ -61,6 +61,19 @@ OTHER_SPORTS = re.compile(
     r'cycling|bike|skateboard|snowboard|skiing|fishing|hunting|'
     r'badminton|volleyball|table tennis|bowling)', re.I)
 
+# A blog, a fighter-profile site or a magazine - not a buyer.
+#   woc-org.com        -> "Boxing fighter profiles, comparisons, top athletes"
+#   thekaratelifestyle.com -> "Martial Arts, Health & Spirituality" blog
+INFO_SITE = re.compile(
+    r'(fighter profiles?\b|player profiles?|athlete profiles?|'
+    r'top athletes\b|rankings?\b|results? and statistics|'
+    r'boxing news|martial arts blog|karate blog|training diary|'
+    r'news and blog|blog posts?|latest articles|'
+    r'about me\b|share this post|leave a comment|posted on|'
+    r'terms? of karate\b|karate stances\b|learn japanese\b|'
+    r'health & spirituality|martial arts, health|'
+    r'encyclopedia|wiki(pedia)?\b)', re.I)
+
 # A Cloudflare / bot-challenge wall. The page shows 'Attention Required!' or
 # 'Just a moment...' but the rest of the HTML can still contain the real
 # site's content - so the product/name checks pass while the phone comes
@@ -293,6 +306,11 @@ COUNTRY_DIAL = {
 PHONE_RUN_RE = re.compile(r'[+(]?\d[\d\s()./-]{6,}\d[)\s.-]*')
 PHONE_GROUP_RE = re.compile(r'\d{2,4}')
 
+def head_or_text(html, text):
+    """The title plus the top of the body - where a site says what it is."""
+    return (title_hint(html) + ' ' + text[:1200]).lower()
+
+
 def phones_from_links(html):
     """Extract phone numbers from structured links on the page.
 
@@ -521,6 +539,8 @@ def process(comp):
             continue
         text = strip_tags(html)
         low = text.lower()
+        if INFO_SITE.search(head_or_text(html, text)):
+            continue
         if not PRODUCT_WORDS.search(text):
             continue
         # The product must be the company's actual business, not a passing
@@ -781,7 +801,8 @@ def main():
     except Exception:
         pass
     print()
-    print('added %d contactable buyer companies | leads.csv now %d rows' % (added, len(rows)))
+    from leads_safe_write import read_rows as _live_rows
+    print('added %d contactable buyer companies | leads.csv now %d rows' % (added, len(_live_rows())))
 
 
 if __name__ == '__main__':

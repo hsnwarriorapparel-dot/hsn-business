@@ -223,6 +223,8 @@ were matched to `definitions.net` with one stray number.
 | `galaxysports.com` | a **sportsbook** - "Galaxy Sportsbook's live betting software" | `GAMBLING_SITE` regex |
 | `sportsmode.us` | a **US retail clothing store** ("FREE SHIPPING ON ALL ORDERS $150+") | `RETAIL_WORDS` (already caught it once the retail check saw the cart) |
 | `fohuniforms.com` | a **New York casino-uniform maker**, not the UAE company | verify the site's own country/identity, not just the product |
+| `woc-org.com` | a **boxing fighter-profiles site** ("Boxing fighter profiles, comparisons, top athletes") | `INFO_SITE` regex |
+| `thekaratelifestyle.com` | a **karate blog** ("Martial Arts, Health & Spirituality", "About me", "Learn Japanese") | `INFO_SITE` regex |
 | `cobrasports.com.my` | **REAL** - "Cobra Sports Sdn Bhd \| Sport equipment supplier in Malaysia" | the singular "sport equipment" was missing from `PRODUCT_WORDS` |
 
 **`cobrasports.com.my` was wrongly rejected** because `PRODUCT_WORDS` had
@@ -294,6 +296,25 @@ the phone came from the challenge page.
 `CHALLENGE_WALL` regex now rejects those pages outright. A Cloudflare
 lead is marked `CLOUDFLARE-BLOCKED ... needs manual check` and KEPT - it may
 well be genuine, it just cannot be fetched from this host.
+
+## WHY THE REACH RETURNS MOSTLY NOTHING (diagnosed 2026-11-07)
+
+`diagnose_reach.py` reports WHICH check rejected each company. On 10 Omani
+trading firms:
+
+```
+bad tld          3     (bidbid.tech, leadcontact.ai, irrelevant .gov sites)
+no product word  2
+not-a-company    2
+cloudflare       2
+unreachable      1
+```
+
+**Every rejection was legitimate.** Small Omani trading firms simply do not
+have findable websites - the funnel is working correctly, the supply is not
+there. The markets that DO yield matches are UAE, Saudi Arabia, Malaysia,
+Portugal, Israel and Oman - so the harvester/reach queue is ordered to hit
+those first.
 
 ## A KILLED RUN WRITES NOTHING - BUT A LIVE RUN WRITES AT THE END
 
