@@ -296,10 +296,15 @@ def update_status(lead_id, new_status):
             cur = (r[idx['Status']] if idx['Status'] < len(r) else '') or ''
             r[idx['Status']] = (cur.rstrip(' |') + ' | ' + new_status)[:250]
             break
-    fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerows(rows)
-    os.replace(tmp, CSV)
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import acquire as _acq, release as _rel
+    _acq()
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import safe_write_csv
+    safe_write_csv(rows, CSV)
+    _rel()
 
 
 def sent_today_count():

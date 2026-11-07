@@ -268,10 +268,10 @@ if status_updates:
     for r in rows[1:]:
         if r[0] in status_updates:
             r[iS] = (r[iS].rstrip(' |') + ' | ' + status_updates[r[0]])[:250]
-    fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerows(rows)
-    os.replace(tmp, CSV)
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import safe_write_csv
+    safe_write_csv(rows, CSV)
     chk = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
     print('csv rows after exclusion write:', len(chk) - 1, '| excluded marks applied:', len(status_updates))
 

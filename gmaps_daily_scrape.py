@@ -315,7 +315,14 @@ def append_leads(leads):
         csv.writer(f).writerows(rows)
     with open(tmp) as f:
         assert len(list(csv.reader(f))) == len(rows)
-    os.replace(tmp, LEADS)
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import acquire as _acq, release as _rel
+    _acq()
+    try:
+        os.replace(tmp, LEADS)
+    finally:
+        _rel()
     return added
 
 def rebuild_excel():

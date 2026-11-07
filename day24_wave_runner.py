@@ -55,15 +55,17 @@ def load():
 
 
 def update_status(lead_id, new_status):
-    rows = load()
-    idx = {h: i for i, h in enumerate(rows[0])}
-    for r in rows[1:]:
-        if r and r[0] == lead_id:
-            r[idx['Status']] = (r[idx['Status']].rstrip(' |') + ' | ' + new_status)[:250]
-    fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerows(rows)
-    os.replace(tmp, CSV)
+    """Append a status marker to one lead.
+
+    Routed through leads_safe_write.update_row(), which takes the leads.csv
+    lock and re-reads at write time. The old version wrote the whole file
+    back with no lock, so a row added by the ammo hunt or a reacher between
+    its read and its write was silently destroyed.
+    """
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import update_row
+    update_row(lead_id, 'Status', new_status, append=True)
 
 
 def already_sent(lid):

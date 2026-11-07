@@ -551,6 +551,10 @@ def main():
         print('nothing new')
         return
 
+    # Load leads.csv for the FIELD LAYOUT only. The rows are appended at the
+    # end through leads_safe_write.add_rows(), which re-reads the file at
+    # write time - writing our whole in-memory copy back would destroy any
+    # row the wave or the hunt added while we were working.
     with open(CSV_PATH, newline='', encoding='utf-8-sig') as f:
         rows = list(csv.reader(f))
     hdr = rows[0]
@@ -558,6 +562,7 @@ def main():
     maxid = max((int(r[0][1:]) for r in rows[1:] if r and r[0][1:].isdigit()), default=0)
     existing = {(r[idx['Email']] or '').strip().lower()
                 for r in rows[1:] if len(r) > idx['Email']}
+    new_rows = []          # rows to append safely at the end
 
     added = 0
     for i, (kid, comp) in enumerate(todo, 1):
@@ -615,7 +620,7 @@ def main():
                     % (comp.get('dir_category', ''), comp.get('dir_country', ''),
                        comp.get('href', ''), hit['website'], email))
                 row[idx['Notes']] = 'go4WorldBusiness buyer company - ' + comp.get('href', '')
-                rows.append(row)
+                new_rows.append(row)
                 existing.add(email)
                 added += 1
                 print('    ADDED %s | %s | %s | %s' % (row[idx['Lead ID']], name[:30],
@@ -629,10 +634,9 @@ def main():
         state['processed'] = done
         json.dump(state, open(STATE, 'w'), indent=2, ensure_ascii=False)
 
-    fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerows(rows)
-    os.replace(tmp, CSV_PATH)
+    # save - append safely so nothing written while we worked is lost
+    from leads_safe_write import add_rows
+    add_rows(new_rows)
     try:
         os.unlink(LOCK)
     except Exception:

@@ -37,10 +37,10 @@ def update_status(lead_id, new_status):
         if r and r[0] == lead_id:
             r[idx['Status']] = (r[idx['Status']].rstrip(' |') + ' | ' + new_status)[:250]
             hit = True
-    fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
-    with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerows(rows)
-    os.replace(tmp, CSV)
+    import sys as _sys
+    _sys.path.insert(0, '/home/ubuntu')
+    from leads_safe_write import safe_write_csv
+    safe_write_csv(rows, CSV)
     return hit
 
 
