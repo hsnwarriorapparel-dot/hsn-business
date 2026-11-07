@@ -124,13 +124,19 @@ def wave_allowance():
 def followup_allowance():
     """How many follow-ups may still go out today.
 
-    The follow-up engine runs LAST (20:40), after the wave (20:00) and the
-    chain pitches (20:25), so it takes whatever is left of the daily cap.
-    The absolute daily cap is what actually stops the day going over 100.
+    The follow-up engine runs LAST (21:10), after the wave (20:00) and the
+    chain pitches (20:55). It takes whatever is left of the daily cap, BUT it
+    must leave the chain engine's reserved slice alone.
+
+    The old version was simply `daily - used`, so the follow-up engine ate
+    the chain reserve and the chain pitches never ran. It has to be:
+        daily - used - (chain reserve still unused)
     """
     a = allocation()
     used = sent_today()
-    return max(0, a['daily'] - used)
+    chain_used = sent_today(engine='chain')
+    chain_left = max(0, a['chain_reserve'] - chain_used)
+    return max(0, a['daily'] - used - chain_left)
 
 
 def chain_allowance():

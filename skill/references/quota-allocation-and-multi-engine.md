@@ -52,8 +52,30 @@ wave allowance    = 100 - 20 - 8 = 72
 ```
 `wave_allowance()` = `min(wave_cap - wave_used, daily - sent_today())`
 `chain_allowance()` = `min(chain_reserve - chain_used, daily - sent_today())`
-`followup_allowance()` = `daily - sent_today()`  (it runs LAST, so it takes
-what is left)
+`followup_allowance()` = `daily - sent_today() - chain_left`
+
+### THE FOLLOW-UP ALLOWANCE BUG (found 2026-11-07 21:45)
+
+The follow-up engine runs LAST (21:10), so its allowance was written as
+`daily - sent_today()` - "take whatever is left". But that left NOTHING for
+the chain pitches: the follow-up engine ate the chain's reserved slice and
+the chain pitches (20:55) would have found `chain_allowance() == 0` and
+skipped every brand.
+
+The follow-up engine actually ran at 21:10 with 72 already sent, so it
+started sending and the day's total climbed 72 -> 85. Fixed:
+
+```python
+chain_left = max(0, a['chain_reserve'] - sent_today(engine='chain'))
+return max(0, a['daily'] - used - chain_left)
+```
+
+Now at 85 sent: follow-up 7, chain 8, total exactly 15. Both engines are
+protected no matter which one runs first.
+
+**ALWAYS give every engine an allowance that subtracts the OTHER engines'
+unused reserves.** A "take what's left" rule hands the whole cap to
+whoever runs last.
 
 ### The Gmail send lock
 `/home/ubuntu/gmail_send.lock` - exclusive create, holds pid + engine name.
