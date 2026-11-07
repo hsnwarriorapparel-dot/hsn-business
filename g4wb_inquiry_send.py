@@ -23,7 +23,9 @@ sys.path.insert(0, '/home/ubuntu')
 from cdp_helper import get_tabs, connect
 
 EMAIL = 'hsnwarriorapparel@gmail.com'
-COUNTRY_ID = '99'   # India (Pakistan absent from the site's list)
+# Pakistan IS on the platform - country id 162 (the earlier 'Pakistan is
+# absent' conclusion was wrong; it came from a different country's list).
+COUNTRY_ID = '162'   # Pakistan
 
 DEFAULT_MESSAGE = """Dear Sir/Madam,
 

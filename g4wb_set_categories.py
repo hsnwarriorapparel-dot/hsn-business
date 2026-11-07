@@ -9,7 +9,7 @@ DISCOVERED 2026-11-07 from the site's own JS (b385a6b.js):
                     "state":"...", "countryId":"<id>"}
   - countryId comes from /countries/all-with-ids -> codeToIdMap
 
-COUNTRY FINDING: **Pakistan is NOT in go4WorldBusiness's country list.**
+COUNTRY FINDING: **Pakistan IS in go4WorldBusiness - country id 162.**
 238 countries, no PK (Iran is missing too). The signup form therefore
 defaulted this account to Kuwait - it was never a deliberate choice and it is
 NOT editable on the profile page (country-readonly-field). Best available
@@ -40,7 +40,11 @@ CATEGORIES = [
 COMPANY = 'HSN Warrior Apparels'
 PHONE = '+92 337 3336381'
 STATE = 'Punjab'
-COUNTRY_ID = '99'   # India (IN) - placeholder; Pakistan does not exist in the list
+# CORRECTION (2026-11-07): Pakistan IS on the platform - country id 162.
+# The earlier 'Pakistan does not exist' conclusion came from reading the
+# wrong country's list. The inquiry form's country select confirms it
+# (240 countries, '162~Pakistan').
+COUNTRY_ID = '162'   # Pakistan (PK)
 
 tabs = get_tabs()
 gm = [t for t in tabs if 'mail.google' in t.get('url', '') and t.get('type') == 'page']

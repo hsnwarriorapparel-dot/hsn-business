@@ -32,7 +32,7 @@ sys.path.insert(0, '/home/ubuntu')
 from cdp_helper import get_tabs, connect
 
 EMAIL = 'hsnwarriorapparel@gmail.com'
-COUNTRY_ID = '99'   # India (Pakistan is absent from the site's country list)
+COUNTRY_ID = '162'   # Pakistan - the platform DOES have Pakistan (id 162)
 
 DEFAULT_MESSAGE = """Dear Sir/Madam,
 

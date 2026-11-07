@@ -68,19 +68,90 @@ Button: **"Inquire Now"** (type=submit).
 - Running it takes ~60-90s per phase (the page load is slow) - run it in the
   BACKGROUND, not in a 300s foreground window.
 
-## COUNTRY: PAKISTAN DOES NOT EXIST ON THIS SITE
+## COUNTRY: PAKISTAN IS ON THE PLATFORM — id 162 (CORRECTION)
 
-`/countries/all-with-ids` returns 238 countries and **there is no Pakistan**
-(Iran is missing too). That is why the profile defaulted to **KUWAIT** - it
-was never a deliberate choice. The country field on the profile page is
-read-only (`class="country-readonly-field"`), but the inquiry form has a
-country SELECT whose value comes from `codeToIdMap` - so the inquiry can be
-sent with **India (99)** as the closest available, with the real country
-stated in the message body. Kuwait = 112.
+**The earlier note in this file that "Pakistan does not exist on this site"
+was WRONG.** It came from reading the wrong country's list. The inquiry form's
+country select has **240 countries and `162~Pakistan`** (also `99~India`,
+`112~Kuwait`). The profile's `codeToIdMap` uses the SAME numbering.
 
-**Fix the country properly by asking go4WorldBusiness support to add
-Pakistan** (support link in the footer). Until then, India is the least-bad
-option and the address/city/state/phone all say Pakistan.
+**Fixed 2026-11-07:** the profile country now reads **Pakistan** and every
+inquiry sends with `countryId = 162`. No support request is needed.
+
+How the country gets set: `POST /signup/ajax/category-selection/supplier`
+with `{"categories":[ids],"compname","phone","state","countryId":"162"}`
+(script `g4wb_set_categories.py`). That call ALSO resets some profile
+fields, so run `g4wb_fill_profile.py profile` straight after it.
+
+Verified after the fix: country Pakistan · year 2011 · brand HSN Warrior
+Apparels · tagline · address "Sialkot Industrial Estate, Sialkot 51310,
+Punjab, Pakistan" · city Sialkot · state Punjab · zip 51310 · phone
++92 337 3336381 · email hsnwarriorapparel@gmail.com · homepage
+https://hsnwarriorapparels.vercel.app · OEKO-TEX, REACH · export markets
+Portugal, Spain, UK, Germany, Ireland, Netherlands, France, Italy, USA, UAE,
+Czech Republic, Poland · brand story still empty (logo upload required).
+
+The homepage/intro save does not submit because the platform requires a logo
+image on the homepage first. Everything else saves.
+
+## THE BUYER-INQUIRY DAILY LIMIT — it is 1 PER DAY, not 5
+
+Error text from the platform:
+*"As you are not a Premium GOLD/SILVER Member, you can only contact limited
+number of buyers."*
+
+Measured on 2026-11-07: the FIRST buyer inquiry (Karate Black Master Belt)
+succeeded; the SECOND one the same day (Taekwondo Belts, 3,500 pcs) was
+refused with that error. So a JUNIOR member gets **1 buyer inquiry per day**,
+not the 5/day that applies to suppliers and products. **Premium GOLD/SILVER
+gets 100 buyers/day** (60 days, no auto-renewal, money-back guarantee).
+
+The platform's own sales copy on that screen: *"Contact 100 Buyers per day"*.
+
+Member inquiries (`/inquiries/send/members/<id>/<slug>`) use the SAME form
+and the SAME 1/day buyer limit.
+
+### The daily buyer-inquiry queue
+`/home/ubuntu/g4wb_buyer_queue.py` keeps a ranked queue of eligible RFQs and
+sends the biggest one per day:
+
+```
+ 1. taekwondo-belts                            3500 pcs  Malaysia   (LC, CIF, worldwide)
+ 2. soccer-football-jerseys-unit-units         2000 units USA      (PREMIUM ONLY - blocked)
+ 3. boxing-accessories-like-hand-tie-gloves-head-guard  500-1000 pcs Egypt (LC, CIF)
+ 4. martial-arts-belts-like-judo-belts          100 pcs  Portugal   (LC, CIF, worldwide)
+ 5. taekwondo-uniforms                          MOQ     Israel
+ 6. taekwondo-mats                              MOQ     UAE
+ 7. martial-arts-wear                           MOQ     Oman
+ 8. boxing-gloves-boxing-headgear-and-groin-protectors  MOQ  USA
+```
+
+- `--list` prints the ranked queue with eligibility
+- `--mark <slug> SENT|FAILED` records the outcome
+- state file `/home/ubuntu/g4wb_buyer_queue_state.json` holds the day's count
+- cron `g4wb-daily-buyer-inquiry` (job d8fd4cf307aa, 09:05 UTC daily,
+  script `g4wb_buyer_inquiry.sh`, no_agent) runs phase 1 and leaves the
+  captcha image for the agent to finish phase 2
+- tailored per-RFQ copy lives in `g4wb_belt_messages.py` and is QA'd by
+  `spam_qa_followup.check()` - note "quotation" contains the banned token
+  "quote", so use "price" or "pricing" instead
+
+## RANKED RFQ DETAILS
+
+**Taekwondo Belts - Malaysia - 3,500 pieces** (May-22-24, ARCHIVED but
+contactable, LC, CIF, worldwide): White 2000, Green 1000, Red 350, Black 50,
+Yellow 100.
+
+**Boxing Accessories - Egypt - 500-1,000 pieces** (Jun-30-26, **VERIFIED**,
+LC, CIF): hand ties, gloves, head guard, mouth guard, cap. Looking for
+suppliers from Egypt only.
+
+**Judo Belts - Portugal - 100 pieces** (Aug-01-24, ARCHIVED, LC, CIF,
+worldwide): with own logo, White/Yellow, Yellow, Yellow Orange, Orange.
+
+**Soccer / Football Jerseys - USA - 2,000 units** (Nov-06-26, VERIFIED,
+PREMIUM MEMBERS ONLY, HS 610910, worldwide). Locked by the premium rule AND
+by the 5-day rule until Nov-11-26.
 
 ## CATEGORIES — what actually unlocks buyer matching
 
