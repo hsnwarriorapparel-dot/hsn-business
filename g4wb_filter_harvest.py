@@ -14,8 +14,9 @@ import sys
 # each other's entries). Merge them here.
 RAW_FILES = ['/home/ubuntu/g4wb_buyer_harvest_dir.json',
              '/home/ubuntu/g4wb_buyer_harvest_search.json']
-# kept for reading anything written before the split
-LEGACY_RAW = '/home/ubuntu/g4wb_buyer_harvest.json'
+# The legacy shared file was renamed: two harvesters used to write it and
+# whichever finished last wiped the other's entries.
+LEGACY_RAW = '/home/ubuntu/g4wb_buyer_harvest_legacy_20261107.json'
 OUT = '/home/ubuntu/g4wb_buyer_harvest_filtered.json'
 
 OUR = re.compile(
@@ -25,6 +26,24 @@ OUR = re.compile(
     r'team uniform|uniform|headgear|head guard|shin guard|protective (gear|equipment)|'
     r'training gear|self defence|self defense|kickboxing|kick ?pad|muay thai|'
     r'boxing wear|mma wear|combat sport|fitness equipment & sports goods)', re.I)
+
+# The PRODUCT line is also a signal. A buyer wanting 'Sports Jerseys 500
+# Pairs' is ours even if their category line is vague.
+OUR_PRODUCT = re.compile(
+    r'(martial art|karate|taekwondo|judo|boxing glove|boxing uniform|'
+    r'bjj|jiu[- ]?jitsu|mma|dobok|sports (jersey|wear|uniform|kit|shorts|shirt)|'
+    r'football (jersey|kit)|team uniform|fight (wear|shorts)|'
+    r'gym (wear|shorts)|head (gear|guard)|mouth guard|hand wrap|'
+    r'shin guard|self defence|self defense|kick ?pad|kickboxing|'
+    r'training (wear|kit|shorts)|rash guard)', re.I)
+
+# Trades that are definitely not ours even if the site mentions 'sports'.
+NOT_OURS = re.compile(
+    r'(flooring|floor tile|carpet|rug|bamboo|laminate|vinyl flooring|durrie|'
+    r'mattress|wallpaper|cushion|curtain|underlay|plywood|'
+    r'printer|copier|toner|office supply|medical|pharmaceutical|'
+    r'food|beverage|spice|rice|tea|coffee|cashew|nut|'
+    r'prayer mat|car mat|linoleum)', re.I)
 
 # Names that are not real people/companies.
 BAD_NAME = re.compile(r'^(purchaser|buyer|seller|admin|test|-|none|n/a|user|member|'
@@ -63,7 +82,10 @@ def main():
             continue
         if 'file a complaint' in cat.lower():
             continue
-        if not OUR.search(cat):
+        prod = str(v.get('product') or '')
+        if not (OUR.search(cat) or OUR_PRODUCT.search(prod)):
+            continue
+        if NOT_OURS.search(prod) or NOT_OURS.search(cat):
             continue
         keep[k] = v
     json.dump(keep, open(OUT, 'w'), indent=2, ensure_ascii=False)

@@ -8,7 +8,7 @@ from collections import Counter
 CSV_PATH = '/home/ubuntu/leads.csv'
 RAW_FILES = ['/home/ubuntu/g4wb_buyer_harvest_dir.json',
              '/home/ubuntu/g4wb_buyer_harvest_search.json']
-RAW = '/home/ubuntu/g4wb_buyer_harvest.json'
+RAW = '/home/ubuntu/g4wb_buyer_harvest_legacy_20261107.json'
 COMPANIES = '/home/ubuntu/g4wb_company_harvest.json'
 FILT = '/home/ubuntu/g4wb_buyer_harvest_filtered.json'
 STATE = '/home/ubuntu/buyer_reach_state.json'

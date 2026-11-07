@@ -103,7 +103,83 @@ g4wb_buyer_harvest_filtered.json <- g4wb_filter_harvest.py  (96, merged)
 `g4wb_filter_harvest.py` merges all of them (plus the legacy file) and keys
 on name+country+product so the same buyer from two sources merges.
 
-## VERIFICATION - every false positive had a specific cause
+## PAGINATION - the directory is far deeper than one page
+
+Every buyer-category directory page carries a "Next" link with a
+`searchAfter` cursor:
+
+```
+/find?searchText=martial-arts-mats&BuyersOrSuppliers=buyers
+  &countryFilter[0]=oman&cityFilter[0]=&FindBuyers=&_format=html
+  &searchAfter=WzE1LjMyNzMyNCwxNzUyMTI3OTMzOTg3XQ
+```
+
+Page 1 gives 50 requirements; the cursor walks deeper (oman/martial-arts-mats
+page 2 gave 41 more, and it keeps going). The pagination block is
+`<ul class="pagination search-after-pagination">` and the next link carries
+`searchAfter`.
+
+`g4wb_deep_harvest.py` follows the cursor N pages deep:
+
+```
+g4wb_deep_harvest.py --pages 4 --countries oman egypt malaysia portugal \
+    --cats sportswear team-uniforms fight-gear fight-wear mouth-guards
+```
+
+Yield: **1,662 buyer identities** (page 1: 1399, p2: 191, p3: 47, p4: 25)
+and **212 buyers** in our product space after filtering - up from 96 before
+pagination.
+
+### WHICH CATEGORY SLUGS ACTUALLY HOLD BUYERS
+
+The directory slugs are NOT reliable - `martial-arts-mats` (161 leads) holds
+mostly floorings, and `boxing-head-guards` (69) mostly medical gloves. The
+CLEAN slugs (ours/total ratio) are:
+
+| slug | ours | total |
+|---|---|---|
+| sportswear | 36 | 36 |
+| fitness-equipment-sports-goods | 28 | 45 |
+| martial-arts-gloves | 8 | 122 |
+| mouth-guards | 5 | 17 |
+| team-uniforms | 4 | 47 |
+| sports-goods-equipments | 3 | 3 |
+| fight-gear | 2 | 63 |
+| fight-wear | 2 | 27 |
+| martial-arts-belts | 1 | 26 |
+
+Deep-harvest the clean slugs, and always filter on the buyer's OWN
+"Buyer Of" category, never on the directory slug.
+
+### THE FILTER - category OR product, minus wrong trades
+
+A buyer wanting "Sports Jerseys 500 Pairs" is ours even when their category
+line is vague, so the filter accepts `OUR.search(category) OR
+OUR_PRODUCT.search(product)`, then drops anything matching `NOT_OURS`
+(flooring, carpets, rugs, printer toner, medical, food, prayer mats).
+
+## ONE VERIFIED IMPLEMENTATION, NOT TWO
+
+`buyer_reach.py` (personal names) and `company_reach.py` (company names) are
+two funnels. They MUST share one verification implementation - when
+`buyer_reach.py` had its own weaker copy it added a `sentry.wixpress.com`
+error-tracker address, a beauty salon and a parked domain. It now imports
+every check from `company_reach.py`:
+
+```
+valid_email, NOT_A_COMPANY, OTHER_TRADE, OTHER_SPORTS, PRODUCT_WORDS,
+RETAIL_WORDS, WHOLESALE_WORDS, DEAD_SITE, GOOD_ROLE, find_phones,
+site_domain, strip_tags, title_hint
+```
+
+### The state key must match the filter key
+
+The filter merges the harvest files and keys on
+`name|country|product`. The reach scripts must key their state file the
+SAME way, or every buyer looks unprocessed on every run and the funnel
+never advances. `company_reach.py` keys by the stable member id, so it was
+fine; `buyer_reach.py` keyed by the harvest id and was re-processing
+everyone.
 
 | False positive | Cause | Fix |
 |---|---|---|

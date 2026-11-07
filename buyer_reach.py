@@ -34,6 +34,16 @@ import time
 import urllib.parse
 
 HARVEST = '/home/ubuntu/g4wb_buyer_harvest_filtered.json'
+
+# Reuse the HARDENED verification from company_reach.py. This script had its
+# own weaker copy and was adding junk: a sentry.wixpress.com error-tracker
+# address, a beauty salon, a parked domain. One verified implementation is
+# the only safe way to run two funnels.
+from company_reach import (valid_email, NOT_A_COMPANY, OTHER_TRADE, OTHER_SPORTS,
+                           PRODUCT_WORDS as CR_PRODUCT_WORDS, RETAIL_WORDS as CR_RETAIL,
+                           WHOLESALE_WORDS, DEAD_SITE as CR_DEAD_SITE,
+                           GOOD_ROLE, find_phones, site_domain as cr_domain,
+                           strip_tags, title_hint)
 LEDGER = '/home/ubuntu/send_ledger.jsonl'
 CSV_PATH = '/home/ubuntu/leads.csv'
 STATE = '/home/ubuntu/buyer_reach_state.json'
@@ -160,7 +170,7 @@ def candidate_emails(site):
             continue
         for m in re.finditer(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', html):
             e = m.group(0).lower()
-            if not BAD_LOCAL.match(e) and 'example' not in e:
+            if not BAD_LOCAL.match(e) and 'example' not in e and valid_email(e):
                 found[e] = found.get(e, 0) + 1
     return found
 
@@ -207,6 +217,8 @@ def process(buyer):
                 continue
             if any(x in d for x in ('duckduckgo.com', 'google.com', 'bing.com')):
                 continue
+            if NOT_A_COMPANY.search(d):
+                continue
             seen_urls.append(d)
             if not re.search(r'\.(com|net|org|io|co|ae|sa|pk|in|my|eg|pt|tr|my)\b', d):
                 continue
@@ -246,20 +258,39 @@ def process(buyer):
             emails = candidate_emails(href)
             if not emails:
                 continue
-            # score: role address on the company's OWN domain wins
-            best = None
+            # The email MUST be on the company's own domain. A random address
+            # found in page text ('order@rand.org') is not this company, and a
+            # sentry.wixpress.com address is an error tracker, not a mailbox.
+            own = {}
             for e, score in emails.items():
+                if not valid_email(e):
+                    continue
                 dom = e.split('@')[1]
-                s = score
-                if dom == d or d.endswith(dom.split('.')[0]):
-                    s += 10
-                if GOOD_ROLE.match(e):
-                    s += 5
-                if best is None or s > best[1]:
-                    best = (e, s)
-            if best:
-                return {'email': best[0], 'website': 'https://%s' % d,
-                        'matched_name': clean, 'query': q}
+                if dom == d or d.endswith(dom) or dom.endswith(d):
+                    own[e] = score + (20 if GOOD_ROLE.match(e) else 8)
+            if not own:
+                continue
+            best = None
+            for e, score in own.items():
+                if best is None or score > best[1]:
+                    best = (e, score)
+            if not best:
+                continue
+            # FINAL SELF-CHECK: re-fetch and confirm the site still shows our
+            # product and is not a parked/dictionary/other-trade page.
+            chk = curl(href, timeout=18)
+            if not chk:
+                continue
+            ctext = strip_tags(chk)
+            chead = (title_hint(chk) + ' ' + ctext[:900]).lower()
+            if not CR_PRODUCT_WORDS.search(chead):
+                continue
+            if OTHER_TRADE.search(ctext[:1200]) or OTHER_SPORTS.search(chead):
+                continue
+            if CR_DEAD_SITE.search(chk) or NOT_A_COMPANY.search(d):
+                continue
+            return {'email': best[0], 'website': 'https://%s' % d,
+                    'matched_name': clean, 'query': q}
     return None
 
 
@@ -302,7 +333,20 @@ def main():
     harvest = load_json(HARVEST, {})
     state = load_json(STATE, {'processed': {}})
     done = state.get('processed', {})
-    todo = [b for k, b in harvest.items() if k not in done]
+    # Key the state by the SAME key the filter uses. The filter merges the
+    # harvest files and keys on name|country|product, so keying the state on
+    # the harvest id made every buyer look unprocessed on every run.
+    def state_key(v):
+        return v.get('dedupe') or ('%s|%s|%s' % (
+            str(v.get('contact') or '').lower(),
+            (v.get('country') or '').lower(),
+            str(v.get('product') or '').lower()))
+    todo = []
+    for k, b in harvest.items():
+        sk = state_key(b)
+        if sk in done:
+            continue
+        todo.append((sk, b))
     todo = todo[:limit]
     print('buyers harvested: %d | already processed: %d | to try: %d'
           % (len(harvest), len(done), len(todo)))
@@ -320,7 +364,7 @@ def main():
                        for r in rows[1:] if len(r) > idx['Email']}
 
     added = 0
-    for i, b in enumerate(todo, 1):
+    for i, (sk, b) in enumerate(todo, 1):
         print('[%d/%d] %s (%s) ...' % (i, len(todo), b.get('contact', '?'),
                                        b.get('country', '?')))
         try:
@@ -333,7 +377,7 @@ def main():
             email = hit['email']
             if email in existing_emails:
                 print('    dup, already in tracker: %s' % email)
-                done[bid] = {'status': 'duplicate', 'email': email}
+                done[sk] = {'status': 'duplicate', 'email': email}
             else:
                 maxid += 1
                 row = [''] * len(hdr)
@@ -364,10 +408,10 @@ def main():
                 print('    ADDED %s | %s | %s | %s' % (row[idx['Lead ID']],
                                                        hit['matched_name'],
                                                        email, hit['website']))
-                done[bid] = {'status': 'added', 'email': email, 'lead': row[idx['Lead ID']]}
+                done[sk] = {'status': 'added', 'email': email, 'lead': row[idx['Lead ID']]}
         else:
             print('    no match')
-            done[bid] = {'status': 'no-match'}
+            done[sk] = {'status': 'no-match'}
         state['processed'] = done
         json.dump(state, open(STATE, 'w'), indent=2, ensure_ascii=False)
 

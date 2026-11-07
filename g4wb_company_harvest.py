@@ -43,15 +43,20 @@ COUNTRIES = ['oman', 'egypt', 'malaysia', 'portugal', 'israel',
              'russia', 'ukraine', 'japan', 'south-korea', 'pakistan']
 
 # Category slugs from the site's own "Fitness Equipment & Sports Goods" tree.
+# Ordered by how many of the entries are actually martial-arts/sportswear
+# buyers (measured 2026-11-07): sportswear 36/36, sports-goods-equipments
+# 3/3, team-uniforms 4/47, fight-gear 2/63, mouth-guards 5/17, fight-wear
+# 2/27, martial-arts-belts 1/26. The loose slugs (martial-arts-mats,
+# boxing-head-guards) are mostly flooring and medical gloves, so they go LAST.
 CATEGORIES = [
-    'boxing-gloves', 'boxing-head-guards', 'boxing-accessories', 'kick-pads',
-    'martial-arts-gloves', 'martial-arts-belts', 'martial-arts-mats',
-    'martial-arts-goods-and-accessories', 'sports-goods-equipments',
-    'sportswear', 'sports-apparel', 'uniforms', 'gym-gloves', 'fight-wear',
-    'head-protection', 'mouth-guards', 'shin-guards', 'hand-wraps',
-    'protective-equipment', 'sports-clothing', 'team-uniforms', 'sports-jerseys',
-    'football-jerseys', 'karate-uniforms', 'taekwondo-uniforms',
-    'fitness-equipment-sports-goods', 'gym-equipment', 'sports-accessories',
+    'sportswear', 'sports-goods-equipments', 'team-uniforms', 'fight-gear',
+    'mouth-guards', 'fight-wear', 'martial-arts-belts', 'martial-arts-gloves',
+    'boxing-gloves', 'boxing-accessories', 'kick-pads', 'gym-gloves',
+    'sports-apparel', 'uniforms', 'sports-clothing', 'protective-equipment',
+    'martial-arts-goods-and-accessories', 'head-protection', 'shin-guards',
+    'hand-wraps', 'sports-jerseys', 'football-jerseys', 'karate-uniforms',
+    'taekwondo-uniforms', 'fitness-equipment-sports-goods', 'gym-equipment',
+    'sports-accessories', 'boxing-head-guards', 'martial-arts-mats',
 ]
 
 MEMBER_RE = re.compile(r'/member/view/(\d+)/([^\'"<>]+?)\.html')
@@ -112,6 +117,9 @@ def main():
             jobs.append((c, cat))
     offset = (len(harvest) * 11) % max(1, len(jobs))
     jobs = jobs[offset:] + jobs[:offset]
+    # 10 pages = 80 country/category combos per run. The company directory
+    # does NOT paginate, so the depth comes from covering more countries and
+    # categories instead.
     jobs = jobs[:pages * 8]
 
     new = 0
