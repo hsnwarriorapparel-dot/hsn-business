@@ -136,6 +136,59 @@ sends the biggest one per day:
   `spam_qa_followup.check()` - note "quotation" contains the banned token
   "quote", so use "price" or "pricing" instead
 
+## THE INQUIRY QUEUE WAS STALE - 8 ARCHIVED TARGETS (2026-11-08)
+
+The inquiry queue was seeded from 8 hand-mapped targets, **all ARCHIVED**.
+Meanwhile `g4wb_buyleads_live.json` holds **23 live buy requirements**, 11
+of them in our product space, most VERIFIED and several posted in the last
+month:
+
+```
+Institutional Uniforms Like School Uniforms, Corporate Uniforms   Oman
+Uniforms Like School Uniforms                                    Bahrain
+Institutional Uniforms Like Dress Uniform                        Oman
+Uniform Fabric Cotton Fabric, Poly Viscose Fabric               Kuwait
+Sports Bags Like Duffel Bags, Gym Bags                    Malaysia/Singapore
+```
+
+`g4wb_queue_rebuild.py` rebuilds the queue from the live buyleads every
+night, and `g4wb_queue_messages.py` writes a message that answers THAT
+requirement - quantity, destination and payment terms taken from the
+requirement itself. **14 messages, 14/14 pass the spam check.**
+
+### RANK UNIFORMS FIRST
+
+Uniforms are the PRIMARY product. A 20ft container of school uniforms is
+a far better order than gym bags, even though bags score higher on a raw
+keyword match. The score gives uniforms +140, fabric +90.
+
+### ELIGIBILITY MATTERS
+
+A JUNIOR member cannot send to a `PREMIUM MEMBERS ONLY` requirement, so
+those are excluded, and a buylead can only be inquired about 5 DAYS after
+it was posted. 9 of the 11 are eligible for a JUNIOR inquiry.
+
+### THE CAPTCHA BUG - PHASE 2 WAS OVERWRITING THE IMAGE
+
+The send failed with *"Error processing your request"* because phase 2
+**re-captured the captcha image**, overwriting the picture the agent had
+just read - and the page regenerates the captcha on every load. So the
+picture and the submitted text were always different captchas.
+
+The fix: phase 2 does NOT capture. It only prints the current captcha
+`src` so a mismatch is visible, and phase 1 records the `src` it captured.
+
+### SENT AND VERIFIED
+
+```
+"Thanks. Your Inquiry has been sent for:
+ Wanted : Uniforms Like School Uniforms"
+```
+
+1/1 for today. The requirement: School Uniforms, 100% cotton, boys and
+girls, 1 twenty-foot container, CIF Bahrain, L/C. Contact: Yacoob. Jawad.
+Tracked as L5297.
+
 ## RANKED RFQ DETAILS
 
 **Taekwondo Belts - Malaysia - 3,500 pieces** (May-22-24, ARCHIVED but

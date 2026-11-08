@@ -104,19 +104,40 @@ def main():
     time.sleep(24)
 
     # 1. capture the captcha from THIS tab
-    box = ev("""(()=>{
-      const i=document.querySelector('#form_captcha_image');
-      if(!i) return null;
-      const r=i.getBoundingClientRect();
-      return JSON.stringify({x:r.x,y:r.y,w:r.width,h:r.height});
-    })()""", s)
-    if box:
-        b = json.loads(box)
-        shot = cdp('Page.captureScreenshot', {'format': 'png', 'clip': {
-            'x': b['x'], 'y': b['y'], 'width': b['w'], 'height': b['h'], 'scale': 3}}, s)
-        if shot.get('data'):
-            open('/home/ubuntu/g4wb_captcha.png', 'wb').write(base64.b64decode(shot['data']))
-            print('captcha image -> /home/ubuntu/g4wb_captcha.png  (read it, then run again with the text)')
+    #
+    # CRITICAL: in phase 2 this must NOT overwrite the image the agent
+    # already read. The page regenerates the captcha on every load, so
+    # re-capturing means the picture and the text no longer match - and the
+    # submit fails with "Error processing your request".
+    #
+    # So: capture only in phase 1. In phase 2, read the CURRENT captcha
+    # image src and make sure it is the SAME one the agent read. If the src
+    # changed, the tab was reloaded and the agent must read it again.
+    if not captcha:
+        box = ev("""(()=>{
+          const i=document.querySelector('#form_captcha_image');
+          if(!i) return null;
+          const r=i.getBoundingClientRect();
+          return JSON.stringify({x:r.x,y:r.y,w:r.width,h:r.height});
+        })()""", s)
+        if box:
+            b = json.loads(box)
+            shot = cdp('Page.captureScreenshot', {'format': 'png', 'clip': {
+                'x': b['x'], 'y': b['y'], 'width': b['w'], 'height': b['h'], 'scale': 3}}, s)
+            if shot.get('data'):
+                open('/home/ubuntu/g4wb_captcha.png', 'wb').write(base64.b64decode(shot['data']))
+                src = ev("(()=>{const i=document.querySelector('#form_captcha_image');return i?(i.getAttribute('src')||''):'none';})()", s)
+                try:
+                    st2 = json.load(open(STATE))
+                    st2['captchaSrc'] = src
+                    json.dump(st2, open(STATE, 'w'))
+                except Exception:
+                    pass
+                print('captcha image -> /home/ubuntu/g4wb_captcha.png  (read it, then run again with the text)')
+                print('captcha src   :', src)
+    else:
+        # phase 2: report the CURRENT captcha src so a mismatch is visible
+        print('captcha src now:', ev("(()=>{const i=document.querySelector('#form_captcha_image');return i?(i.getAttribute('src')||''):'none';})()", s))
     if not captcha:
         print('PHASE 1 DONE. Read /home/ubuntu/g4wb_captcha.png and re-run with the text.')
         ws.close(); return
