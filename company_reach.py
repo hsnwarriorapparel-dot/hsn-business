@@ -50,7 +50,19 @@ PRODUCT_WORDS = re.compile(
     r'kickboxing|kick ?pad|muay thai|kung fu|aikido|boxing wear|mma wear|'
     r'combat sport|fitness equipment|sporting good|sport equipment|'
     r'sport goods|sports gear|t-shirt|polo shirt|'
-    r'sports kit|custom kit|team kit|football kit|jersey)', re.I)
+    r'sports kit|custom kit|team kit|football kit|jersey|'
+    # General APPAREL / uniform makers. A school-uniform or workwear
+    # manufacturer is a real buyer of ours - fashquedesigns.com ("Online
+    # Clothing Wholesale Suppliers Vendors") was rejected because none of
+    # these words were in the list.
+    r'clothing (wholesale|supplier|manufacturer)|apparel (wholesale|supplier|manufacturer)|'
+    r'garment (wholesale|supplier|manufacturer|factory)|'
+    r'uniform (supplier|manufacturer|factory|maker)|'
+    r'workwear|work wear|coverall|coveralls|'
+    r'school uniform|corporate uniform|hospitality uniform|'
+    r'military uniform|police uniform|institutional uniform|'
+    r'activewear|athleisure|loungewear|'
+    r'blank ?t-shirt|custom t-shirt|screen print|embroidery)', re.I)
 
 # Sports that are NOT our line. A golf results site ('golfscale.com' -
 # "Bridging the worlds of Professional Golf") matched on 'sports equipment'.
@@ -215,6 +227,155 @@ JUNK_NAME = re.compile(
     r'^(new company|company|test|yard|auto parts|diamond auto spare parts|'
     r'amin|just4girls|sannad|afaq|afaq|new|company ltd|company llc)$', re.I)
 
+# ---------------------------------------------------------------- dead leads --
+# The go4WorldBusiness buyer directory lists BUYER CONTACTS, so a large
+# share of the "companies" are a PERSON'S name ("Chetan Kandhari",
+# "Amer Nisar") or a firm in a completely different trade ("Power & Sun
+# Solar Equipment", "Blue Waves Marine Equipments"). Those cannot be
+# searched for as businesses - a person's name finds other people.
+#
+# 577 of the 990 queued companies were dead leads. Every one of them cost
+# a web search plus a page fetch, so the nightly run spent hours proving
+# nothing.
+#
+# A trading company IS a legitimate buyer, so "Fatima Trading" and "Zama
+# Trading" stay. The test is: a person's name, an off-trade word, or a
+# name in our product category that carries no trade word at all.
+FIRST_NAMES = set(
+    'ali ahmed mohammad mohammed abdullah abdul rashid khalid sultan hassan '
+    'hussein ibrahim omar osama saeed yousef yusuf zayed saif hamed fahad '
+    'nasser tariq firas shahab wafa ameer shuaib dima rima bravo private '
+    'fayyaz akash fatima maryam aisha khadija zainab layla noor rehan waqar '
+    'kamran adnan bilal tanveer asim fawad irfan junaid kashif moez nadeem '
+    'qais raheel sami taimoor waleed xavier zubair chetan chettan amer '
+    'nishikant shahid raja khan kandhari shetty shirke nisar ansari singh '
+    'patel kumar reddy rao naidu menon iyer bhatt jain gupta sharma verma '
+    'kaur malhotra chopra bhalla dhillon grewal sidhu bhagat desai makar '
+    'sethi bhatia ahluwalia gill sandhu khaled mansour saleh hamad dawood '
+    'iqbal jaffery farooq latif rizvi qureshi sheikh butt bhatti abbasi '
+    'ashraf baig chowdhury das ghosh jadhav kamble mahajan more patil '
+    'thakur tiwari varma yadav zaware radhika gayathri devi lakshmi priya '
+    'pooja rekha sunita vladimir sergei alexei dmitri oleg yuri andrey '
+    'pavel mikhail nikolai abraham'.split())
+
+# A firm in a trade that cannot buy martial-arts apparel.
+OFF_TRADE = re.compile(
+    r'(solar|petroleum|marine|packaging|airways|air |hotel|restaurant|medical|'
+    r'food|electrical|chemical|automotive|construction|real estate|consult|'
+    r'freight|logistic|cargo|oil|gas|bank|insur|account|audit|tax|legal|'
+    r'hospitality|travel|tour|agency|advertis|marketing|media|software|'
+    r'technology|solutions|systems|consultancy|holding|investment|finance)', re.I)
+
+# A name that IS about our product space.
+OUR_TRADE = re.compile(
+    r'\b(sport|sporting|athletic|gym|fitness|martial|karate|taekwondo|judo|'
+    r'boxing|fighter|combat|fight|uniform|apparel|clothing|wear|kit|gloves?|'
+    r'glove|equip(ment)?|suppl(y|ies)|train(ing|er)?|dojo|academy|club|team|'
+    r'champion|arena|boxe|active|fit|pro\b|legacy|'
+    r'kick ?pad|kickbox|muay|tae ?kwon|jiu ?jitsu|bjj|'
+    r'head ?gear|shin ?guard|hand ?wrap|mouth ?guard|'
+    r'fight ?wear|fight ?short|sparring|bum ?guard|'
+    r'uniform|gi\b|dobok|karate ?gi|'
+    r'factory|manufacturer|supplier|wholesale|distributor|'
+    r'boxing|boxer|protector)', re.I)
+
+# A name that could still be a business.
+COULD_BE_BUSINESS = re.compile(
+    r'\b(trading|co\b|llc|ltd|group|international|store|shop|company|est\b|'
+    r'general|enterprise|world|star|zone|genius|nsrit|altx|ats\b|bt\b)', re.I)
+
+OUR_CATEGORIES = {
+    'karate-uniforms', 'team-uniforms', 'martial-arts-gloves', 'boxing-gloves',
+    'uniforms', 'protective-equipment', 'fight-wear', 'kick-pads', 'hand-wraps',
+    'mouth-guards', 'sports-apparel', 'sports-goods-equipments', 'sportswear',
+    'sports-accessories', 'martial-arts-mats', 'martial-arts-belts',
+    'sports-jerseys',
+}
+
+
+# ------------------------------------------------------- the real filter ----
+# The directory CATEGORY is unreliable. A company listed under
+# 'martial-arts-gloves' may actually 'Buys industrial gloves, latex gloves',
+# and one listed under 'sportswear' may 'Buys inflatable rugby ball'.
+#
+# The go4WorldBusiness member profile states what the buyer actually buys
+# in one sentence:
+#     'Koreca Glove Industry is a junior buyer from Daegu, South Korea.
+#      Buys industrial gloves, latex gloves.'
+#
+# That sentence is the ONLY reliable signal. Reading it costs one profile
+# fetch per company, but it replaces a web search plus a page fetch, and
+# it stops the funnel chasing buyers who want inflatable rugby balls.
+BUYS_RE = re.compile(r'\.\s*(Buys|Buying)\s+([^\n]{0,170})', re.I)
+
+# What we actually manufacture.
+OUR_PRODUCTS = re.compile(
+    r'(martial art|judo|karate|taekwondo|bjj|brave ?jitsu|boxing|'
+    r'kickbox(?:ing)?|mma|mixed martial|fight ?wear|combat sport|'
+    r'self[- ]defen[cs]e|uniform|dobok|karate gi|'
+    r'sport uniform|team wear|boxing glove|sparring|headgear|'
+    r'shin guard|mouth guard|hand wrap|'
+    # 'belt' only counts in a martial-arts sense - 'seat belt' and 'wire
+    # hanger' are not belts we make.
+    r'karate belt|black belt|rank belt|belt\b(?!\s*(?:belt|webbing))|'
+    r'(?<!seat )(?<!car )belt)', re.I)
+
+# Products that look adjacent but are a different industry entirely.
+NOT_OUR_PRODUCTS = re.compile(
+    r'(industrial glove|latex glove|nitrile|medical glove|work glove|'
+    r'safety glove|cleaning glove|chemical glove|food grade glove|'
+    r'household glove|golf item|cricket ball|rugby ball|football|'
+    r'basketball|soccer ball|volleyball|tennis|badminton|swim|'
+    r'housekeeping|hand towel|towel|food and beverage|'
+    r'menswear|womenswear|kidswear|knits|woven|'
+    r'inflatab|beach|swimwear|fashion accessory|jewell|eyewear|'
+    r'shoe|footwear|bag\b|umbrella|watch|cap\b|hat\b|'
+    # not ours, even though the word 'uniform' can appear nearby
+    r'disposable medical|surgical|laundry hanger|wire hanger|'
+    r'lab coat|disposable apron|'
+    # 'belt' in a car/seat context
+    r'seat belt|steering wheel|car belt)', re.I)
+
+
+def buyer_wants(html):
+    """Return the phrase the buyer says they buy, or None."""
+    if not html:
+        return None
+    t = strip_tags(html)
+    m = BUYS_RE.search(t)
+    if not m:
+        return None
+    return (m.group(1) + ' ' + m.group(2)).strip()
+
+
+def profile_verdict(buys):
+    """'ours' | 'theirs' | 'unknown' for the phrase the buyer states."""
+    if not buys:
+        return 'unknown'
+    if NOT_OUR_PRODUCTS.search(buys):
+        return 'theirs'
+    if OUR_PRODUCTS.search(buys):
+        return 'ours'
+    return 'unknown'
+
+
+def is_dead_lead(name, category):
+    """True when the entry cannot be searched for as a business."""
+    n = (name or '').strip()
+    if not n:
+        return True
+    words = [w for w in re.split(r'[\s,&.]+', n) if w]
+    if len(words) == 1 and words[0].lower() in FIRST_NAMES:
+        return True
+    if len(words) == 2 and all(w.lower() in FIRST_NAMES for w in words):
+        return True
+    if OFF_TRADE.search(n):
+        return True
+    if category in OUR_CATEGORIES:
+        if not OUR_TRADE.search(n) and not COULD_BE_BUSINESS.search(n):
+            return True
+    return False
+
 UA = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
       'Chrome/156.0.0.0 Safari/537.36')
 
@@ -279,6 +440,50 @@ GENERIC_WORDS = {
     'supplies', 'supply', 'solutions', 'management', 'consulting', 'agency',
     'business', 'commerce', 'commercial', 'projects', 'project', 'works',
 }
+
+
+def _close_enough(a, b):
+    """True when two tokens are near-identical (one letter apart).
+
+    The directory said 'Fashqua Buying Company'; the company writes 'Fashque
+    Designs'. A single-letter spelling difference must not kill the lead.
+    """
+    a = (a or '').lower()
+    b = (b or '').lower()
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    if abs(len(a) - len(b)) > 1:
+        return False
+    # one insertion / deletion / substitution
+    shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+    i = j = 0
+    diff = 0
+    while i < len(shorter) and j < len(longer):
+        if shorter[i] == longer[j]:
+            i += 1
+            j += 1
+            continue
+        diff += 1
+        if diff > 1:
+            return False
+        j += 1
+    return True
+
+
+def fuzzy_name_match(tokens, distinctive, body_low, domain, title_low):
+    """A spelling variant of the company name is still the company."""
+    hay = (body_low or '') + ' ' + (domain or '') + ' ' + (title_low or '')
+    words = re.findall(r'[a-z]{4,}', hay)
+    for t in (distinctive or tokens):
+        tl = t.lower()
+        if tl in hay:
+            return True
+        for w in words:
+            if _close_enough(tl, w):
+                return True
+    return False
 
 
 def company_tokens(name, distinctive_only=False):
@@ -525,6 +730,20 @@ def process(comp):
                                 'twitter.com', 'wikipedia.org', 'go4worldbusiness.com',
                                 'amazon.', 'ebay.', 'alibaba.', 'pinterest.', 'reddit.')):
             continue
+        # B2B DIRECTORIES list the company but do not sell to us - the
+        # contact on them is a listing agent, not the buyer. We need the
+        # company's OWN site to find its real sales email.
+        if any(x in d for x in ('company-listing.org', 'listcompany.org',
+                                'exporthub.com', 'tradekorea.com', 'ec21.com',
+                                'exportersindia.com', 'tradeindia.com', 'alibaba.',
+                                'made-in-china.com', 'globalsources.com',
+                                'importgenius.com', 'panjiva.com', 'kompass.com',
+                                'europages.co.uk', 'yellow-pages.', 'yelp.com',
+                                'yellowpages.', 'b2b.', 'tradeatlas.com',
+                                'searchnature', 'firmedia', 'pitchbook.com',
+                                'crunchbase.com', 'bloomberg.com', 'zoominfo.',
+                                'listcompany', 'companylist', 'b2b-jp.com')):
+            continue
         if not re.search(r'\.(com|net|org|io|co|ae|sa|pk|in|my|eg|pt|tr|uk|us)$', d):
             continue
         if NOT_A_COMPANY.search(d):
@@ -570,25 +789,33 @@ def process(comp):
         # The company name must actually be on the site, and the MATCH must
         # be on the distinctive token - in the domain or the page title, not
         # just buried in the body text.
-        name_ok = False
-        for t in toks:
-            if t.lower() in low:
-                name_ok = True
-                break
-        if not name_ok:
-            continue
         distinct = company_tokens(name, distinctive_only=True)
         title = ''
         tm = re.search(r'<title[^>]*>(.*?)</title>', html, re.S | re.I)
         if tm:
             title = strip_tags(tm.group(1)).lower()
         dparts = d.replace('-', ' ').replace('.', ' ').lower()
+        name_ok = False
+        for t in toks:
+            if t.lower() in low:
+                name_ok = True
+                break
+        if not name_ok:
+            # a spelling variant is still the same company
+            name_ok = fuzzy_name_match(toks, distinct, low, d, title)
+        if not name_ok:
+            continue
         sig_ok = False
         for t in distinct:
             tl = t.lower()
             if tl in dparts or tl in title:
                 sig_ok = True
                 break
+        if not sig_ok:
+            # 'Fashqua' (directory) vs 'Fashque' (their site) - one letter
+            # apart must still count as the distinctive token
+            if fuzzy_name_match(distinct, distinct, dparts + ' ' + title, d, title):
+                sig_ok = True
         if not sig_ok:
             # the domain may be a brand name we cannot split, but the TITLE
             # still has to carry the distinctive token together with the
@@ -710,6 +937,22 @@ def main():
             continue
         if JUNK_NAME.match((v.get('company') or '').strip()):
             done[k] = {'status': 'junk-name'}
+            continue
+        if is_dead_lead(v.get('company'), v.get('dir_category')):
+            # a person's name, or a firm in another trade - it cannot be
+            # searched for as a business, so do not waste a search on it
+            done[k] = {'status': 'dead-lead'}
+            continue
+        # THE DECISIVE CHECK: read the buyer's own go4WorldBusiness profile
+        # and see what they say they buy. If it is not our product, stop
+        # here - a web search for a buyer who wants inflatable rugby balls
+        # can never succeed.
+        prof = curl(v.get('href') or '', timeout=22)
+        buys = buyer_wants(prof)
+        verdict = profile_verdict(buys)
+        if verdict == 'theirs':
+            print('    skip - they buy: %s' % (buys or '')[:90])
+            done[k] = {'status': 'wrong-product', 'buys': (buys or '')[:120]}
             continue
         todo.append((k, v))
     todo = todo[:limit]

@@ -297,6 +297,116 @@ the phone came from the challenge page.
 lead is marked `CLOUDFLARE-BLOCKED ... needs manual check` and KEPT - it may
 well be genuine, it just cannot be fetched from this host.
 
+## THE FUNNEL WAS RUNNING BLIND - BING BROKE ITS DOM (2026-11-08)
+
+`search_company()` returned **ZERO results for every company**. The whole
+company-reach funnel had been searching nothing.
+
+### THE BUG
+
+Bing's `<cite>` element now begins with the scheme:
+
+```
+https://www.exporthub.com > youngjin-glove-co-ltd
+```
+
+The old parser only stripped a leading `http://`, so it produced:
+
+```
+https://https:/youngjin-glove-co-ltd     <- every URL malformed
+```
+
+Every fetch then failed, every company came back "no match", and the
+funnel reported a normal-looking result. **Silent failure, no error.**
+
+The fix strips ANY scheme before rebuilding the URL.
+
+### BING ALSO SERVES DIRECTORIES, NOT COMPANIES
+
+For "Youngjin Glove Co." the top hits are `company-listing.org`,
+`exporthub.com`, `listcompany.org`, `tradekorea.com`, `ec21.com` - B2B
+directories that list the company but whose contact is a listing agent,
+not the buyer. Added to the block list.
+
+## THE DECISIVE FILTER - READ THE BUYER'S OWN PROFILE
+
+The directory CATEGORY is unreliable. A company listed under
+`martial-arts-gloves` may actually say:
+
+> Koreca Glove Industry is a junior buyer from Daegu, South Korea.
+> **Buys industrial gloves, latex gloves.**
+
+and one listed under `sportswear` may say **"Buys inflatable rugby ball"**.
+
+The member profile states what the buyer ACTUALLY buys in one sentence.
+That is the only reliable signal, and reading it costs ONE profile fetch
+instead of a web search plus a page fetch.
+
+```python
+buys = buyer_wants(curl(comp['href']))
+verdict = profile_verdict(buys)   # 'ours' | 'theirs' | 'unknown'
+```
+
+Screening the whole pool:
+
+```
+OURS (buys our products) : 32
+UNKNOWN (no Buys phrase) : 318
+THEIRS (wrong product)   : 56
+```
+
+The 28 confirmed "ours" included the best buyers found so far:
+**"Buys karate belt 4.1cm 8 rows 100% cotton"** (Al Awal Enterprise),
+**"Buys police uniforms"** (Al Tamauez Al Raqi, Easy Source),
+**"Buys school uniform"** (Bhasin Co, Salem Al Qattan),
+**"Buys corporate, school, hospitality uniforms"** (Yousef Al Rajhi).
+
+`profile_verdict()` is tested: **16/16 PASS** on real 'Buys ...' phrases.
+
+## A SPELLING VARIANT MUST NOT KILL THE LEAD
+
+The directory said **"Fashqua Buying Company"**; the company writes
+**"Fashque Designs"**. One letter apart, and the exact-match name check
+rejected a genuine clothing-wholesale buyer with two real emails.
+
+`fuzzy_name_match()` allows one insertion/deletion/substitution on the
+distinctive token, checked against the domain, the title and the body.
+**8/8 PASS** - it matches Fashqua/Fashque and still refuses to match
+Bhasin against gloveworld.net.
+
+## THREE MORE FALSE NEGATIVES FIXED
+
+| Was | Fix |
+|---|---|
+| "Online Clothing Wholesale Suppliers" rejected | `PRODUCT_WORDS` now covers clothing/apparel/garment/uniform/workwear makers - **8/8 PASS** |
+| "wire hanger, gi" matched `\bgi\b` | `gi` needs "karate gi" or "dobok" context |
+| "seat belt" matched `belts?` | belt needs a martial-arts sense |
+
+## DEAD LEADS - 577 OF 990
+
+The directory lists BUYER CONTACTS, so many "companies" are a person's
+name ("Chetan Kandhari", "Amer Nisar") or a firm in another trade
+("Power & Sun Solar Equipment", "Blue Waves Marine Equipments").
+
+`is_dead_lead()` classifies them; **0 false kills, 0 missed** on the test
+set (17 real businesses kept, 13 dead ones caught).
+
+## ONE CONTACT - ONE COMPANY
+
+A stale run added 'Shuaib' AND 'Ameer' with the SAME phone
+(+968 20012026) and the SAME website (definitions.net). If a phone or
+website is already held by a DIFFERENT company name, reject it.
+**4/4 PASS.**
+
+## THE STANDS4 NETWORK
+
+`definitions.net` was accepted once. It has 16 siblings on the same
+network (abbreviations.net, anagrams.net, biographies.net, calculators.net,
+convert.net, grammar.com, literature.com, lyrics.net, phrases.net,
+poetry.net, quotes.net, references.net, rhymes.net, scripts.net,
+symbols.net, synonyms.net, uszip.com) - **all 17 now blocked**, and the 9
+real buyer domains still pass.
+
 ## THE COMPANY FUNNEL IS 12x MORE PRODUCTIVE THAN THE PERSON FUNNEL
 
 Measured over the same window (2026-11-07):

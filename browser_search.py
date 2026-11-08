@@ -58,10 +58,21 @@ def search(query, engine='bing'):
         // pieces, not one slug, so replacing spaces with dashes (the old
         // behaviour) produced broken urls that never fetched.
         if(real){
+          // Bing's <cite> NOW STARTS WITH 'https://' on many renders.
+          // The old parser only stripped a leading http:// when the cite
+          // had no scheme, so it produced 'https://https:/...' for every
+          // result and EVERY fetch failed. That silently blinded the whole
+          // company-reach funnel.
+          //
+          // Strip ANY scheme, then rebuild.
           const parts=real.split('>').map(x=>x.trim()).filter(Boolean);
           if(parts.length){
-            let dom=parts[0].replace(/^https?:\/\//,'').split('/')[0]
-                       .replace(/[^a-zA-Z0-9.:-]/g,'');
+            let first=parts[0]
+                       .replace(/^https?:\/\//i,'')
+                       .replace(/^http:\/\//i,'')
+                       .replace(/^www\./i,'');
+            let dom=first.split('/')[0].replace(/[^a-zA-Z0-9.:-]/g,'');
+            if(!dom){ return; }
             const path=parts.slice(1).map(x=>x.replace(/[^a-zA-Z0-9._~%-]/g,'-')).join('/');
             real='https://'+dom+(path?'/'+path:'');
           }
