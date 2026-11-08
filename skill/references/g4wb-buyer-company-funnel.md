@@ -896,3 +896,49 @@ Before these fixes the funnel was picking a 16-character empty page and
 recording its email address. That is the failure mode to watch for: a
 lead that looks real, points at a real domain, and belongs to a
 different company entirely.
+
+## THE REACH STATE MUST BE CHECKED AGAINST THE TRACKER
+
+`company_reach_state.json` records what happened to each company in the
+directory. It is bookkeeping, and bookkeeping rots.
+
+Two kinds of stale entry were found on 2026-11-08:
+
+**1. 'added' for a lead that does not exist.** The funnel wrote the state
+entry but the lead never landed - or the lead was later removed. The
+company is marked 'added', so it is NEVER retried, and the record is
+silently lost. Four entries were in that state.
+
+**2. 'added' pointing at a lead whose email disagrees.** L5292 is
+Linkwell Uniforms (`info@linkwelluniforms.com`), but a state entry said
+it was `shop@sportsmode.us` - a site that was one of the eight original
+false positives. The junk was never in the tracker, but the state still
+claimed it.
+
+**THE FIX - the funnel now verifies before it records:**
+
+```python
+_landed = any(_r and _r[0] == row[idx['Lead ID']] for _r in _all[1:])
+if not _landed:
+    log('    NOT LANDED - re-queueing the company')
+    done[kid] = {'status': 'add-failed', ...}
+    continue
+done[kid] = {'status': 'added', 'lead': row[idx['Lead ID']]}
+```
+
+**THE AUDIT - run this whenever the state and the tracker seem to
+disagree:**
+
+```python
+for k, v in state['processed'].items():
+    if v.get('status') != 'added':
+        continue
+    lead = by_id.get(v.get('lead'))
+    if not lead:
+        print('ORPHAN', v.get('lead'), v.get('email'))     # never landed
+    elif v.get('email') and lead['Email'] and v['email'] != lead['Email']:
+        print('STALE', v.get('lead'), v['email'])          # wrong contact
+```
+
+Both kinds get DELETED from the state, which re-queues the company for
+the next run.

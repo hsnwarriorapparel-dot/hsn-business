@@ -1366,6 +1366,26 @@ def main():
                 print('    ADDED %s | %s | %s | %s' % (row[idx['Lead ID']], name[:30],
                                                        (email or ('phone:' + phone)),
                                                        hit['website']))
+                # VERIFY the lead actually landed before recording
+                # 'added'. A state file that claims 'added' for a lead
+                # that is not in the tracker means the company is never
+                # retried - the record is silently lost. Four entries
+                # were in that state on 2026-11-08.
+                _landed = False
+                try:
+                    import csv as _csv2
+                    with open(CSV_PATH, newline='', encoding='utf-8-sig') as _f2:
+                        _all = list(_csv2.reader(_f2))
+                    _landed = any(_r and _r[0] == row[idx['Lead ID']]
+                                  for _r in _all[1:])
+                except Exception:
+                    _landed = True      # cannot verify - do not block
+                if not _landed:
+                    log('    NOT LANDED - %s is not in leads.csv, '
+                        're-queueing the company' % row[idx['Lead ID']])
+                    done[kid] = {'status': 'add-failed',
+                                 'email': email, 'phone': phone}
+                    continue
                 done[kid] = {'status': 'added', 'email': email, 'phone': phone,
                              'lead': row[idx['Lead ID']]}
         else:
