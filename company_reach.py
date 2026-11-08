@@ -1189,8 +1189,17 @@ def main():
                         rw = (r[idx['Website']] or '').strip().lower()
                     except Exception:
                         continue
-                    if not rn or rn == name.strip().lower():
+                    if not rn:
                         continue
+                    if rn == name.strip().lower():
+                        # The SAME company is already in the tracker under
+                        # another name spelling, or under the same name.
+                        # A stale run added 'Muscat Sports Llc' as L5286
+                        # when L5285 already held 'Muscat Sports LLC'.
+                        print('    REJECTED %s - the same company is already '
+                              'in the tracker' % name[:30])
+                        clash = True
+                        break
                     if phone and rp and rp == phone.strip():
                         print('    REJECTED %s - phone %s already belongs to "%s"'
                               % (name[:30], phone[:20], rn[:28]))

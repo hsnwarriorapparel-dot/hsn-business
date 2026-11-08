@@ -136,9 +136,13 @@ def check(subject, body):
         flags.append('fmt:greeting-prefix')
     # ALL CAPS - a run of 3+ capital letters that is not an acronym we
     # knowingly use (CIF, FOB, L/C, HS, DHL, UPS, MOQ, UAE, USA, UK)
+    # Recognised abbreviations are not SHOUTING. EUR/USD are currency
+    # codes, MMA/BJJ are sport names, GI/DOBOK are garment names.
     allowed = {'CIF', 'FOB', 'HS', 'DHL', 'UPS', 'MOQ', 'UAE', 'USA', 'UK',
                'LC', 'TT', 'CFR', 'EXW', 'FCA', 'DDP', 'PVC', 'OE',
-               'HSN', 'SIALKOT', 'PAKISTAN'}
+               'HSN', 'SIALKOT', 'PAKISTAN', 'EUR', 'USD', 'MMA', 'BJJ',
+               'GI', 'DOBOK', 'MOQs', 'PVC', 'PU', 'SS', 'OEM', 'ODM',
+               'L/C', 'T/T', 'HSN', 'REPLIED', 'PDF', 'MOQ'}
     for m in re.finditer(r'\b[A-Z]{3,}\b', body or ''):
         if m.group(0) not in allowed:
             flags.append('fmt:allcaps:' + m.group(0))

@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
-"""Rebuild HWA_Lead_Tracker.xlsx from leads.csv with a per-day summary sheet.
-Read-only on the CSV. Prints a read-back verification of the saved workbook."""
+"""Rebuild HWA_Lead_Tracker.xlsx from leads.csv.
+
+THIS SCRIPT NOW DELEGATES to build_full_tracker.py, which produces the
+full 10-sheet workbook (Leads, Buyer Companies, Replied, RFQ Queue, Price
+List, Channel Summary, Daily Summary, Countries, Funnel, Pipeline
+Report). The old 4-sheet builder overwrote it with a simpler version and
+lost the campaign context.
+
+Kept as a thin wrapper so every existing caller still works.
+"""
+import subprocess
+import sys
+
+rc = subprocess.call([sys.executable, '/home/ubuntu/build_full_tracker.py'])
+if rc != 0:
+    print('full tracker build FAILED (rc=%d)' % rc)
+sys.exit(rc)
+
+# ---- original implementation below, kept for reference only ----
 import csv
 from collections import Counter, defaultdict
 from datetime import datetime, timezone

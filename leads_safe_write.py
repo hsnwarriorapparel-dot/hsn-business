@@ -204,6 +204,31 @@ def add_rows(new_rows, retries=3):
             before = len(rows)
             # If our header differs from the file's, the file was replaced by
             # a different format - do not blindly append.
+            #
+            # ASSIGN THE LEAD IDs HERE, UNDER THE LOCK. A caller that
+            # allocates IDs before calling add_rows() works from a snapshot
+            # taken at ITS start, so a concurrent run that added rows in
+            # between hands out an ID that is already taken. The stale run
+            # logged 'ADDED L5286 | Muscat Sports' when L5286 was already
+            # Cobra Sports and Muscat Sports was L5285.
+            if new_rows and new_rows[0] and new_rows[0][0]:
+                try:
+                    _hdr = rows[0]
+                    _ii = _hdr.index('Lead ID')
+                    _used = set()
+                    for r in rows[1:]:
+                        if r and len(r) > _ii and r[_ii]:
+                            _used.add(r[_ii].strip())
+                    _next = max((int(x[1:]) for x in _used
+                                 if x.startswith('L') and x[1:].isdigit()),
+                                default=0)
+                    for r in new_rows:
+                        if len(r) > _ii and r[_ii] in _used:
+                            _next += 1
+                            r[_ii] = 'L%d' % _next
+                            _used.add(r[_ii])
+                except Exception:
+                    pass
             rows.extend(new_rows)
             write_rows(rows)
             # verify
