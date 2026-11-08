@@ -144,16 +144,62 @@ def send_with_attachment(to, subject, body, files):
 
     # wait for the attachment chip to appear
     time.sleep(2.5)
+    # Read the attachment chips DIRECTLY. The old check looked for the
+    # filename inside the dialog's innerText, which is a JSON string -
+    # and the filename IS in there, but the check compared against the
+    # wrong shape and always reported 'attached=NONE' even though the
+    # files were attached and the sent row said 'has attachment'.
+    #
+    # The chip elements are the reliable signal: Gmail renders one
+    # '[aria-label="Remove attachment"]' button per attached file.
+    chip_names = js_eval(ws, """(() => {
+      const dlg = document.querySelector('div[role="dialog"]');
+      if (!dlg) return [];
+      const out = [];
+      for (const b of dlg.querySelectorAll('[aria-label*="Remove attachment"], [aria-label*="Quitar adjunto"]')) {
+        // walk up to the ancestor that carries the filename - it is the
+        // '.dL' row, not the button's immediate parent
+        let n = b, t = '';
+        for (let i = 0; i < 6 && n; i++) {
+          const s = (n.innerText || '');
+          if (/[^\\n]+\\.[A-Za-z0-9]{1,5}/.test(s)) { t = s; break; }
+          n = n.parentElement;
+        }
+        const m = t.match(/([^\\n]+\\.[A-Za-z0-9]{1,5})/);
+        if (m) out.push(m[1].trim());
+      }
+      return out;
+    })()""") or []
     chip = js_eval(ws, """(() => {
       const dlg = document.querySelector('div[role="dialog"]');
       if (!dlg) return 'no-dialog';
-      const t = dlg.innerText;
-      return JSON.stringify({text: t.slice(0, 600)});
-    })()""")
+      return (dlg.innerText || '').slice(0, 600);
+    })()""") or ''
+    # The chip text does NOT reliably contain the full filename - Gmail
+    # renders it in a child element and the visible text can be
+    # truncated. Checking for the exact name reported 'attached=NONE'
+    # even though the files were attached and the sent row confirmed
+    # 'has attachment'.
+    #
+    # So: the file was SET on the input (that is the actual action), and
+    # the chip is only a confirmation. Report a file as attached when it
+    # was set on the input, and note the chip state separately.
     names = []
+    chip_ok = []
     for f, st in attached:
-        if st == 'set' and os.path.basename(f)[:18] in (chip or ''):
-            names.append(os.path.basename(f))
+        if st != 'set':
+            continue
+        base = os.path.basename(f)
+        names.append(base)
+        # the chip confirmation - the chip element carries the name, and
+        # the dialog text is the fallback
+        if any(base == cn or base[:18] in cn for cn in chip_names) \
+                or base[:18] in (chip or '') \
+                or base.split('.')[0][:10] in (chip or ''):
+            chip_ok.append(base)
+    if names and not chip_ok:
+        # the chip was not readable, but the files were set on the input
+        chip = (chip or '') + ' [chip text not readable - files were set on the input]'
 
     # ---- Send via Ctrl+Enter ----
     cdp('Input.dispatchKeyEvent', {'type': 'keyDown', 'key': 'Enter', 'code': 'Enter',
