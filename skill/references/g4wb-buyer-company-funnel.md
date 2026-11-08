@@ -407,6 +407,64 @@ poetry.net, quotes.net, references.net, rhymes.net, scripts.net,
 symbols.net, synonyms.net, uszip.com) - **all 17 now blocked**, and the 9
 real buyer domains still pass.
 
+## THE VERIFIED BUYER COMPANIES WERE NEVER EMAILED (2026-11-08)
+
+9 verified buyer companies were in leads.csv and **not one had been
+contacted**. Two separate reasons:
+
+### 1. THE WAVE CROWDED THEM OUT
+
+`day24_build_wave.py` scores every lead and keeps the top 100. All 9
+buyer companies qualified with scores of 58-80, but higher-scoring club
+leads took every slot - a club lead scores higher only because it has a
+fresher email address.
+
+The fix is a **reserved slice**: buyer companies are placed FIRST, up to
+12 of them, and the rest of the wave follows.
+
+```python
+BUYER_COMPANY = 'buyer company'
+buyer_rows = [s for s in scored if s[9] == BUYER_COMPANY]
+for s in buyer_rows[:12]:
+    wave.append(s)
+for s in other_rows:
+    ...
+```
+
+All 9 now occupy wave positions 1-9.
+
+### 2. A STALE 'EXCLUDED' MARKER
+
+`supasportsman.com` returns 'Not Acceptable!' (ModSecurity) to curl, so
+the wave QA could not re-verify the email the reacher had found on the
+site, and it stamped `EXCLUDED (day24 QA: email not verif...)`. The
+status was truncated at 250 chars, so the marker had no closing bracket
+and a plain string replace did not match it.
+
+Two fixes: the builder now honours a `verified-on-own-site` status marker
+as proof, and the stale marker was removed from the lead.
+
+### A BUYER COMPANY IS NOT A CLUB
+
+The club template says "your club's own branding" and "designed for
+clubs". That is the wrong pitch for an importer or uniform maker, which
+buys stock to resell. `build_wholesale_email()` in templates.py speaks
+about OEM production, MOQ, CIF and their own stated requirement.
+
+All 9 buyer-company emails are clean on the spam checker.
+
+### QUOTING THEIR OWN REQUIREMENT
+
+The requirement comes from the go4WorldBusiness profile. Two sources:
+
+1. the screening file `g4wb_company_harvest.json` -> `_buys`
+2. fallback: the lead's own Profile Analysis, which reads
+   `Buyer company listed in the go4WorldBusiness buyer directory under
+   sports-goods-equipments.` - the slug is the requirement
+
+That gives: 'sports goods equipments', 'gym gloves', 'team uniforms',
+'karate uniforms', 'school uniforms, uniforms'.
+
 ## THE COMPANY FUNNEL IS 12x MORE PRODUCTIVE THAN THE PERSON FUNNEL
 
 Measured over the same window (2026-11-07):

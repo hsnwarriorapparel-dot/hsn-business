@@ -208,7 +208,11 @@ for r in rows[1:]:
     sbase = base(sd) if sd else ''
     site_match = bool(sd) and (base(dom) == sbase or dom in sd or sd in dom)
     name_match = bool(local_tokens(local) & tokens(name, website))
-    verified_onsite = onsite.get(r[0], False)
+    # A lead that was already verified on its own site counts as verified,
+    # even if the site now blocks a re-fetch. supasportsman.com returns
+    # 'Not Acceptable!' (ModSecurity) to curl, so the QA cannot re-verify
+    # the email that the reacher found there - and the lead was lost.
+    verified_onsite = onsite.get(r[0], False) or 'verified-on-own-site' in sl
 
     if site_match:
         kind = 'site-domain-match'
@@ -245,14 +249,56 @@ for r in rows[1:]:
              else 1 if '2026-10-29' in st else 1 if '2026-10-28' in st else 0)
     score += fresh * 2
     seen_emails.add(e)
+    rtype = (r[idx['Type']] if 'Type' in idx and idx['Type'] < len(r) else '') or ''
     scored.append((score, r[0], name, e, (r[iC] if len(r) > iC else '') or '',
-                   kind, fresh, (r[iCi] if len(r) > iCi else '') or '', dom))
+                   kind, fresh, (r[iCi] if len(r) > iCi else '') or '', dom,
+                   'buyer company' if rtype.startswith('Buyer company') else ''))
 
 scored.sort(key=lambda x: (-x[0], int(re.sub(r'\D', '', x[1]) or 0)))
 
+# --score-only: report why a specific lead did or did not make the wave.
+# Used to check that the verified buyer companies are actually reachable.
+if '--score-only' in sys.argv:
+    want = set(sys.argv[sys.argv.index('--score-only') + 1].split(','))
+    for s in scored:
+        if s[1] in want:
+            print('IN   %-7s score=%-4d %-26s %s' % (s[1], s[0], s[5], s[2]))
+    for (lid, nm, em, why) in excluded:
+        if lid in want:
+            print('OUT  %-7s %-34s %s' % (lid, nm[:33], why))
+    for r in rows[1:]:
+        if r[0] in want and r[0] not in [x[1] for x in scored]:
+            st = r[iS] or ''
+            if not (r[iE] or '').strip():
+                print('OUT  %-7s %-34s no email' % (r[0], (r[iN] or '')[:33]))
+            elif 'email sent' in st.lower():
+                print('OUT  %-7s %-34s already emailed' % (r[0], (r[iN] or '')[:33]))
+    sys.exit(0)
+
 wave = []
 per_dom = Counter()
-for s in scored:
+
+# RESERVED SLICE FOR VERIFIED BUYER COMPANIES (2026-11-08).
+#
+# 8 verified buyer companies qualified with scores of 58-80 and were STILL
+# crowded out of the 100-row wave by higher-scoring club leads. These are
+# the highest-intent leads we have: each one was found in the
+# go4WorldBusiness BUYER DIRECTORY, meaning it is a real importing company
+# - and each has its own verified website and sales email.
+#
+# A club lead scores higher only because it has a fresher email address. A
+# directory-verified importer should not lose to that.
+BUYER_COMPANY = 'buyer company'
+buyer_rows = [s for s in scored if s[9] == BUYER_COMPANY]
+other_rows = [s for s in scored if s[9] != BUYER_COMPANY]
+BUYER_RESERVE = min(len(buyer_rows), 12)
+
+for s in buyer_rows[:BUYER_RESERVE]:
+    wave.append(s)
+    if s[8] not in WEBMAIL:
+        per_dom[s[8]] += 1
+
+for s in other_rows:
     # per-domain cap applies to BUSINESS domains only. Webmail providers
     # (gmail.com / hotmail.com / outlook.com) are not company chains, so
     # capping them at 4 would discard unrelated gyms with their own address.

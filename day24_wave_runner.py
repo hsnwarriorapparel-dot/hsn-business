@@ -10,7 +10,7 @@ Usage:
   day24_wave_runner.py            # send the whole wave
   day24_wave_runner.py --limit N  # send only the first N (foreground test)
 """
-import sys, os, time, csv, tempfile, argparse
+import sys, os, time, csv, tempfile, argparse, json, re
 sys.path.insert(0, '/home/ubuntu')
 from outreach import gmail_send
 from templates import build_email
@@ -155,9 +155,23 @@ CHAIN_RESERVE = _alloc['chain_reserve']
 RESERVED = FOLLOWUP_RESERVE + CHAIN_RESERVE
 # count from the shared ledger (actual emails), not CSV rows
 _already = sent_today()
-_remaining = max(0, _alloc['wave'] - _already)
+# The wave allowance is what is LEFT of the daily cap after the reserves
+# for the follow-up and chain engines.
+#
+# It was computed as `_alloc['wave'] - _already` = 72 - 85 = 0, which is
+# wrong: 'wave' is the wave's OWN cap for a full day, not a target to
+# subtract today's total from. The correct number is
+#     daily - already_sent - reserves
+# = 100 - 85 - 28 = 7.
+# Only the UNUSED part of each reserve is protected. The follow-up engine
+# has already sent 14 of its 20, so only 6 of that reserve are still
+# reserved, and the chain reserve is 8.
+_followup_left = max(0, _alloc['followup_reserve'] - sent_today(engine='followup'))
+_chain_left = max(0, _alloc['chain_reserve'] - sent_today(engine='chain'))
+_reserved_left = _followup_left + _chain_left
+_remaining = max(0, _alloc['daily'] - _already - _reserved_left)
 log(f"DAY24 WAVE START: {len(ids)} leads from {WAVE}")
-log(f"QUOTA: {_already} sent today (incl. {PRE_SENT_TODAY} pre-wave) | limit {DAILY_EMAIL_QUOTA} | reserved {RESERVED} (followup {FOLLOWUP_RESERVE} + chain {CHAIN_RESERVE}) | wave allowance {_remaining}")
+log(f"QUOTA: {_already} sent today (incl. {PRE_SENT_TODAY} pre-wave) | limit {DAILY_EMAIL_QUOTA} | reserved left {_reserved_left} (followup {_followup_left} + chain {_chain_left}) | wave allowance {_remaining}")
 if _remaining <= 0:
     log(f"DAILY EMAIL QUOTA ALREADY REACHED ({_already}/{DAILY_EMAIL_QUOTA}) - nothing sent")
     raise SystemExit(0)
@@ -214,6 +228,9 @@ if lock_ok:
 rows = load()
 idx = {h: i for i, h in enumerate(rows[0])}
 iE, iN, iC, iCi, iS = (idx['Email'], idx['Name'], idx['Country'], idx['City'], idx['Status'])
+iI = idx
+iT = idx['Type'] if 'Type' in idx else -1
+iPA = idx['Profile Analysis'] if 'Profile Analysis' in idx else -1
 meta = {r[0]: r for r in rows[1:] if r and r[0] in ids}
 
 # GMAIL TAB LOCK (2026-11-07): the chain-pitch engine (20:25) and the
@@ -258,9 +275,14 @@ for pos, lid in enumerate(ids, 1):
     # and stops instead of overshooting.
     # The ledger counts ACTUAL emails sent by ALL engines today.
     _live = sent_today()
-    _wave_cap = max(0, DAILY_EMAIL_QUOTA - RESERVED)
+    # the live ceiling: the daily cap minus the reserves that are STILL
+    # unused. A reserve the follow-up engine has already drawn down no
+    # longer protects anything.
+    _fu_left = max(0, _alloc['followup_reserve'] - sent_today(engine='followup'))
+    _ch_left = max(0, _alloc['chain_reserve'] - sent_today(engine='chain'))
+    _wave_cap = max(0, DAILY_EMAIL_QUOTA - _fu_left - _ch_left)
     if _live >= _wave_cap:
-        log(f"  WAVE CAP REACHED ({_live}/{_wave_cap} = quota {DAILY_EMAIL_QUOTA} minus reserved {RESERVED}) at {lid} - stopping, remaining stay queued")
+        log(f"  WAVE CAP REACHED ({_live}/{_wave_cap} = quota {DAILY_EMAIL_QUOTA} minus reserves still unused {_fu_left + _ch_left}) at {lid} - stopping, remaining stay queued")
         log(f"PAUSED after {sent} sent, {failed} failed, {skipped} skipped")
         break
 
@@ -271,7 +293,41 @@ for pos, lid in enumerate(ids, 1):
     region = 'USA' if country.upper() in ('USA', 'UNITED STATES', 'US') else 'Europe'
     detail = f"martial arts and boxing gym in {city}" if city else f"martial arts and boxing gym in {country}"
     try:
-        subject, body = build_email(name, detail, region=region)
+        # A go4WorldBusiness buyer company is an importer or a uniform maker,
+        # not a club. It gets the wholesale copy, quoting the requirement
+        # it stated in its own directory profile.
+        rtype = (r[iT] if iT >= 0 and iT < len(r) else '') or ''
+        if rtype.startswith('Buyer company'):
+            from templates import build_wholesale_email
+            req = ''
+            # 1. the screening file - the buyer's own words
+            try:
+                _hb = json.load(open('/home/ubuntu/g4wb_company_harvest.json'))
+                for _v in _hb.values():
+                    if (_v.get('company') or '').lower() == name.lower():
+                        req = (_v.get('_buys') or '').split('Legal Entity')[0].strip()
+                        req = re.sub(r'^Buys\s+', '', req)[:120]
+                        break
+            except Exception:
+                pass
+            # 2. fallback: the requirement recorded in the lead's own
+            #    Profile Analysis, e.g. 'GymNation (Gym Souq) - gym-gloves'
+            if not req:
+                try:
+                    _pa = (r[iPA] if iPA >= 0 and iPA < len(r) else '') or ''
+                    # the analysis begins 'Name - category-slug.' - take the
+                    # WHOLE slug, not just its last word ('sports-goods-
+                    # equipments' must not become 'goods equipments')
+                    # the analysis reads: 'Buyer company listed in the
+                    # go4WorldBusiness buyer directory under <slug>.'
+                    _m = re.search(r'buyer directory under ([a-z][a-z0-9-]{2,60})\.', _pa, re.I)
+                    if _m:
+                        req = _m.group(1).replace('-', ' ')
+                except Exception:
+                    pass
+            subject, body = build_wholesale_email(name, req, country)
+        else:
+            subject, body = build_email(name, detail, region=region)
         res = gmail_send(email, subject, body)
         ok = res.get('ok') if isinstance(res, dict) else ('sent' in str(res).lower())
         log(f"  [{pos}/{len(ids)}] EMAIL {lid} {name[:22]} -> {email}: {'OK' if ok else str(res)[:60]}")

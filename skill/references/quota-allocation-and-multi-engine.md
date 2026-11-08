@@ -119,3 +119,31 @@ The old 20:25 / 20:40 slots collided with the still-running wave.
   navigates a dirty one back to the inbox.
 - Close scratch browser tabs when done - the work browser had 112
   go4WorldBusiness tabs open, which slows every `get_tabs()` call.
+
+
+## THE WAVE ALLOWANCE WAS WRONG (2026-11-08 06:24)
+
+The wave runner computed its allowance as:
+
+```python
+_remaining = max(0, _alloc['wave'] - _already)     # 72 - 85 = 0
+```
+
+`'wave'` is the wave's OWN cap for a FULL day, not a target to subtract
+today's total from. With 85 already sent the wave computed **allowance 0**
+and sent nothing, even though 15 daily slots were still free.
+
+The correct number subtracts only the reserves that are **still unused**:
+
+```python
+_followup_left = max(0, followup_reserve - sent_today(engine='followup'))
+_chain_left    = max(0, chain_reserve    - sent_today(engine='chain'))
+_remaining     = max(0, daily - sent_today() - _followup_left - _chain_left)
+```
+
+A reserve the follow-up engine has already drawn down no longer protects
+anything. At 85 sent: followup had 6 of its 20 left, chain 8 of 8, so the
+wave allowance was 1 - and after that send, 0.
+
+**The per-lead cap inside the loop must use the same live numbers**, or it
+stops the run at a different limit than the one it announced.
