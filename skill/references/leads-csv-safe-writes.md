@@ -216,3 +216,41 @@ recorded on two rows - correctly collapsed.
 
 Count TOUCHES, not rows, when verifying: a per-row count makes a correct
 merge look like data loss.
+
+## TOOL OUTPUT REDACTS PHONE NUMBERS - DO NOT CHASE THE MASK
+
+The terminal tool replaces phone-like strings with a masked form in its
+output. `+971552997170` prints as `+971****7170`. The number on disk is
+complete and correct.
+
+**A masked number in tool output is not a defect in your code.** Three
+changes were made to "fix" a mask that was only a display artifact.
+
+Check the real value before changing anything:
+
+```python
+p = row.get('Phone') or ''
+print('len=%d all_digits=%s' % (len(p), p[1:].isdigit()))
+```
+
+If `len` is right and `isdigit()` is True, the number is fine.
+
+The same redaction applies to email-like strings in some outputs. Read
+the LENGTH and a CHARACTER CHECKSUM rather than the value itself.
+
+## A REGISTRATION NUMBER IS NOT A PHONE NUMBER
+
+`COBRA SPORTS SDN BHD (NO. 207737-K NO. 199001016068)` produced
+`+60 199001016068` - the company registration number read as a phone.
+A run of digits sitting inside brackets right after `NO.`, `REG`, `VAT`,
+`CRN`, `LC`, `GST` or `SSM` is an identifier, not a number to dial:
+
+```python
+_before = text[max(0, m.start() - 40):m.start()].lower()
+if re.search(r'\b(no|reg(?:istration)?|vat|crn|licen[cs]e|lc|gst|'
+             r'company no|reg\.?\s*no|ssm)\b[\s.:#-]{0,12}$',
+             _before):
+    continue
+```
+
+This one was a genuine bug and the fix is worth keeping.

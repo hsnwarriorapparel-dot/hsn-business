@@ -585,9 +585,22 @@ def phones_from_links(html):
     """
     nums = []
     wa = []
-    for m in re.finditer(r'href="(?:https?://wa\.me/|tel:)([+0-9\s()./-]{6,20})"',
+    for m in re.finditer(r'href="((?:https?://wa\.me/|tel:)[^"]{6,40})"',
                          html, re.I):
-        raw = m.group(1).strip()
+        _full = m.group(1).strip()
+        # A MASKED number - 'tel:+971****8453' - is not dialable. The mask
+        # is the site's own privacy filter. Check the FULL href: the
+        # capture group stops at the '*', so the mask has to be looked for
+        # before the number is extracted.
+        if '*' in _full:
+            continue
+        raw = re.sub(r'^(?:https?://wa\.me/|tel:)', '', _full, flags=re.I)
+        raw = raw.strip()
+        if not re.fullmatch(r'[+0-9\s()./-]{6,25}', raw):
+            continue
+        # a wa.me number is always a bare digit string
+        if 'wa.me' in _full.lower() and not raw.isdigit():
+            continue
         digits = re.sub(r'\D', '', raw)
         if not 8 <= len(digits) <= 15:
             continue
@@ -619,6 +632,9 @@ def phones_from_links(html):
     # wa.me links are, by definition, WhatsApp-reachable mobiles
     for m in re.finditer(r'href="https?://wa\.me/([0-9]{8,15})"', html, re.I):
         d = '+' + m.group(1)
+        # a masked or placeholder wa.me link is not reachable
+        if set(d) <= {'0', '+'}:
+            continue
         if d not in wa:
             wa.append(d)
     return nums, wa
@@ -646,6 +662,16 @@ def find_phones(text, country):
     out = []
     for m in PHONE_RUN_RE.finditer(text):
         run = m.group(0)
+        # A REGISTRATION or VAT number is not a phone. cobra sports lists
+        # 'COBRA SPORTS SDN BHD (NO. 207737-K NO. 199001016068)' - the
+        # extractor turned the registration number into +60 199001016068.
+        # A run that sits inside brackets right after 'NO.', 'REG', 'VAT',
+        # 'CRN', 'LC' or 'GST' is an identifier, not a number to dial.
+        _before = text[max(0, m.start() - 40):m.start()].lower()
+        if re.search(r'\b(no|reg(?:istration)?|vat|crn|licen[cs]e|lc|gst|'
+                     r'company no|reg\.?\s*no|ssm)\b[\s.:#-]{0,12}$',
+                     _before):
+            continue
         # A PLACEHOLDER phone: '+971 00 000 0000' is a CSS/JS mask, not a
         # number. desertlinktrading.com carried one and it was recorded as
         # a dialable contact. A real number has at least 7 significant
