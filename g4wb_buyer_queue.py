@@ -96,18 +96,46 @@ def qty_num(q):
 
 
 def eligible(item):
-    """5-day rule + not premium-only + not already sent."""
+    """5-day rule + not premium-only + not already sent + not archived."""
     if item.get('sent'):
         return False, 'already sent'
     if item.get('premium'):
         return False, 'premium only'
+    if (item.get('status') or '').strip().upper() == 'ARCHIVED':
+        return False, 'archived requirement'
     if age_days(item.get('date')) < 5:
         return False, 'posted %dd ago (needs 5d)' % age_days(item.get('date'))
     return True, 'ok'
 
 
+RFQ_QUEUE = '/home/ubuntu/g4wb_rfq_queue.json'
+
+
 def build_queue():
-    """Seed the queue from the targets we have already mapped."""
+    """The queue the inquiry engine sends from.
+
+    PREFERENCE ORDER:
+      1. the RFQ queue - /buyers/<country>/<category> pages are LIVE buy
+         requirements carrying product, quantity, destination and payment
+         terms. 33 of them are in our product space. Each one can be
+         answered with a real quote.
+      2. the buylead queue - the /inquiries/send/buyleads targets.
+      3. the hand-mapped legacy targets.
+
+    The RFQ queue wins because its targets state WHAT and HOW MANY.
+    """
+    if os.path.exists(RFQ_QUEUE):
+        try:
+            rq = json.load(open(RFQ_QUEUE))
+            live = [r for r in rq if not r.get('sent')
+                    and (r.get('status') or '').upper() != 'ARCHIVED'
+                    and r.get('age_days', 999) >= 5]
+            if live:
+                print('using the RFQ queue: %d live in-scope requirements'
+                      % len(live))
+                return rq
+        except Exception as e:
+            print('RFQ queue unavailable (%s) - falling back' % str(e)[:40])
     if load_queue():
         return load_queue()
     q = []
@@ -203,14 +231,24 @@ def main():
         return
 
     print('TARGET=%s' % target['slug'])
-    print('HREF=%s' % target['href'])
+    # the RFQ queue carries the inquiry route; the buylead queue carries href
+    _href = target.get('inquiry_href') or target.get('href') or ''
+    print('HREF=%s' % _href)
     print('QTY=%s' % target.get('qty'))
-    print('BUYER=%s' % target.get('buyer'))
+    print('BUYER=%s' % (target.get('buyer') or target.get('destination') or ''))
     print('DATE=%s' % target.get('date'))
 
     msgfile = ''
     try:
+        # the RFQ queue has its own message set, built from each
+        # requirement's product, quantity, destination and payment terms
         from g4wb_belt_messages import MESSAGES
+        try:
+            from g4wb_rfq_messages import MESSAGES as RFQ_MESSAGES
+            MESSAGES = dict(MESSAGES)
+            MESSAGES.update(RFQ_MESSAGES)
+        except Exception:
+            pass
         m = MESSAGES.get(target['slug'])
         if m:
             msgfile = '/home/ubuntu/g4wb_queue_msg.txt'

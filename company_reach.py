@@ -387,9 +387,21 @@ def load_json(p, d):
         return d
 
 
-def curl(url, timeout=22, retries=2):
+# A go4WorldBusiness rate-limit page is a short HTML stub (~2 KB) with no
+# directory content. It is NOT an empty response, so the old 'if out.strip()'
+# check accepted it and the crawler moved on with no data - and the harvest
+# silently returned 0.
+BLOCK_PAGE_MIN = 8000
+
+
+def curl(url, timeout=22, retries=3):
     """Fetch a url. Some hosts fail intermittently, so retry a couple of
-    times before giving up on a page that clearly exists."""
+    times before giving up on a page that clearly exists.
+
+    A SHORT response on a go4WorldBusiness page is a rate-limit stub, not
+    the page. Treat it as a failure and retry with a backoff.
+    """
+    is_g4wb = 'go4worldbusiness.com' in url
     for attempt in range(retries + 1):
         try:
             r = subprocess.run(
@@ -399,6 +411,12 @@ def curl(url, timeout=22, retries=2):
                 capture_output=True, text=True, timeout=timeout + 10)
             out = r.stdout or ''
             if out.strip():
+                if is_g4wb and len(out) < BLOCK_PAGE_MIN:
+                    # a rate-limit stub - back off and try again
+                    if attempt < retries:
+                        time.sleep(4 + attempt * 4)
+                        continue
+                    return ''
                 return out
         except Exception:
             pass

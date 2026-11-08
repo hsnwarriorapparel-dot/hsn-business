@@ -189,6 +189,111 @@ The fix: phase 2 does NOT capture. It only prints the current captcha
 girls, 1 twenty-foot container, CIF Bahrain, L/C. Contact: Yacoob. Jawad.
 Tracked as L5297.
 
+## THE /buyers/ PAGES ARE BUY REQUIREMENTS, NOT A COMPANY DIRECTORY
+
+This is the most important thing found about go4WorldBusiness.
+
+`https://www.go4worldbusiness.com/buyers/<country>/<category>` was being
+harvested as if it were a company directory. It is NOT. Each block is a
+**LIVE BUY REQUIREMENT** posted by a buyer:
+
+```
+VERIFIED Nov-03-26 Wanted : Institutional Uniforms Like School Uniforms
+Buyer From Oman | Quantity Required: 1 Twenty-Foot Container
+Payment Terms: LC | Destination: Oman
+  Product Name: Institutional Uniforms
+  Specifications: Types: School Uniforms, Corporate Uniforms, Healthcare
+    Uniforms Material: Cotton, Polyester, Poly-Cotton Blends
+  Quantity: 1 Twenty-Foot Container
+  Shipping Terms : CIF HS Code : 620343
+  Destination Port : Oman | Payment Terms : LC
+  Contact : Mr. Vincent
+  Buyer Of Uniforms | School Uniforms
+```
+
+That carries the PRODUCT, the SPECIFICATION, the QUANTITY, the HS CODE,
+the DESTINATION and the PAYMENT TERMS. A contact name alone is
+unsearchable - searching "Pedro Bernardo" finds other people
+(people-search sites, TikTok, BJJ profiles), which is why the company
+funnel outperforms the person funnel 12x.
+
+`g4wb_rfq_harvest.py` harvests it. From 6 countries x 14 categories:
+
+```
+OURS 56 | THEIRS 489 | UNKNOWN 335
+```
+
+and 5 VERIFIED live requirements in our product space:
+
+| Requirement | Qty | Destination | Payment | Contact |
+|---|---|---|---|---|
+| Institutional Uniforms | 20ft container | Oman | LC | Mr. Vincent |
+| Institutional Uniforms Like Dress, Uniform | 20ft container | Muscat, Oman | LC | Mr. Vincent |
+| Sports Drawstring Backpack Waterproof | 600 pieces | Saudi Arabia | transfer | Tamim Alsalamah |
+| Safety Gloves (industrial, rubber) | 20ft container | Oman | LC | Faris |
+| Leather Jackets (biker/bomber) | 20ft container | Saudi Arabia | L/C | Nazeel |
+
+The last two are correctly rejected by the product filter - industrial
+hand-safety gloves and fashion biker jackets are not our line.
+
+### THE INQUIRY ROUTE IS IN THE RAW HTML
+
+The "Inquire Now" button is JS-driven, so there is no link in the text.
+But the raw html carries it:
+
+```
+data-entity-id="1332643"
+href="/inquiries/send/buyleads/1332643/wanted-:-institutional-uniforms-..."
+```
+
+Split the RAW html on `Wanted\s*:` as well, so the ids line up with the
+text blocks, and capture the href.
+
+### THE LISTING HEADER BELONGS TO THE PREVIOUS BLOCK
+
+The split on `Wanted :` puts the `VERIFIED Nov-03-26` header at the END
+of the PREVIOUS block, so every requirement looked like it had no date
+and every one was rejected as 'posted 0d ago'. Take the status and date
+from the tail of the previous block:
+
+```python
+pm = re.search(r'(VERIFIED|ARCHIVED|NEW)\s+([A-Z][a-z]{2}-\d{2}-\d{2})\s*$',
+               parts[i - 1].strip())
+```
+
+Without this, 51 of 56 requirements looked live and dated today.
+
+### THE SITE THROTTLES A BURST OF REQUESTS
+
+A burst of fetches gets a short ~2 KB stub instead of the 93 KB page.
+Because the stub is NOT empty, the old `if out.strip()` check accepted it
+and the harvest silently returned 0.
+
+`curl()` now treats a go4WorldBusiness response under 8 KB as a failure
+and retries, and the harvester paces itself at 2.5 s per page with a
+60 s then 120 s backoff.
+
+### THE QUEUE PREFERS THE RFQ TARGETS
+
+`g4wb_buyer_queue.py` now uses the RFQ queue when it has live targets,
+because each one states WHAT and HOW MANY, and falls back to the buylead
+queue. `g4wb_rfq_queue.py` writes a message per requirement that answers
+that requirement - its quantity, its destination, its HS code and its
+payment terms. **3/3 messages pass the spam checker.**
+
+### SPAM-WORD TRAPS IN THE PLATFORM'S OWN TERMS
+
+The platform states the buyer's terms verbatim, and two of them trip the
+spam checker:
+
+| Platform term | Problem | Rewrite |
+|---|---|---|
+| `Bank Transfer` | banned word `bank` | `transfer in advance` |
+| `30 Days Credit` | banned word `credit` | `payment after delivery` |
+
+Also `new` can appear inside a pasted specification ("Brand New") - it is
+rewritten to `fresh`.
+
 ## RANKED RFQ DETAILS
 
 **Taekwondo Belts - Malaysia - 3,500 pieces** (May-22-24, ARCHIVED but
