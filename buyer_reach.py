@@ -45,6 +45,29 @@ from company_reach import (valid_email, NOT_A_COMPANY, OTHER_TRADE, OTHER_SPORTS
                            GOOD_ROLE, find_phones, site_domain as cr_domain,
                            strip_tags, title_hint)
 LEDGER = '/home/ubuntu/send_ledger.jsonl'
+# ---------------------------------------------------------------- RETIRED
+# This script searches for the BUYER'S OWN NAME to find their company.
+#
+# It produced ZERO verified buyer companies and added junk: a privacy
+# contact address, a Wix form address, a personal website. Searching a
+# person's name finds OTHER people - people-search sites, TikTok, BJJ
+# profiles.
+#
+# The company funnel does this work 12x better: 12 hits from 90 companies
+# searched, against 0 from 25 people searched. The nightly pipeline calls
+# company_reach.py instead (see .hermes/scripts/g4wb_dir_pipeline.sh).
+#
+# Kept for reference and for the shared leads.csv reader tests. Pass
+# --force to run it anyway.
+# -----------------------------------------------------------------------
+if '--force' not in sys.argv:
+    sys.stderr.write(
+        'buyer_reach.py is RETIRED. It produced 0 verified buyer companies\n'
+        'and added junk addresses. The company funnel does this work 12x\n'
+        'better - see .hermes/scripts/g4wb_dir_pipeline.sh.\n'
+        'Pass --force to run it anyway.\n')
+    raise SystemExit(2)
+
 CSV_PATH = '/home/ubuntu/leads.csv'
 STATE = '/home/ubuntu/buyer_reach_state.json'
 

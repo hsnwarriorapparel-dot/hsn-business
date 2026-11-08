@@ -610,3 +610,35 @@ The person funnel injected a Wix form address (`hash@sentry.wixpress.com`
 - a mail to it goes nowhere) and a privacy contact page. `leads_safe_write`
 now rejects those in `read_rows()`. See `leads-csv-safe-writes.md` for
 the full rule and the header-row trap.
+
+## buyer_reach.py IS RETIRED - IT NOW REFUSES TO RUN
+
+The personal-name funnel was removed from the nightly pipeline and the
+script itself is now guarded:
+
+```python
+if '--force' not in sys.argv:
+    sys.stderr.write('buyer_reach.py is RETIRED. ...')
+    raise SystemExit(2)
+```
+
+Why it matters: stale runs kept firing it, and each one produced a run of
+"no match" lines and a **wrong row count** in its log (`leads.csv now 5273
+rows` when the file actually held 5,227). That wrong number is what
+triggered a full integrity investigation of a file that was never damaged.
+
+If a stale notification ever shows `buyer_reach.py` output again, the file
+was not touched. Check the real count with:
+
+```python
+import leads_safe_write as lsw
+lsw.CSV = '/home/ubuntu/leads.csv'
+print(len(lsw.read_rows()))
+```
+
+and look for `buyer_reach.lock` - a stale lock means an old process is
+still alive.
+
+The state file `buyer_reach_state.json` is still read by
+`g4wb_pipeline_report.py` for reporting only. The live company funnel
+uses `company_reach_state.json`.
