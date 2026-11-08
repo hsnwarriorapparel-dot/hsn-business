@@ -113,7 +113,16 @@ NOT_A_COMPANY = re.compile(
     r'spokeo\.com|beenverified\.com|truepeoplesearch|radaris\.com|'
     r'clustrmaps\.com|fastpeoplesearch|radaris\.io|peoplefinder|'
     r'checkpeople|veripages\.com|pipl\.com|leadiq\.com|'
-    r'dnb\.com|apollo\.io|zoominfo\.com|clearbit\.com)', re.I)
+    r'dnb\.com|apollo\.io|zoominfo\.com|clearbit\.com|'
+    # The STANDS4 network - 16+ reference/dictionary sites that all look
+    # alike and all carry a shared contact phone. definitions.net was
+    # accepted once (as 'Shuaib' and 'Ameer' in Oman) because only that
+    # one domain was listed.
+    r'abbreviations\.net|anagrams\.net|biographies\.net|'
+    r'calculators\.net|convert\.net|grammar\.com|literature\.com|'
+    r'lyrics\.net|phrases\.net|poetry\.net|quotes\.net|'
+    r'references\.net|rhymes\.net|scripts\.net|symbols\.net|'
+    r'synonyms\.net|uszip\.com|stands4\.com|webmaster\.net)', re.I)
 
 # Gambling / betting sites are never buyers of our products. galaxysports.com
 # is a sportsbook ("Galaxy Sportsbook's live betting software").
@@ -721,6 +730,7 @@ def main():
     maxid = max((int(r[0][1:]) for r in rows[1:] if r and r[0][1:].isdigit()), default=0)
     existing = {(r[idx['Email']] or '').strip().lower()
                 for r in rows[1:] if len(r) > idx['Email']}
+    existing_rows = rows[1:]   # for the one-contact-one-company guard
     new_rows = []          # rows to append safely at the end
 
     added = 0
@@ -779,6 +789,38 @@ def main():
                     % (comp.get('dir_category', ''), comp.get('dir_country', ''),
                        comp.get('href', ''), hit['website'], email))
                 row[idx['Notes']] = 'go4WorldBusiness buyer company - ' + comp.get('href', '')
+
+                # ONE contact may belong to ONE company only.
+                #
+                # A stale run added 'Shuaib' AND 'Ameer' with the SAME phone
+                # (+968 20012026) and the SAME website (definitions.net) -
+                # two different names on one contact is a false positive.
+                # If this phone or this website is already held by a
+                # DIFFERENT company name, reject this one.
+                clash = False
+                for r in existing_rows:
+                    try:
+                        rn = (r[idx['Name']] or '').strip().lower()
+                        rp = (r[idx['Phone']] or '').strip()
+                        rw = (r[idx['Website']] or '').strip().lower()
+                    except Exception:
+                        continue
+                    if not rn or rn == name.strip().lower():
+                        continue
+                    if phone and rp and rp == phone.strip():
+                        print('    REJECTED %s - phone %s already belongs to "%s"'
+                              % (name[:30], phone[:20], rn[:28]))
+                        clash = True
+                        break
+                    if hit['website'] and rw and rw == hit['website'].strip().lower():
+                        print('    REJECTED %s - website %s already belongs to "%s"'
+                              % (name[:30], hit['website'][:24], rn[:28]))
+                        clash = True
+                        break
+                if clash:
+                    done[kid] = {'status': 'contact-clash'}
+                    continue
+
                 new_rows.append(row)
                 existing.add(email)
                 added += 1
