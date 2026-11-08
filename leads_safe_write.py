@@ -133,9 +133,21 @@ def is_placeholder_email(email):
 
 
 def email_is_contactable(email):
-    """False for a form address, a no-reply sender or a privacy contact."""
+    """False for a form address, a no-reply sender or a privacy contact.
+
+    Also false for a MALFORMED address. The scrape produced
+    '//info@wonsbarcelona.es' and '%e2%80%a8%e2%80%a8support@sportingcluble'
+    - a URL path prefix and URL-encoded zero-width spaces. Both bounce
+    every time they are sent.
+    """
     e = (email or '').strip().lower()
     if not e or '@' not in e:
+        return False
+    # a URL path or an encoded character means the scrape mangled it
+    if '/' in e or '%' in e or e.startswith('mailto:') or '\\' in e:
+        return False
+    # the address must actually LOOK like an address
+    if not re.fullmatch(r'[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}', e):
         return False
     local, dom = e.split('@', 1)
     if JUNK_EMAIL_LOCAL.match(local):

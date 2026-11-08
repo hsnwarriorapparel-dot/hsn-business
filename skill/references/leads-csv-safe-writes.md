@@ -404,3 +404,55 @@ it. A reader that CLEARS a field keeps the two in step.
 `test_clear_not_drop.py` checks this: a row with a placeholder email
 survives, the address is cleared, the reader and the disk agree, and a
 read-write round trip loses nothing.
+
+## A MALFORMED EMAIL BOUNCES EVERY TIME
+
+The scrape produced two shapes of malformed address:
+
+```
+//info@wonsbarcelona.es                 <- a URL path prefix
+%e2%80%a8%e2%80%a8support@sportingcluble   <- URL-encoded zero-width spaces
+```
+
+Both bounce on every send. The guard now rejects them:
+
+```python
+if '/' in e or '%' in e or e.startswith('mailto:') or '\\' in e:
+    return False
+if not re.fullmatch(r'[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}', e):
+    return False
+```
+
+**The fix is to take the real address from the company's OWN website**,
+not to guess the domain. L1576's scraped value was
+`support@sportingclubleague.com`; the real site is
+`sportingclubleonardo.it` and publishes `support@sportingclubleonardo.it`.
+
+## THE BOUNCE RATE, AND WHAT IT ACTUALLY MEANS
+
+| Scope | Sent | Bounced | Rate |
+|---|---|---|---|
+| All time | 2,182 | 100 | 4.58% |
+| Today only | 89 | 3 | 3.37% |
+
+**A bounce is usually a dead MAILBOX, not a dead domain.** All three of
+today's bounces were on domains that are alive (HTTP 200/301/302) and
+that publish the same address on their own site:
+
+| Lead | Address | Domain |
+|---|---|---|
+| KONSTANTOPOULOS TEAM | info@konstandopoulosteam.gr | alive (200) |
+| Taekwondo Klub ION | ion@taekwondoion.com | alive (301) |
+| Predator Gym | webmaster@predatorfightgym.hu | alive (302), MX = Google |
+
+So the domain-level filters are right to accept them, and the bounce
+handler is the mechanism that catches the rest. Both work: a bounced
+lead carries BOTH the 'email sent' and the 'EMAIL FAILED' marker, the
+wave builder excludes anything marked 'failed', and `_is_sent()` skips it.
+
+**A ROLE ADDRESS ON A GOOGLE-HOSTED DOMAIN IS THE RISKY CASE.**
+`predatorfightgym.hu` has `MX = SMTP.GOOGLE.COM`, and Google accepts only
+real mailboxes - a `webmaster@` that was never created is rejected with
+'Address not found'. The 361 role addresses on Google-hosted domains are
+NOT all bad (`info@` is often a configured alias), and 68 leads carry both
+markers, so the bounce handler - not a guess - is what decides.
