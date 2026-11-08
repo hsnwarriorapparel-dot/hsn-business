@@ -25,6 +25,7 @@ Usage:
     python3 g4wb_rfq_queue.py --list     # show it
 """
 import json
+import os
 import re
 import sys
 from datetime import datetime
@@ -139,7 +140,7 @@ def build_message(r):
     lines.append('- Karate, judo and taekwondo doboks in 8 oz, 10 oz, 12 oz and 14 oz')
     lines.append('- School, institutional and work uniforms in poly-cotton, poly-viscose or cotton')
     lines.append('- Rank belts in cotton or polyester, with a woven or printed rank bar')
-    lines.append('- Boxing and MMA gloves, shin guards, headgear and mouth guards')
+    lines.append('- Boxing and mixed martial arts gloves, shin guards, headgear and mouth guards')
     lines.append('- Your logo embroidered or woven in, with your colours')
     lines.append('- 30 pieces per style and colour as the starting quantity')
     lines.append('- 3 to 4 weeks production after artwork approval, then DHL, FedEx or UPS door to door')
@@ -157,7 +158,7 @@ def build_message(r):
         paytxt = re.sub(r'\bbank\b', 'transfer', paytxt, flags=re.I)
         lines.append('- %s, as your requirement states' % paytxt)
     lines.append('')
-    lines.append('Send us your size range, your logo file and the item mix you want quoted,')
+    lines.append('Send us your size range, your logo file and the item mix you want priced,')
     lines.append('and we will reply with an exact price per piece and a sample mockup.')
     lines.append('')
     lines.append('Best regards,')
@@ -177,11 +178,95 @@ def build_message(r):
     return {'subject': subject, 'body': body}
 
 
+LIVE_RFQ = '/home/ubuntu/g4wb_live_rfq.json'
+
+
+def load_live_rfq():
+    """The VERIFIED live requirements with full specs and inquiry links.
+
+    g4wb_live_rfq_fetch.py fetches the /buyers/ pages that actually hold
+    live requirements in our product space and captures the WHOLE
+    requirement - product, specification, quantity, shipping terms,
+    destination, payment terms, HS code and the inquiry route.
+
+    This is the best target source: it has the status (VERIFIED vs
+    ARCHIVED), the date AND the inquiry link, and the specification is
+    already separated from the terms.
+    """
+    if not os.path.exists(LIVE_RFQ):
+        return []
+    try:
+        d = json.load(open(LIVE_RFQ))
+    except Exception:
+        return []
+    out = []
+    for rec in d.values():
+        if (rec.get('status') or '').upper() != 'VERIFIED':
+            continue
+        age = age_days(rec.get('date'))
+        if age < 5:
+            continue
+        if not rec.get('inquiry_href'):
+            continue
+        q = dict(rec)
+        q['age_days'] = age
+        q['sent'] = False
+        q['slug'] = re.sub(r'[^a-z0-9]+', '-', (rec.get('title') or
+                      rec.get('product') or '')[:46].lower())[:58]
+        out.append(q)
+    return out
+
+
 def main():
     rfq = json.load(open(RFQ))
     ours = rfq.get('ours', {})
 
     picked = []
+    # 1) the VERIFIED live requirements - these carry the inquiry link
+    live = load_live_rfq()
+    for r in live:
+        # the live parser stores 'Product Name: X Specifications: Y' in one
+        # field - split them so the title is clean
+        prod = (r.get('product') or r.get('title') or '').strip()
+        specs = (r.get('specs') or '').strip()
+        if 'Specifications:' in prod:
+            head, _, tail = prod.partition('Specifications:')
+            prod = head.strip()
+            if not specs:
+                specs = tail.strip()
+        # and the title carries the platform's tail - cut it
+        title = (r.get('title') or prod).strip()
+        for junk in (' Buyer From ', ' Quantity Required: ', ' Payment Terms: ',
+                     ' Destination: ', ' Looking for suppliers from: '):
+            if junk in title:
+                title = title.split(junk)[0].strip()
+        picked.append({
+            'slug': r['slug'],
+            'product': prod,
+            'title': r.get('title', ''),
+            'specs': specs,
+            'title': title,
+            'interest': r.get('interest', ''),
+            'qty': r.get('qty', ''),
+            'qty_num': qty_num(r.get('qty', '')),
+            'destination': r.get('destination', ''),
+            'shipping': r.get('shipping', ''),
+            'payment': r.get('payment', ''),
+            'hs_code': r.get('hs_code', ''),
+            'contact': r.get('contact', ''),
+            'date': r.get('date', ''),
+            'status': r.get('status', ''),
+            'dir_country': r.get('dir_country', ''),
+            'dir_category': r.get('dir_category', ''),
+            'url': r.get('url', ''),
+            'inquiry_href': r.get('inquiry_href', ''),
+            'buylead_id': r.get('buylead_id', ''),
+            'sent': False,
+            'score': score(r),
+            'age_days': r['age_days'],
+            'source': 'live-rfq',
+        })
+    # 2) the RFQ harvest - the same pages, captured with the older parser
     for key, r in ours.items():
         product = (r.get('product') or '').strip()
         if not product:
@@ -216,6 +301,7 @@ def main():
             'sent': False,
             'score': score(r),
             'age_days': age,
+            'source': 'rfq-harvest',
         })
 
     # dedupe on product+contact+dest+qty
@@ -233,8 +319,17 @@ def main():
     json.dump(picked, open(QUEUE, 'w'), indent=2, ensure_ascii=False)
 
     msgs = {}
+    # live targets carry a full specification, so they use the richer
+    # builder; the RFQ-harvest targets use the older one.
+    try:
+        from g4wb_live_rfq_messages import build as build_live
+    except Exception:
+        build_live = None
     for it in picked:
-        msgs[it['slug']] = build_message(it)
+        if it.get('source') == 'live-rfq' and build_live:
+            msgs[it['slug']] = build_live(it)
+        else:
+            msgs[it['slug']] = build_message(it)
     out = ['"""Messages for the go4WorldBusiness RFQ inquiries.',
            '',
            'Generated by g4wb_rfq_queue.py from each requirement\'s own product,',

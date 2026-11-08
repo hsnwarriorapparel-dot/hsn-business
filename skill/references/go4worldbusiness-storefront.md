@@ -389,3 +389,78 @@ City Sialkot · State Punjab · Zip 51310 · Business Manufacturer/OEM · Sales
 OEKO-TEX, REACH · Export markets: Portugal, Spain, UK, Germany, Ireland,
 Netherlands, France, Italy, USA, UAE, Czech Republic, Poland · supplier-of
 list set · categories set (10).
+
+## THE DEEP HARVEST IS A DIRECTORY SCAN, NOT A REQUIREMENT LIST
+
+`g4wb_deep_harvest.py` reads the `/buyers/` pages and records ONE field
+per listing - the category and a single product. It produced **1,662
+entries across 24 categories and 9 countries** (Oman 286, UAE 280,
+Malaysia 226, Indonesia 228, Australia 338, Saudi 108, Portugal 84,
+Egypt 61, Israel 51), with 1,233 carrying a real quantity.
+
+It is a great SCOUTING map - it tells you which country/category pages
+hold live requirements in your space - but each entry is thin.
+
+**The page category is unreliable.** The `fight-gear` page lists steel
+scrap, diesel and coking coal; the `martial-arts-mats` page lists prayer
+mats, car mats and bath mats; the `martial-arts-gloves` page lists
+medical and latex gloves. The buyer's OWN `Buyer Of X` phrase is the
+only trustworthy signal:
+
+```
+Buyer Of Mat | Floor Mats          -> NOT ours
+Buyer Of Martial Arts Goods...    -> ours
+```
+
+Filtering on an exact `Buyer Of` whitelist is what turns 1,662 raw
+entries into **35 live requirements in our product space**, and 23 of
+those carry an inquiry link.
+
+## THE PAGE THAT HOLDS THE REQUIREMENT IS WHAT MATTERS
+
+Rather than parse one page at a time and guess, work out which
+country/category pairs hold a live requirement and fetch only those:
+
+```
+oman/team-uniforms (9)   united-arab-emirates/team-uniforms (6)
+saudi-arabia/team-uniforms (5)   australia/team-uniforms (3)
+malaysia/team-uniforms (3)   + 7 more pairs
+```
+
+12 pairs hold all 35. Fetching those 12 (plus the uniform and
+karate-uniform pages) with 2.5 s pacing yields the clean set in
+`g4wb_live_rfq.json`.
+
+## A STRICT SPAM CHECKER IS NOW A MODULE
+
+`/home/ubuntu/spam_check.py` implements the full spam-word-checker skill
+- banned words, banned phrases, high-risk promotional wording, phishing
+language, irrelevant categories, formatting bans and silence-based
+unsubscribe promises.
+
+Two words the OLD checker missed and that appear in the copy we already
+wrote:
+
+| Word | Where | Fix |
+|---|---|---|
+| `quote` / `quoted` | "the item mix you want quoted" | "the item mix you want priced" |
+| `MMA` | "Boxing and MMA gloves" | "Boxing and mixed martial arts gloves" |
+
+`quote` is on the high-risk banned list and `MMA` trips the ALL-CAPS
+rule. Both were in the shipped RFQ messages - the earlier checker only
+had a short word list. **Always check with `spam_check.check_all()`
+before sending.**
+
+## THE LIVE REQUIREMENTS WE HAVE IN HAND
+
+| Requirement | Qty | Destination | Payment | Contact |
+|---|---|---|---|---|
+| Institutional Uniforms (School/Corporate/Healthcare) | 20ft container | Oman | LC | Mr. Vincent |
+| Institutional Uniforms like Dress, Uniform, Skirt | 20ft container | Muscat, Oman | LC | Mr. Vincent |
+| Boxing Accessories - Hand Tie, Gloves, Head Guard, Mouth Guard, Cap | 500-1,000 pcs | Egypt | LC | Ali Aref |
+| Sports Drawstring Backpack Waterproof | 600 pieces | Saudi Arabia | transfer | Tamim Alsalamah |
+
+All four are VERIFIED, all four are 5+ days old, all four carry an
+inquiry link and a purpose-built message. **The JUNIOR limit is 1
+inquiry/day, so the daily slot is the bottleneck - Premium is what
+clears this queue.**
