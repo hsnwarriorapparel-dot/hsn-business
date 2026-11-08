@@ -30,9 +30,19 @@ cp -ru /home/ubuntu/.hermes/skills/hsn-business-hub/. "$BACKUP_DIR/skill/" 2>/de
 # nothing would run them. Sync it too.
 mkdir -p "$BACKUP_DIR/hermes-scripts"
 cp -ru /home/ubuntu/.hermes/scripts/. "$BACKUP_DIR/hermes-scripts/" 2>/dev/null
-# The cron job definitions drive the schedule. Back them up as well.
+# The cron job definitions drive the schedule. Back them up as well -
+# but only the DEFINITIONS, not the runtime state. The lock files, the
+# delivery/execution databases and the logs are live runtime artefacts
+# that change every tick; copying them makes every backup dirty and
+# adds noise without protecting anything.
 mkdir -p "$BACKUP_DIR/hermes-cron"
-cp -ru /home/ubuntu/.hermes/cron/. "$BACKUP_DIR/hermes-cron/" 2>/dev/null
+cp -ru /home/ubuntu/.hermes/cron/jobs.json "$BACKUP_DIR/hermes-cron/" 2>/dev/null
+for f in /home/ubuntu/.hermes/cron/*.json; do
+  [ -e "$f" ] || continue
+  b=$(basename "$f")
+  [ "$b" = "jobs.json" ] && continue
+  cp -u "$f" "$BACKUP_DIR/hermes-cron/" 2>/dev/null
+done
 
 # Sync website source (only changed files)
 cd /home/ubuntu/business-backup
