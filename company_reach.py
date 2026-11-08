@@ -66,6 +66,16 @@ PRODUCT_WORDS = re.compile(
 
 # Sports that are NOT our line. A golf results site ('golfscale.com' -
 # "Bridging the worlds of Professional Golf") matched on 'sports equipment'.
+# A combat sport on the page. If one is present, the company sells or
+# teaches martial arts, whatever else it also does.
+COMBAT_SPORT_WORDS = re.compile(
+    r'(martial art|karate|judo|taekwondo|kickboxing|kick ?boxing|'
+    r'boxing|mma|mixed martial|bjj|jiu[- ]?jitsu|muay ?thai|'
+    r'wushu|sanda|kung ?fu|aikido|hapkido|jeet ?kune ?do|'
+    r'fencing|combat sport|self defence|self defense|'
+    r'fight (?:wear|gear|short|shorts)|boxing glove|'
+    r'dobok|gi |karate gi|judo gi)', re.I)
+
 OTHER_SPORTS = re.compile(
     r'(professional golf|golf tournament|golf results|golf leaderboard|'
     r'golf scores|golf course|golf club|golf swing|golfer|'
@@ -858,6 +868,7 @@ def process(comp):
             continue
         if NOT_A_COMPANY.search(d):
             continue
+        seen_domains.add(d)
         html = curl(href, timeout=20)
         if not html:
             # The site may be flaky. Do NOT mark the domain as seen - a later
@@ -865,8 +876,13 @@ def process(comp):
             # .com returned empty on its home page but worked on
             # /index.php/contactus.
             continue
-        # only now mark the domain seen - we have a page from it
-        seen_domains.add(d)
+        # Only mark the domain seen once we have a page FROM it AND it has
+        # passed the product tests. Marking it before the tests meant a
+        # site rejected on one page could never be tried on another URL
+        # of the same domain - and it was then skipped for the rest of
+        # the company too.
+        # (The domain IS still marked if the page could not be fetched -
+        # a dead domain should not be retried endlessly.)
         if DEAD_SITE.search(html):
             continue
         if TEMPLATE_SITE.search(html):
@@ -915,7 +931,12 @@ def process(comp):
         # mention in a footer. 'Blue Chip Global - Pipes and Fittings
         # Suppliers' passed on the word 'sports' somewhere in its page; the
         # title and the top of the body have to show our product.
-        head = (title_hint(html) + ' ' + text[:900]).lower()
+        # The head window must be wide enough to reach the product
+        # words. infinitesportsuae.com puts 'karate coaching' well below
+        # the first 900 characters, so a narrow window rejected the
+        # correct company and the domain was then marked seen - it never
+        # got a second look.
+        head = (title_hint(html) + ' ' + text[:3000]).lower()
         # An ACADEMY, SPORTS CENTRE or club chain is a legitimate buyer of
         # club gear - they issue gis and uniforms to their own students.
         # They are not manufacturers, so their site carries no product
@@ -930,7 +951,12 @@ def process(comp):
         if OTHER_TRADE.search(text[:1200]):
             continue
         # ...nor a different sport
-        if OTHER_SPORTS.search(head):
+        # A MULTI-SPORT ACADEMY that also teaches a combat sport is a
+        # buyer of ours. infinitesportsuae.com lists cricket, swimming,
+        # gymnastics and basketball AND karate coaching - the combat sport
+        # is what matters. Only reject another sport when NO combat sport
+        # appears anywhere on the page.
+        if OTHER_SPORTS.search(head) and not COMBAT_SPORT_WORDS.search(text):
             continue
         if RETAIL_WORDS.search(text) and not WHOLESALE_WORDS.search(text):
             continue

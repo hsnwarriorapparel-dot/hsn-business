@@ -836,3 +836,63 @@ fixes it found 1 of 10. The 8 misses break down as:
 - 2 own sites are Cloudflare-blocked
 - 1 is a formal-wear shop (correctly rejected now)
 - 2 are the genuine hits: Al Waha Middle East Co, Desert Link Trading
+
+## "INFINITE SPORTS" MATCHED FOUR DIFFERENT DOMAINS
+
+One company name, four different websites across four runs:
+
+| Domain | What it actually is | Verdict |
+|---|---|---|
+| i-sport.org | a 16-character empty page | reject |
+| infinitesportsgroup.com | a full-service brand agency | reject |
+| infinitesp8.com | a sports performance brand | reject |
+| infinitesports-management.com | sports management | reject |
+| infiniteindoorsportscenter.com | an indoor sports centre | reject |
+| **infinitesportsuae.com** | **a 33-venue academy chain with karate coaching** | **CORRECT** |
+
+Three separate rules were each capable of picking the wrong one.
+
+### THE HEAD WINDOW WAS TOO NARROW
+
+`infinitesportsuae.com` puts "karate coaching" well below the first 900
+characters. The head check looked only at `text[:900]` and rejected it,
+while the body check (on the full text) passed. The window is now 3,000
+characters.
+
+**A site whose product words sit below the fold is still a site whose
+product words exist.** A narrow head window rejects the correct company.
+
+### A COMBAT SPORT OVERRIDES THE OTHER-SPORTS RULE
+
+`OTHER_SPORTS` catches cricket, swimming, football and the rest. A
+multi-sport academy that ALSO teaches karate is a buyer of ours. The
+rule now only rejects another sport when no combat sport appears
+anywhere on the page:
+
+```python
+if OTHER_SPORTS.search(head) and not COMBAT_SPORT_WORDS.search(text):
+    continue
+```
+
+`COMBAT_SPORT_WORDS` covers martial arts, karate, judo, taekwondo,
+kickboxing, boxing, MMA, BJJ, muay thai, fencing, dobok, gi and combat
+sport generally.
+
+### THE DOMAIN MUST NOT BE MARKED SEEN BEFORE THE TESTS
+
+The domain was marked seen as soon as a page was fetched, so a site
+rejected on one page could never be tried on another URL of the same
+domain. The domain is now marked seen before the FETCH (a dead domain
+should not be retried endlessly) but the product tests run on the page
+that was actually retrieved.
+
+## THE RESULT
+
+Infinite Sports now resolves to `sports@infinitesportsuae.com` - the
+correct company, a 33-venue academy chain with a dedicated combat
+department. Added as **L5386**.
+
+Before these fixes the funnel was picking a 16-character empty page and
+recording its email address. That is the failure mode to watch for: a
+lead that looks real, points at a real domain, and belongs to a
+different company entirely.
