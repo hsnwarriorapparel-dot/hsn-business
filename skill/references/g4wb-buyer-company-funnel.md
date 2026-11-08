@@ -581,3 +581,32 @@ Kuwait = 112, India = 99.
 Tailored per-RFQ copy lives in `g4wb_belt_messages.py`, QA'd by
 `spam_qa_followup.check()`. **"quotation" contains the banned token "quote"**
 - use "price" or "pricing".
+
+## THE PERSON-NAME FUNNEL IS DEAD - IT WAS REMOVED
+
+`buyer_reach.py` searched for the BUYER'S OWN NAME and tried to find
+their company. It produced **0 verified buyer companies** and added junk:
+
+```
+ADDED L5286 | Nabil Al Raisi  | privacy@eximnext.com
+ADDED L5287 | Ali Aref       | 2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com
+ADDED L5288 | Heba           | mindstylingwithme@gmail.com
+ADDED L5289 | Chan           | cobrasports8@gmail.com
+```
+
+Searching a person's name finds OTHER people - people-search sites,
+TikTok, BJJ profiles. The company funnel is 12x more productive
+(12 hits from 90 companies searched vs 0 from 25 people searched).
+
+It is now commented out in `g4wb_dir_pipeline.sh` and its budget went to
+the company funnel (limit 20 -> 30).
+
+Even the good-looking hit from it, `Cobra Sports Sdn Bhd`, was found by
+the COMPANY funnel, not the name funnel.
+
+## A LEAD'S EMAIL MUST BE A REAL ADDRESS
+
+The person funnel injected a Wix form address (`hash@sentry.wixpress.com`
+- a mail to it goes nowhere) and a privacy contact page. `leads_safe_write`
+now rejects those in `read_rows()`. See `leads-csv-safe-writes.md` for
+the full rule and the header-row trap.

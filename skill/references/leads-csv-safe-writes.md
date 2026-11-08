@@ -1,5 +1,99 @@
 # leads.csv writes must be locked (2026-11-07)
 
+## THE HEADER ROW MUST NEVER BE FILTERED OUT
+
+`leads.csv` has a header row:
+
+```
+Lead ID,Name,Type,IG Username,...,Email,Website,...
+```
+
+The header's Email cell contains the **literal text `Email`**. Any filter
+that runs over the rows and asks 'is this a usable email address?' will
+read `Email` as an address, decide it is undeliverable, and **delete the
+header**. Every later read is then off by one and `rows[0]` is a data
+row.
+
+This actually happened - the file lost its header three times during one
+cleanup, and the symptom was confusing: `write_rows()` looked correct,
+the file was the right byte length, and the header still appeared to be
+there - until you compared the reader's row count with `csv.reader`'s.
+
+**The rule: always skip index 0.** In `read_rows()`:
+
+```python
+for i, r in enumerate(rows):
+    if i == 0:
+        keep.append(r); continue
+```
+
+And `write_rows()` refuses to write at all without a header:
+
+```python
+if not rows or not rows[0] or rows[0][0] != 'Lead ID':
+    raise ValueError('refusing to write leads.csv without a header row')
+```
+
+## THE EMAIL FILTER LIVES IN THE READER, NOT THE WRITER
+
+A lead's email must be something a buyer would REPLY to. These local
+parts are forms, privacy pages and platform system addresses:
+
+```
+privacy@  no-reply@  noreply@  donotreply@  postmaster@  abuse@
+hostmaster@  mailer-daemon@  sentry@  autoreply@
+```
+
+And these domains are form services, never a buyer:
+
+```
+wixpress.com  sentry.io  formsubmit.co  formspree.io  web3forms.com
+googleapis.com  amazonaws.com  mailchimp.com  list-manage.com
+```
+
+**ONLY** those. `support@`, `webmaster@`, `sales@` and `enquiry@` are
+real business addresses - 33 existing club leads carry `support@` and
+have already been emailed successfully. A test that treats `support@` as
+junk will delete live leads.
+
+The filter must live in `read_rows()`, not in the writer. A writer-only
+filter is applied to `new_rows`, but `write_rows()` then writes the
+WHOLE list including any junk already on disk, so the junk comes right
+back. Putting the filter in the reader means every caller - every
+funnel, every tracker, every writer - sees the same clean list, and the
+next write drops the junk permanently.
+
+**The invariant to check: `len(read_rows()) == len(csv.reader(file))`.**
+If they differ, the reader is filtering (good) or something is dropping
+rows (bad). After a cleanup they must be equal, because the file on disk
+is then written from the reader's own clean view.
+
+## THE BOM AND THE LINE ENDINGS
+
+The file carries CRLF line endings and may carry a UTF-8 BOM.
+`read_rows()` opens with `encoding='utf-8-sig'` so the BOM is stripped;
+`write_rows()` opens with plain `utf-8`. That is fine - reading with
+`utf-8-sig` on a file without a BOM is harmless.
+
+But if you read the file with plain `utf-8` and the BOM is present, the
+first field name becomes `\ufeffLead ID` and a check like
+`rows[0][0] == 'Lead ID'` fails for a reason that has nothing to do with
+the data. Always use `leads_safe_write.read_rows()` rather than opening
+the CSV yourself.
+
+## NEVER MUTATE `leads_safe_write.CSV` IN A TEST
+
+`CSV` is a module global. A test that points it at a scratch file and
+then forgets to restore it leaves the module writing to the scratch path
+while the live file stays stale - which looks exactly like the filter
+not working. Reset it:
+
+```python
+lsw.CSV = '/home/ubuntu/leads.csv'   # always, before the real write
+```
+
+## THE BUG
+
 ## THE BUG
 
 Every script used to do this:

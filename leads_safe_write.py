@@ -28,6 +28,7 @@ current file, appends the new rows, and writes that. It also:
 Use it instead of the read-once/write-whole-file pattern.
 """
 import csv
+import re
 import errno
 import os
 import tempfile
@@ -72,12 +73,81 @@ def release():
         pass
 
 
+# A lead's email must be something a buyer would REPLY to. These local
+# parts are forms, privacy pages, no-reply senders and platform
+# system addresses - a mail to them goes nowhere.
+#
+# A stale run added privacy@eximnext.com and a Wix form address
+# (hash@sentry.wixpress.com) as buyer companies.
+# ONLY genuinely undeliverable local parts. 'support@', 'webmaster@' and
+# 'sales@' ARE real business addresses - 33 existing club leads carry
+# 'support@' and have already been emailed successfully.
+JUNK_EMAIL_LOCAL = re.compile(
+    r'^(privacy|no-?reply|noreply|donotreply|do-not-reply|postmaster|'
+    r'mailer-daemon|abuse|hostmaster|'
+    r'sentry|autoreply|auto-reply)', re.I)
+
+# Platform / form-service domains that are never a buyer.
+JUNK_EMAIL_DOMAIN = re.compile(
+    r'(wixpress\.com|sentry\.io|sentry\.wixpress\.com|'
+    r'formsubmit\.co|formspree\.io|web3forms\.com|'
+    r'googleapis\.com|amazonaws\.com|mailchimp\.com|'
+    r'list-manage\.com|hubspot\.com|facebook\.com)', re.I)
+
+
+def email_is_contactable(email):
+    """False for a form address, a no-reply sender or a privacy contact."""
+    e = (email or '').strip().lower()
+    if not e or '@' not in e:
+        return False
+    local, dom = e.split('@', 1)
+    if JUNK_EMAIL_LOCAL.match(local):
+        return False
+    if JUNK_EMAIL_DOMAIN.search(dom):
+        return False
+    return True
+
+
 def read_rows():
+    """Read leads.csv, skipping any row whose email cannot receive mail.
+
+    The filter lives HERE, in the reader, so every caller - every funnel,
+    every tracker, every writer - sees the same clean list. A row with a
+    form address or a no-reply sender is invisible to the whole system,
+    and write_rows() therefore never puts it back.
+
+    The header row is always kept. Its Email cell holds the literal text
+    'Email', which would otherwise be read as an address and dropped.
+    """
     with open(CSV, newline='', encoding='utf-8-sig') as f:
-        return list(csv.reader(f))
+        rows = list(csv.reader(f))
+    if not rows:
+        return rows
+    hdr = rows[0]
+    try:
+        ei = hdr.index('Email')
+    except ValueError:
+        return rows
+    clean = [hdr]
+    for r in rows[1:]:
+        if len(r) > ei and (r[ei] or '').strip() \
+                and not email_is_contactable(r[ei]):
+            continue
+        clean.append(r)
+    return clean
 
 
 def write_rows(rows):
+    """Write leads.csv. Refuses to write a file without a header.
+
+    The header row's Email cell holds the literal text 'Email'. If any
+    future filter is applied without checking for the header, that row
+    is read as an address and the header is deleted - which silently
+    turns every later read into an off-by-one. Guard it here.
+    """
+    if not rows or not rows[0] or rows[0][0] != 'Lead ID':
+        raise ValueError('refusing to write leads.csv without a header row '
+                         '(first row was %r)' % (rows[0][:2] if rows else None))
     fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
     with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
         csv.writer(f).writerows(rows)
@@ -93,6 +163,32 @@ def add_rows(new_rows, retries=3):
     """
     if not new_rows:
         return len(read_rows())
+    # Drop any row whose email cannot receive a reply. The check is on the
+    # EMAIL COLUMN, whose index is fixed by the leads.csv header.
+    try:
+        with open(CSV, newline='', encoding='utf-8-sig') as f:
+            _hdr = next(csv.reader(f))
+        _ei = _hdr.index('Email')
+        keep = []
+        dropped = 0
+        for r in new_rows:
+            # NEVER touch the header row. Its Email cell contains the
+            # literal text 'Email', which the guard would read as an
+            # address and DROP - deleting the header from leads.csv.
+            if r and r[0] and r[0] == 'Lead ID':
+                keep.append(r)
+                continue
+            if len(r) > _ei and not email_is_contactable(r[_ei]):
+                dropped += 1
+                continue
+            keep.append(r)
+        if dropped:
+            print('dropped %d row(s) with a non-contactable email' % dropped)
+        new_rows = keep
+        if not new_rows:
+            return len(read_rows())
+    except Exception:
+        pass
     for attempt in range(retries):
         if not acquire():
             print('could not lock leads.csv - skipping %d row(s)' % len(new_rows))
