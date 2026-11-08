@@ -185,13 +185,32 @@ JUNK_TLD = re.compile(r'\.(png|jpg|jpeg|gif|svg|webp|css|js|json|xml|woff2?|ttf|
 
 
 # Trades that are definitely not ours, even if they mention 'sports'.
+# An academy, sports centre, gym or club chain BUYS club gear for its
+# own members. They are customers, not manufacturers.
+ACADEMY_WORDS = re.compile(
+    r'(sports academ|academ(?:y|ies)|sports cent(?:er|re)|sports club|'
+    r'gym|fitness cent|training cent|martial arts (?:school|cent|academy)|'
+    r'boxing (?:club|gym|academy)|taekwondo|judo|karate|'
+    r'sports camp|sports school|dojo|fight (?:club|school|academy)|'
+    r'venues? across|our venues)', re.I)
+
 OTHER_TRADE = re.compile(
     r'(pipes and fittings|pipe fittings|plumbing|valves?|flanges?|'
     r'hardware|fasteners?|cement|construction material|tiles?|ceramic|'
     r'auto spare parts|automotive parts|car mats|cement|steel|aluminium|'
     r'printer|copier|toner|office supplies|medical|pharmaceutical|'
     r'food|beverage|spice|rice|tea|coffee|cashew|nuts|'
-    r'prayer mat|carpet|rug|linoleum|vinyl flooring|rubber flooring)', re.I)
+    r'prayer mat|carpet|rug|linoleum|vinyl flooring|rubber flooring|'
+    # trades that surface under a 'sports' or 'apparel' category but
+    # cannot buy our goods:
+    r'lighters?|cigar|kerosene|usb lighter|'
+    r'first communion|christening|communion dress|tuxedo|formal wear|'
+    r'wedding dress|bridal|evening gown|'
+    # a sports AGENCY or academy is not a manufacturer and does not buy
+    # uniforms to resell:
+    r'full service agency|brand agency|advertising agency|'
+    r'event management|sports agency|athlete management|'
+    r'photography|film production|video production)', re.I)
 
 
 def title_hint(html):
@@ -878,17 +897,34 @@ def process(comp):
         # A MINIMAL site lists no products at all (alwahaksa.com is one).
         # The platform's own classification plus a working email on the
         # company's own domain is enough for those.
+        #
+        # But a minimal site with NO product words and NO wholesale words
+        # is not evidence of anything. litoonline.com is a children's
+        # formal-wear shop (first communion dresses, tuxedos) that the
+        # directory had filed under 'sportswear'. It must NOT be accepted
+        # just because the page is small.
         _minimal = len(text) < 4500
+        _name_on_page = any(t.lower() in low for t in toks)
+        _is_academy = bool(ACADEMY_WORDS.search(text[:1500]))
         if not PRODUCT_WORDS.search(text):
-            if not (dir_is_ours and (WHOLESALE_WORDS.search(text) or _minimal)):
+            if not (dir_is_ours and
+                    (WHOLESALE_WORDS.search(text) or _is_academy or
+                     (_minimal and _name_on_page and len(text) > 900))):
                 continue
         # The product must be the company's actual business, not a passing
         # mention in a footer. 'Blue Chip Global - Pipes and Fittings
         # Suppliers' passed on the word 'sports' somewhere in its page; the
         # title and the top of the body have to show our product.
         head = (title_hint(html) + ' ' + text[:900]).lower()
-        if not PRODUCT_WORDS.search(head):
-            if not (dir_is_ours and (WHOLESALE_WORDS.search(head) or _minimal)):
+        # An ACADEMY, SPORTS CENTRE or club chain is a legitimate buyer of
+        # club gear - they issue gis and uniforms to their own students.
+        # They are not manufacturers, so their site carries no product
+        # words, but they do buy in volume.
+        _is_academy = bool(ACADEMY_WORDS.search(head))
+        if not PRODUCT_WORDS.search(text):
+            if not (dir_is_ours and
+                    (WHOLESALE_WORDS.search(head) or _is_academy or
+                     (_minimal and _name_on_page and len(text) > 900))):
                 continue
         # and it must not be obviously a different trade
         if OTHER_TRADE.search(text[:1200]):
@@ -1135,8 +1171,11 @@ def main():
                 r'hand-?wrap|kick-?pad|sportswear|sports-?wear|team-?wear|'
                 r'protective|sport)', _dcat))
             _cminimal = len(ctext) < 4500
+            _cname = any(t.lower() in ctext.lower()
+                         for t in company_tokens(name))
             _cok = PRODUCT_WORDS.search(chead) or (
-                _dours and (WHOLESALE_WORDS.search(chead) or _cminimal))
+                _dours and (WHOLESALE_WORDS.search(chead) or
+                            (_cminimal and _cname and len(ctext) > 900)))
             if not _cok or OTHER_TRADE.search(ctext[:1200]) \
                     or OTHER_SPORTS.search(chead) or NOT_A_COMPANY.search(hit['website']):
                 print('    final check failed (site no longer matches) - skipping')

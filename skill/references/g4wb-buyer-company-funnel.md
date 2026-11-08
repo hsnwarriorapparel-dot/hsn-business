@@ -762,3 +762,77 @@ trusting it.
 already has, and saves the merged set. A run reporting "1,080 total" can
 still leave 865 on disk if a later concurrent run wrote a smaller merge -
 check the file's mtime and count before acting on a run summary.
+
+## THE MINIMAL-SITE EXEMPTION MUST NOT BE A LOOPHOLE
+
+The directory-category exemption (the platform says they buy our product,
+so accept a general trading company whose site does not advertise it) was
+too loose. It accepted two companies it should never have:
+
+| Company | Directory said | Actually is | Verdict |
+|---|---|---|---|
+| Lito Clothing | sportswear | children's formal wear - first communion dresses, tuxedos | REJECT |
+| Infinite Sports | sports-apparel | a sports academy chain with 33 venues | KEEP (a customer) |
+
+**Lito passed on a 824-character page with ZERO product words and ZERO
+wholesale words.** The only reason it got through was that the directory
+said "sportswear".
+
+The exemption now requires all three:
+
+```python
+_minimal = len(text) < 4500
+_name_on_page = any(t.lower() in low for t in toks)
+if not PRODUCT_WORDS.search(text):
+    if not (dir_is_ours and
+            (WHOLESALE_WORDS.search(text) or _is_academy or
+             (_minimal and _name_on_page and len(text) > 900))):
+        continue
+```
+
+The company name must appear on the page AND there must be some substance
+to it. The same rule applies to the head check and the final self-check.
+
+## AN ACADEMY IS A CUSTOMER, NOT A MANUFACTURER
+
+`ACADEMY_WORDS` marks a sports academy, sports centre, club chain, dojo,
+boxing gym or martial arts school as a legitimate buyer. They issue gis
+and uniforms to their own members and buy in volume. Their site carries
+no product words because they are not manufacturers - that must not
+disqualify them.
+
+## NEW TRADES THAT MUST BE REJECTED
+
+These surface under a 'sports' or 'apparel' category and cannot buy our
+goods. Add them to `OTHER_TRADE`:
+
+```
+lighters?|cigar|kerosene|usb lighter
+first communion|christening|communion dress|tuxedo|formal wear
+wedding dress|bridal|evening gown
+full service agency|brand agency|advertising agency
+event management|sports agency|athlete management
+photography|film production|video production
+```
+
+## A SITE CAN BLOCK YOU AT ANY TIME
+
+`classicfootballshirts.com` matched on the first run and returned None
+on the second. Nothing changed in the code - the site started serving a
+Cloudflare page ("sorry, you have been blocked"). The `CHALLENGE_WALL`
+check correctly rejected it. **A 'no match' after a previous hit is not
+necessarily a regression** - check whether the site is serving a
+challenge page before changing the rules.
+
+## THE UAE TEST SET
+
+`/home/ubuntu/.hermes/cache/scratch/test_ua_companies.py` runs 10 known
+UAE and Saudi companies through `process()` without writing to the
+tracker. It is a read-only probe of the funnel's hit rate. Before the
+fixes it found 1 of 10. The 8 misses break down as:
+
+- 3 have no own website (directory-only)
+- 2 own sites are dead or return nothing
+- 2 own sites are Cloudflare-blocked
+- 1 is a formal-wear shop (correctly rejected now)
+- 2 are the genuine hits: Al Waha Middle East Co, Desert Link Trading
