@@ -1,0 +1,174 @@
+Cronjob Response: morning-briefing
+(job_id: f8b8d47f5151)
+-------------
+
+[brief] morning_briefing.py rc=0
+[brief] wrote /home/ubuntu/morning_briefing_final.txt (6390 chars)
+☀️ HSN MORNING BRIEFING — Sunday, 08 November 2026
+
+========================================
+
+📊 YOUR PIPELINE
+• Total leads tracked: 5147
+• USA batch (Day 5): 208
+• 🔥 HOT leads: 2
+   - Uzbekistan Kurash Federation (L964)
+   - Uzbekistan Kurash Federation (gmail) (L965)
+
+📰 BUSINESS NEWS (24h)
+• [Textile/Export] Fabric Tearing Machines Market To 2035: Recycling and Quality Control Fuel Growth - News and Statistics
+  https://news.google.com/rss/articles/CBMi3wFBVV95cUxNNTdPTVZwN20zc2t6YzVmZnp0VHlfeU1lTmI4UmdKb3pBdEtGNk5UMV9SR3FhZWMtMTkyT3ItMXlRT0xqVWhEU2dCTjNHa1EyQjVPX2hNbmZrUVY4OE9oQ2ZWcHUydmdpZnNyeTJnelpHd0VLcmJHUmZRM1pHcndsQWdZbngyVFVBRDcyTGtZT0RXbHVVUjVHdXg0VUZVOEpyTkpYTmF6dmhmaTdydUMwTWlfNzZ1Vlc2QjFBVTNEMUJnb3IxekNEN3o2SU9oZGd5b0NBYWt4WVhnV3BETTdV?oc=5
+• [Textile/Export] Tamil Nadu: Tiruppur’s Knitwear Industry Eyes Export Boom As US Tariff Concerns Ease While Bangladesh Faces Uncertainty - ETV Bharat
+  https://news.google.com/rss/articles/CBMiswFBVV95cUxNVmZabnhueGNhUGFoa3N1TFBZRmVZNWVSbU01dmZwYW01RS1kN2lxLWpqbGxZbEl1bWRDbDBNLWVPcGVuSWw5RjBGRTE3UmRiU3NNVUVWQWZNcGVSSlF0TlM3dmFBSXFwOVdZdFpFcWNVT2Nud1REQ0MwbzdIZDAtaHltaUIyNjVoOEdsb1Y1a1Jub2ZGOWRHS0d1dU1RcU5CY2ZubDh3NktNU1B0STU3elBRbw?oc=5
+• [Textile/Export] Data, circularity and value shape Bangladesh’s next chapter in Europe - Textile Today
+  https://news.google.com/rss/articles/CBMivAFBVV95cUxNd2FmVHJncTRnUG1RZTQyTnNseEVhLWl1UXdWdy1idllSNmtqR1ZqLXRiQ2VacTBJNUk0M3ZvQjBQV2pMeUplRzU2SkpPNXBNWVJzQTA5YnVTNVlzaUJodkgzbTYtd2M1ZXQ3cEQzMWMwallBV0dadU15M0RFNnMwUG5rd3l6YUxLczNYNDRZRGVrcjBhcXNLaEJCbDBoM1FxQ1ZzLUtNeVJkbE9IR20tY3dzRkh2bWhQSVpuOA?oc=5
+• [Textile/Export] India-EU trade deal could add €119 billion by 2035. Can Indian exporters seize the opportunity?
+  https://news.google.com/rss/articles/CBMipAFBVV95cUxPbEkyc28yb29ybURjOEhBU3pyZXRQWkw3ektacFpFcDZQNzNBS0JYang4N1VScWJVQy1kVEFFaXhPV2dqUkZiRzhmU01HOXU2S2dBN1ZTcjVpUzVUdXpqdVU0UnBOMXNYZl9FMkJ2MGo0ZWQ4U1VuMHAwZXNaOTl4TzBfYlk1a1RmdnZkR2FqX1ZQRFdTV0xCallneHEyUU5JOWltYg?oc=5
+• [Textile/Export] Vietnam's trade surplus climbs sharply to $7.31 bn in October
+  https://news.google.com/rss/articles/CBMi9AFBVV95cUxNTnNtT2pIc3V2RUFVcHNSRXFBTVAxUWIwRUxaUi1ld0o4SWU1U29YblNGYUYyMS04dGhlWmZxSi11T0tfTzFjOHhFQ1JtMzJJRDlaY0g4amYzeTVYeDRibVVtWldUekNOOHhYQUhtdmZiRU5mSkcyb0tSNHU4M1JsOVZETUtCN29VU2JHNUhLM0ltaUNOWFF2ckVfUmRXVklsTWNESFRpS2ttbjVpQ0M2ZlB2MjRaNjhRNWRDUi1fRGlTQ3dVV295UU9qQjdUcXo4ZUtjb2pyZnZQQzdkZ3U2TnBtU0JEMzFlMC1sNDdwQnZpRnBq?oc=5
+• [Textile/Export] Five Reputable Swimwear Manufacturers in 2026: Advancing Swimsuits Innovation, Quality, and Global Supply - Detroit Free Press
+  https://news.google.com/rss/articles/CBMi4AFBVV95cUxOMF85VDV4NUlxZHdRN19zUjgwRGVKVGRQS1d1YTdXS2IzcXlpNDItNzJfdlVGZ01WdHUxbnlDNTh4U3cxSUc5QTJ3RW5XbjZvVUtFRjNnTl93SzlvSkN4XzlQYzV2bzY2TEwxSU54QTQ5SFIweTJSczhiNDRfYm9iZjAzRDhVdnBFaDMzMWU5MDJXSTdYUEhjTm5sRDE0NW9Vdm9EWnZpbFZUODk0Y2JqVE9ud2hMaXo2NUxxZGJveUdSZ1RKek9vWXFaeFFJRjZhVTNDbUgwaWh1WGlhc2VvVQ?oc=5
+
+💻 HACKER NEWS — top of the morning
+• Need for Speed Underground 2 online in the browser (775 points)
+• Every Mac comes with an (undocumented) family member classifier (572 points)
+• The end of Microsoft Research's AI Frontiers group (327 points)
+• Apple’s grey list: Words and phrases your iPhone won’t help you spell (312 points)
+• Asahi Linux Progress Linux 7.3 (302 points)
+• What I run on my $10 USD OpenStick homelab (281 points)
+• Running a law firm on Free software (228 points)
+• A barbarian tribe's mythic origin story is true, ancient DNA reveals (201 points)
+
+🛠️ NEW TOOLS & LAUNCHES
+• Show HN: Show HN: I declared war on every country, one at a time. 77 of 133 survived
+• Show HN: Show HN: An immutable local inference appliance with routing capability
+• Show HN: Show HN: Sentient, Your Coding Agent Shouldn't Be a Black Box
+• Show HN: Show HN: Nobuild TypeScript web framework with zero dependencies
+• Show HN: Show HN: SF Title Alert
+
+📈 MARKET & PRICING
+• Cotton yarn prices up in north India on rising fibre rates - Fibre2Fashion
+• Brazil cotton prices fall in October as weak demand weighs on market - Fibre2Fashion
+• India Cotton Market 2025/26: Lower Output, Duty-Free Imports and Price Outlook — CMB News - CMB News
+
+💡 TIPS & TRICKS
+• Follow up on sent samples after 5 days with: 'How did the quality feel?'
+• When quoting, always give 2-3 options (budget/premium) - choice increases conversion
+• Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+
+🎯 WHAT YOU NEED TO KNOW TODAY
+• Pipeline: 5147 total leads | USA 880/1822 emailed, 860 still open | global ammo 344 leads ready to email
+• 10 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
+• HUMAN business replies on the board: 3 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal, L3372 TOWASAN Karate Schulen, L5261 Krav Maga Federation (Karate Black Master Belt RFQ)) - reply is DRAFT-ONLY until the user says send
+• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
+• Session health NOT verified this run (sweep file is 7117 min old)
+• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
+
+🎯 TODAY'S MOVES
+• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
+• 344 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• USA emails continue in US business hours (7 PM - 1 AM PKT)
+• Check Alvaro's sample order status - he is the closest to payment
+• Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)
+
+— Your Hermes Agent 🥊
+
+========================================
+📨 CLIENT REPLIES (business only - DRAFT ONLY, not sent)
+Gmail (2 candidate):
+  • Sehr geehrte Damen und Herren! Da ich aus dem Vorstand des Fechtclub Graz ausgeschieden bin ersuche ich Sie Ihre Anliegen an offie@fechtclubgraz.at zu ...
+  • Not interested. On Fri, Nov 6, 2026 at 4:12 PM HSN wrote: Fight Force Fitness team,. We're HSN Warrior Apparels, ...
+WhatsApp (12 candidate):
+  • Updates in Status
+  • Unread
+  • Favorites
+  • Groups
+  • Letter Seen
+  • Create broadcasts faster on web
+
+Personal contacts were excluded automatically.
+☀️ HSN MORNING BRIEFING — Sunday, 08 November 2026
+
+========================================
+
+📊 YOUR PIPELINE
+• Total leads tracked: 5147
+• USA batch (Day 5): 208
+• 🔥 HOT leads: 2
+   - Uzbekistan Kurash Federation (L964)
+   - Uzbekistan Kurash Federation (gmail) (L965)
+
+📰 BUSINESS NEWS (24h)
+• [Textile/Export] Fabric Tearing Machines Market To 2035: Recycling and Quality Control Fuel Growth - News and Statistics
+  https://news.google.com/rss/articles/CBMi3wFBVV95cUxNNTdPTVZwN20zc2t6YzVmZnp0VHlfeU1lTmI4UmdKb3pBdEtGNk5UMV9SR3FhZWMtMTkyT3ItMXlRT0xqVWhEU2dCTjNHa1EyQjVPX2hNbmZrUVY4OE9oQ2ZWcHUydmdpZnNyeTJnelpHd0VLcmJHUmZRM1pHcndsQWdZbngyVFVBRDcyTGtZT0RXbHVVUjVHdXg0VUZVOEpyTkpYTmF6dmhmaTdydUMwTWlfNzZ1Vlc2QjFBVTNEMUJnb3IxekNEN3o2SU9oZGd5b0NBYWt4WVhnV3BETTdV?oc=5
+• [Textile/Export] Tamil Nadu: Tiruppur’s Knitwear Industry Eyes Export Boom As US Tariff Concerns Ease While Bangladesh Faces Uncertainty - ETV Bharat
+  https://news.google.com/rss/articles/CBMiswFBVV95cUxNVmZabnhueGNhUGFoa3N1TFBZRmVZNWVSbU01dmZwYW01RS1kN2lxLWpqbGxZbEl1bWRDbDBNLWVPcGVuSWw5RjBGRTE3UmRiU3NNVUVWQWZNcGVSSlF0TlM3dmFBSXFwOVdZdFpFcWNVT2Nud1REQ0MwbzdIZDAtaHltaUIyNjVoOEdsb1Y1a1Jub2ZGOWRHS0d1dU1RcU5CY2ZubDh3NktNU1B0STU3elBRbw?oc=5
+• [Textile/Export] Data, circularity and value shape Bangladesh’s next chapter in Europe - Textile Today
+  https://news.google.com/rss/articles/CBMivAFBVV95cUxNd2FmVHJncTRnUG1RZTQyTnNseEVhLWl1UXdWdy1idllSNmtqR1ZqLXRiQ2VacTBJNUk0M3ZvQjBQV2pMeUplRzU2SkpPNXBNWVJzQTA5YnVTNVlzaUJodkgzbTYtd2M1ZXQ3cEQzMWMwallBV0dadU15M0RFNnMwUG5rd3l6YUxLczNYNDRZRGVrcjBhcXNLaEJCbDBoM1FxQ1ZzLUtNeVJkbE9IR20tY3dzRkh2bWhQSVpuOA?oc=5
+• [Textile/Export] India-EU trade deal could add €119 billion by 2035. Can Indian exporters seize the opportunity?
+  https://news.google.com/rss/articles/CBMipAFBVV95cUxPbEkyc28yb29ybURjOEhBU3pyZXRQWkw3ektacFpFcDZQNzNBS0JYang4N1VScWJVQy1kVEFFaXhPV2dqUkZiRzhmU01HOXU2S2dBN1ZTcjVpUzVUdXpqdVU0UnBOMXNYZl9FMkJ2MGo0ZWQ4U1VuMHAwZXNaOTl4TzBfYlk1a1RmdnZkR2FqX1ZQRFdTV0xCallneHEyUU5JOWltYg?oc=5
+• [Textile/Export] Vietnam's trade surplus climbs sharply to $7.31 bn in October
+  https://news.google.com/rss/articles/CBMi9AFBVV95cUxNTnNtT2pIc3V2RUFVcHNSRXFBTVAxUWIwRUxaUi1ld0o4SWU1U29YblNGYUYyMS04dGhlWmZxSi11T0tfTzFjOHhFQ1JtMzJJRDlaY0g4amYzeTVYeDRibVVtWldUekNOOHhYQUhtdmZiRU5mSkcyb0tSNHU4M1JsOVZETUtCN29VU2JHNUhLM0ltaUNOWFF2ckVfUmRXVklsTWNESFRpS2ttbjVpQ0M2ZlB2MjRaNjhRNWRDUi1fRGlTQ3dVV295UU9qQjdUcXo4ZUtjb2pyZnZQQzdkZ3U2TnBtU0JEMzFlMC1sNDdwQnZpRnBq?oc=5
+• [Textile/Export] Five Reputable Swimwear Manufacturers in 2026: Advancing Swimsuits Innovation, Quality, and Global Supply - Detroit Free Press
+  https://news.google.com/rss/articles/CBMi4AFBVV95cUxOMF85VDV4NUlxZHdRN19zUjgwRGVKVGRQS1d1YTdXS2IzcXlpNDItNzJfdlVGZ01WdHUxbnlDNTh4U3cxSUc5QTJ3RW5XbjZvVUtFRjNnTl93SzlvSkN4XzlQYzV2bzY2TEwxSU54QTQ5SFIweTJSczhiNDRfYm9iZjAzRDhVdnBFaDMzMWU5MDJXSTdYUEhjTm5sRDE0NW9Vdm9EWnZpbFZUODk0Y2JqVE9ud2hMaXo2NUxxZGJveUdSZ1RKek9vWXFaeFFJRjZhVTNDbUgwaWh1WGlhc2VvVQ?oc=5
+
+💻 HACKER NEWS — top of the morning
+• Need for Speed Underground 2 online in the browser (775 points)
+• Every Mac comes with an (undocumented) family member classifier (572 points)
+• The end of Microsoft Research's AI Frontiers group (327 points)
+• Apple’s grey list: Words and phrases your iPhone won’t help you spell (312 points)
+• Asahi Linux Progress Linux 7.3 (302 points)
+• What I run on my $10 USD OpenStick homelab (281 points)
+• Running a law firm on Free software (228 points)
+• A barbarian tribe's mythic origin story is true, ancient DNA reveals (201 points)
+
+🛠️ NEW TOOLS & LAUNCHES
+• Show HN: Show HN: I declared war on every country, one at a time. 77 of 133 survived
+• Show HN: Show HN: An immutable local inference appliance with routing capability
+• Show HN: Show HN: Sentient, Your Coding Agent Shouldn't Be a Black Box
+• Show HN: Show HN: Nobuild TypeScript web framework with zero dependencies
+• Show HN: Show HN: SF Title Alert
+
+📈 MARKET & PRICING
+• Cotton yarn prices up in north India on rising fibre rates - Fibre2Fashion
+• Brazil cotton prices fall in October as weak demand weighs on market - Fibre2Fashion
+• India Cotton Market 2025/26: Lower Output, Duty-Free Imports and Price Outlook — CMB News - CMB News
+
+💡 TIPS & TRICKS
+• Follow up on sent samples after 5 days with: 'How did the quality feel?'
+• When quoting, always give 2-3 options (budget/premium) - choice increases conversion
+• Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+
+🎯 WHAT YOU NEED TO KNOW TODAY
+• Pipeline: 5147 total leads | USA 880/1822 emailed, 860 still open | global ammo 344 leads ready to email
+• 10 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
+• HUMAN business replies on the board: 3 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal, L3372 TOWASAN Karate Schulen, L5261 Krav Maga Federation (Karate Black Master Belt RFQ)) - reply is DRAFT-ONLY until the user says send
+• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
+• Session health NOT verified this run (sweep file is 7117 min old)
+• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
+
+🎯 TODAY'S MOVES
+• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
+• 344 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• USA emails continue in US business hours (7 PM - 1 AM PKT)
+• Check Alvaro's sample order status - he is the closest to payment
+• Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)
+
+— Your Hermes Agent 🥊
+
+========================================
+📨 CLIENT REPLIES (business only - DRAFT ONLY, not sent)
+Gmail (2 candidate):
+  • Sehr geehrte Damen und Herren! Da ich aus dem Vorstand des Fechtclub Graz ausgeschieden bin ersuche ich Sie Ihre Anliegen an offie@fechtclubgraz.at zu ...
+  • Not interested. On Fri, Nov 6, 2026 at 4:12 PM HSN wrote: Fight Force Fitness team,. We're HSN Warrior Apparels, ...
+WhatsApp (12 candidate):
+  • Updates in Status
+  • Unread
+  • Favorites
+  • Groups
+  • Letter Seen
+  • Create broadcasts faster on web
+
+Personal contacts were excluded automatically.
+
+To stop or manage this job, send me a new message (e.g. "stop reminder morning-briefing").

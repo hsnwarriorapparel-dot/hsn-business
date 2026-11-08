@@ -1,0 +1,170 @@
+Cronjob Response: morning-briefing
+(job_id: f8b8d47f5151)
+-------------
+
+[brief] morning_briefing.py rc=0
+[brief] wrote /home/ubuntu/morning_briefing_final.txt (5774 chars)
+☀️ HSN MORNING BRIEFING — Saturday, 07 November 2026
+
+========================================
+
+📊 YOUR PIPELINE
+• Total leads tracked: 4193
+• USA batch (Day 5): 208
+• 🔥 HOT leads: 2
+   - Uzbekistan Kurash Federation (L964)
+   - Uzbekistan Kurash Federation (gmail) (L965)
+
+📰 BUSINESS NEWS (24h)
+• [Textile/Export] | AGOA runs to 2028: Can Africa's apparel exporters win more US orders?
+  https://news.google.com/rss/articles/CBMiswFBVV95cUxNVmZabnhueGNhUGFoa3N1TFBZRmVZNWVSbU01dmZwYW01RS1kN2lxLWpqbGxZbEl1bWRDbDBNLWVPcGVuSWw5RjBGRTE3UmRiU3NNVUVWQWZNcGVSSlF0TlM3dmFBSXFwOVdZdFpFcWNVT2Nud1REQ0MwbzdIZDAtaHltaUIyNjVoOEdsb1Y1a1Jub2ZGOWRHS0d1dU1RcU5CY2ZubDh3NktNU1B0STU3elBRbw?oc=5
+• [Textile/Export] Foreign-Trade Zone News - Sandler, Travis & Rosenberg, P.A.
+  https://news.google.com/rss/articles/CBMi6wFBVV95cUxOY0Z3aU9rcE1ZOW1lVGJoUnlGcGk1XzNOQmxtdUZFcFR0VXlsalB5aGJ5TGhCdDdJalp3anFNck1KWktkWEZVVmRXR3hiVjBFY3BUOWY1LUFhbktIbEl0YUpEdHU4UU9QZWliQV9OOG01UEhZNVVCak55SDBJbE9tN2lZYTBrY0RWYVJaek42WkxHS2xRR1RRUWcwVDFUUERGblNxSmt6bjd5VGt2NGs4WkpOZXBTUTNVYW1ZU2pMMldRandUWFl2SXBqTGUzaW9WWVpFRlZ6MWE1NFBGVzRRLThwXzNlai1TdlEw?oc=5
+• [Textile/Export] India-EU trade deal could add €119 billion by 2035. Can Indian exporters seize the opportunity?
+  https://news.google.com/rss/articles/CBMioAFBVV95cUxQbWlScmV1Mmpwdk5CR0FTalIwYjNNaUpFNEg1TjVFRGlQR1ZiQ0JRV2RPN2R1N1A3aktnenlLdlR3aC1EN05MSzFzUXB0eEVIU3BycEpPSTZva0VFaEFJRHhBZllTZHFDZ3gxQ3FZM1BWOHJsdnlDNkQ5ZG1aaDJYRjJLS1BmOHBJUXFqNmwtQUV1REdCM3I4SVJNTFJ1ZzdY?oc=5
+• [Textile/Export] | US cotton tariff plan: Will 4 Asian rivals gain on Vietnam in 2027?
+  https://news.google.com/rss/articles/CBMipwFBVV95cUxQZkNVVm83elFjbVQzSzJ0MjNvelFmZjgyTjU3OVVLM3ZhdEpOSloxLW5sOU5aMGdwd2p0b09VdzFHUFcwOTcyaXh4YWdJRThnZVNXYjBlTlhpSU9sai1DajItb2o4Ym01VEZQNmVYTTA1VEFnU2V6V0oxVjJIWW1lRXFwdXQxbF9wLVZWVjNWSkJoQjZsVkxfZ2wyTXNUR1IzTGtoZWdCRQ?oc=5
+• [Textile/Export] | Bangladesh garment crisis: Is India's $1.46 bn yarn trade at risk?
+  https://news.google.com/rss/articles/CBMi7gFBVV95cUxOdDF2MUJtcWlBWmdqa09yWHo5Z29fcG02VFB5Z3g2eDlDdGxBSV9fbWtMUC1xbWZLckhiNloyVUhqaHcyUk9UN1FkeUU0MUVIcnFILUdNeXpUYmZVbDRXQmFKUHRvaUlGOGUxd1R2Y2tVMG5HVkhXelZxUDgzNnhma0RiUzNDc1ZibnVfUTVTS3RiYWtSNGxfMU5mWng1S0FPTko4X2Nob1p3LUpxRHpZYVFLdUJXUkhkZG1ka3RtdGxPX0V6M2V6M090eTNnelNfcHRQOHV2ZkJWNUMwTlZucDRKLXduM1RDazFhUmxR?oc=5
+• [Textile/Export] | North Indian cotton yarn trade thin, post-Diwali recovery expected
+  https://news.google.com/rss/articles/CBMi4gFBVV95cUxQQWR6SDZlazFGLS0zeHZRamZGYTB2RVoxRHRRUEpZNWUwbHhjLXFyUnZIeFZDTkFiQW1JZ2lTMS1xVG5oWkNySExLRXFmanY5QnN0QWY4ZGVNNEtTTEhVeW5QeG5wZlB2R3RIdlo1QmZqdU9BN3VqeUJGZTg4YjdHVmk2RF9pZlVNUDlZaUc1R1RGU1d4Z1ROSzltc2xWY0xzZ1p6cTZVcURwWGlFS01UUlY4LWtUUXNIQzBfeGlmMjBQczZpbEJEM0p1UzRaSVZCQTBsalBnRG9wMlBrX1gwOUJn?oc=5
+
+💻 HACKER NEWS — top of the morning
+• Tesla to wind down Cybertruck production (792 points)
+• Deus Ex (326 points)
+• Gemini Omni 1.2 Flash (289 points)
+• A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost (279 points)
+• US FAA says it will phase out floppy disks from air traffic control by 2028 (256 points)
+• Anthropic IPO buyers see valuation as low as $1.1T (201 points)
+• First steps in bare-metal programming using UEFI (168 points)
+• AI is dramatically accelerating AI research (162 points)
+
+🛠️ NEW TOOLS & LAUNCHES
+• Show HN: Show HN: Cinnamon – a household AI agent with shared context and memories
+• Show HN: Show HN: Vitekube – Vitest on real Kubernetes clusters
+• Show HN: Show HN: Trout: MIRC for the Terminal
+• Show HN: Show HN: Handbrake – a free, private driving log, no trackers, no ads
+• Show HN: Show HN: Budget Friendly City Discovery
+
+📈 MARKET & PRICING
+• Brazil cotton prices fall in October as weak demand weighs on market - Fibre2Fashion
+• USDA Weekly Cotton Review: Softer Spot Prices, Harvest Progress - News and Statistics - IndexBox
+• India's apparel production falls 5.6% in H1 FY27 as weak US demand, high costs hit manufacturers - T
+
+💡 TIPS & TRICKS
+• Reply to leads within 5 minutes when possible - first responder wins 78% of B2B deals
+• Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+• Voice notes outperform text 2:1 in Southern Europe and Gulf markets
+
+🎯 WHAT YOU NEED TO KNOW TODAY
+• Pipeline: 4193 total leads | USA 876/1855 emailed, 890 still open | global ammo 48 leads ready to email
+• 8 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
+• HUMAN business replies on the board: 1 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal) - reply is DRAFT-ONLY until the user says send
+• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
+• Session health NOT verified this run (sweep file is 5677 min old)
+• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
+
+🎯 TODAY'S MOVES
+• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
+• 48 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• USA emails continue in US business hours (7 PM - 1 AM PKT)
+• Check Alvaro's sample order status - he is the closest to payment
+• Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)
+
+— Your Hermes Agent 🥊
+
+========================================
+📨 CLIENT REPLIES (business only - DRAFT ONLY, not sent)
+Gmail: none found (or no Gmail tab open)
+WhatsApp (12 candidate):
+  • Updates in Status
+  • Unread
+  • Favorites
+  • Groups
+  • Letter Seen
+  • Reach new customers
+
+Personal contacts were excluded automatically.
+☀️ HSN MORNING BRIEFING — Saturday, 07 November 2026
+
+========================================
+
+📊 YOUR PIPELINE
+• Total leads tracked: 4193
+• USA batch (Day 5): 208
+• 🔥 HOT leads: 2
+   - Uzbekistan Kurash Federation (L964)
+   - Uzbekistan Kurash Federation (gmail) (L965)
+
+📰 BUSINESS NEWS (24h)
+• [Textile/Export] | AGOA runs to 2028: Can Africa's apparel exporters win more US orders?
+  https://news.google.com/rss/articles/CBMiswFBVV95cUxNVmZabnhueGNhUGFoa3N1TFBZRmVZNWVSbU01dmZwYW01RS1kN2lxLWpqbGxZbEl1bWRDbDBNLWVPcGVuSWw5RjBGRTE3UmRiU3NNVUVWQWZNcGVSSlF0TlM3dmFBSXFwOVdZdFpFcWNVT2Nud1REQ0MwbzdIZDAtaHltaUIyNjVoOEdsb1Y1a1Jub2ZGOWRHS0d1dU1RcU5CY2ZubDh3NktNU1B0STU3elBRbw?oc=5
+• [Textile/Export] Foreign-Trade Zone News - Sandler, Travis & Rosenberg, P.A.
+  https://news.google.com/rss/articles/CBMi6wFBVV95cUxOY0Z3aU9rcE1ZOW1lVGJoUnlGcGk1XzNOQmxtdUZFcFR0VXlsalB5aGJ5TGhCdDdJalp3anFNck1KWktkWEZVVmRXR3hiVjBFY3BUOWY1LUFhbktIbEl0YUpEdHU4UU9QZWliQV9OOG01UEhZNVVCak55SDBJbE9tN2lZYTBrY0RWYVJaek42WkxHS2xRR1RRUWcwVDFUUERGblNxSmt6bjd5VGt2NGs4WkpOZXBTUTNVYW1ZU2pMMldRandUWFl2SXBqTGUzaW9WWVpFRlZ6MWE1NFBGVzRRLThwXzNlai1TdlEw?oc=5
+• [Textile/Export] India-EU trade deal could add €119 billion by 2035. Can Indian exporters seize the opportunity?
+  https://news.google.com/rss/articles/CBMioAFBVV95cUxQbWlScmV1Mmpwdk5CR0FTalIwYjNNaUpFNEg1TjVFRGlQR1ZiQ0JRV2RPN2R1N1A3aktnenlLdlR3aC1EN05MSzFzUXB0eEVIU3BycEpPSTZva0VFaEFJRHhBZllTZHFDZ3gxQ3FZM1BWOHJsdnlDNkQ5ZG1aaDJYRjJLS1BmOHBJUXFqNmwtQUV1REdCM3I4SVJNTFJ1ZzdY?oc=5
+• [Textile/Export] | US cotton tariff plan: Will 4 Asian rivals gain on Vietnam in 2027?
+  https://news.google.com/rss/articles/CBMipwFBVV95cUxQZkNVVm83elFjbVQzSzJ0MjNvelFmZjgyTjU3OVVLM3ZhdEpOSloxLW5sOU5aMGdwd2p0b09VdzFHUFcwOTcyaXh4YWdJRThnZVNXYjBlTlhpSU9sai1DajItb2o4Ym01VEZQNmVYTTA1VEFnU2V6V0oxVjJIWW1lRXFwdXQxbF9wLVZWVjNWSkJoQjZsVkxfZ2wyTXNUR1IzTGtoZWdCRQ?oc=5
+• [Textile/Export] | Bangladesh garment crisis: Is India's $1.46 bn yarn trade at risk?
+  https://news.google.com/rss/articles/CBMi7gFBVV95cUxOdDF2MUJtcWlBWmdqa09yWHo5Z29fcG02VFB5Z3g2eDlDdGxBSV9fbWtMUC1xbWZLckhiNloyVUhqaHcyUk9UN1FkeUU0MUVIcnFILUdNeXpUYmZVbDRXQmFKUHRvaUlGOGUxd1R2Y2tVMG5HVkhXelZxUDgzNnhma0RiUzNDc1ZibnVfUTVTS3RiYWtSNGxfMU5mWng1S0FPTko4X2Nob1p3LUpxRHpZYVFLdUJXUkhkZG1ka3RtdGxPX0V6M2V6M090eTNnelNfcHRQOHV2ZkJWNUMwTlZucDRKLXduM1RDazFhUmxR?oc=5
+• [Textile/Export] | North Indian cotton yarn trade thin, post-Diwali recovery expected
+  https://news.google.com/rss/articles/CBMi4gFBVV95cUxQQWR6SDZlazFGLS0zeHZRamZGYTB2RVoxRHRRUEpZNWUwbHhjLXFyUnZIeFZDTkFiQW1JZ2lTMS1xVG5oWkNySExLRXFmanY5QnN0QWY4ZGVNNEtTTEhVeW5QeG5wZlB2R3RIdlo1QmZqdU9BN3VqeUJGZTg4YjdHVmk2RF9pZlVNUDlZaUc1R1RGU1d4Z1ROSzltc2xWY0xzZ1p6cTZVcURwWGlFS01UUlY4LWtUUXNIQzBfeGlmMjBQczZpbEJEM0p1UzRaSVZCQTBsalBnRG9wMlBrX1gwOUJn?oc=5
+
+💻 HACKER NEWS — top of the morning
+• Tesla to wind down Cybertruck production (792 points)
+• Deus Ex (326 points)
+• Gemini Omni 1.2 Flash (289 points)
+• A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost (279 points)
+• US FAA says it will phase out floppy disks from air traffic control by 2028 (256 points)
+• Anthropic IPO buyers see valuation as low as $1.1T (201 points)
+• First steps in bare-metal programming using UEFI (168 points)
+• AI is dramatically accelerating AI research (162 points)
+
+🛠️ NEW TOOLS & LAUNCHES
+• Show HN: Show HN: Cinnamon – a household AI agent with shared context and memories
+• Show HN: Show HN: Vitekube – Vitest on real Kubernetes clusters
+• Show HN: Show HN: Trout: MIRC for the Terminal
+• Show HN: Show HN: Handbrake – a free, private driving log, no trackers, no ads
+• Show HN: Show HN: Budget Friendly City Discovery
+
+📈 MARKET & PRICING
+• Brazil cotton prices fall in October as weak demand weighs on market - Fibre2Fashion
+• USDA Weekly Cotton Review: Softer Spot Prices, Harvest Progress - News and Statistics - IndexBox
+• India's apparel production falls 5.6% in H1 FY27 as weak US demand, high costs hit manufacturers - T
+
+💡 TIPS & TRICKS
+• Reply to leads within 5 minutes when possible - first responder wins 78% of B2B deals
+• Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+• Voice notes outperform text 2:1 in Southern Europe and Gulf markets
+
+🎯 WHAT YOU NEED TO KNOW TODAY
+• Pipeline: 4193 total leads | USA 876/1855 emailed, 890 still open | global ammo 48 leads ready to email
+• 8 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
+• HUMAN business replies on the board: 1 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal) - reply is DRAFT-ONLY until the user says send
+• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
+• Session health NOT verified this run (sweep file is 5677 min old)
+• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
+
+🎯 TODAY'S MOVES
+• Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
+• 48 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• USA emails continue in US business hours (7 PM - 1 AM PKT)
+• Check Alvaro's sample order status - he is the closest to payment
+• Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)
+
+— Your Hermes Agent 🥊
+
+========================================
+📨 CLIENT REPLIES (business only - DRAFT ONLY, not sent)
+Gmail: none found (or no Gmail tab open)
+WhatsApp (12 candidate):
+  • Updates in Status
+  • Unread
+  • Favorites
+  • Groups
+  • Letter Seen
+  • Reach new customers
+
+Personal contacts were excluded automatically.
+
+To stop or manage this job, send me a new message (e.g. "stop reminder morning-briefing").

@@ -1,0 +1,51 @@
+Cronjob Response: daily-1am-outreach-pipeline
+(job_id: 22c8a5498741)
+-------------
+
+Day 9 outreach pipeline complete. Report:
+
+**📊 Day 9 Wave — Quota Numbers (verified from leads.csv on disk)**
+- **Emails: 100/100 ✅** — 99 in the main wave (L693–L806, Day-8 banked EU leads: Italy/Germany/NL/Spain/Portugal) + 1 top-up (L809 **The Budokwai** — oldest judo club in Europe, when one bounced). Zero other failures.
+- **WhatsApp: 1/10** — L797 AVALON MMA London landed + transcript-verified. Then the WA Web session **died mid-wave** (QR login screen — your phone likely went offline overnight). The other 9 UK leads were NOT failures and are NOT lost — markers cleaned, re-queued for tomorrow once you re-link WA from your phone/VNC.
+- **IG: 1 follow+DM** (@roconnor1978 ROC BoxFit — the only untouched handle; everything else already IG'd or junk-scraped usernames I filtered out).
+- **No hunt needed** — you had 194 valid email leads banked, I sent 100.
+
+**🧹 Wave QA I did before sending (why the emails read properly):**
+- Fixed **59 junk-scraped names** ("Unknown Gym", "N/A", "Contactos"…) — derived real names from each gym's own email domain, so no "Hello Unknown Gym team" went out.
+- **Excluded 9 bad rows** so they never waste quota: 2 federations (fpi.it, fboxcv.com), placeholder email esempio@ilmiosito.com, 2 PEC cross-contaminations, 2 dead/parked domains, 2 dead sites.
+- Blocked active clients (Alvaro, Portuguese, Scorpion, Duramuk, Brazilian Fight Lisboa) and personal contacts from every pool — verified they stayed out.
+
+**🔧 Fixed so it doesn't happen again:**
+- `day6_pipeline.py` rewritten as hardened v2: **mobile-prefix-only WA filter** (no more landline quota burn — verified 0 leaked), **WA-session-alive check before every send** (a dead session now stops the wave and queues leads instead of false-failing them), invalid-email auto-exclusion. Tested the guards live — they work.
+- Caught + fixed the Gmail tab freeze (fresh tab, session intact) before it could kill the email wave.
+- Excel trackers rebuilt, all pushed to GitHub (commit c89f82e).
+
+**📥 Client replies:** none new — 0 human replies from ~700 cold emails so far. Only auto-acks (Oosterbaan Gym NL "request received", VBSK "thanks for your email", karate.de "received confirmation" — good deliverability signals). Alvaro, Portuguese, Scorpion, Lucero, Duramuk: no movement, drafts ready when they reply.
+
+**⚠️ Needs you (morning):** **WA Web is logged out — re-link it from your phone** (VNC → scan QR, or "Link with phone number"). The moment it's back, tomorrow's run automatically re-sends to those 9 queued UK mobile leads first.
+
+**Campaign totals: 697 emailed · 74 WA · ~399 IG · 950 leads · 83 email ammo remaining** (2 PM gmaps scrape keeps topping up ~50–90/day).Day 9 outreach pipeline complete. Report:
+
+**📊 Day 9 Wave — Quota Numbers (verified from leads.csv on disk)**
+- **Emails: 100/100 ✅** — 99 in the main wave (L693–L806, Day-8 banked EU leads: Italy/Germany/NL/Spain/Portugal) + 1 top-up (L809 **The Budokwai** — oldest judo club in Europe, when one bounced). Zero other failures.
+- **WhatsApp: 1/10** — L797 AVALON MMA London landed + transcript-verified. Then the WA Web session **died mid-wave** (QR login screen — your phone likely went offline overnight). The other 9 UK leads were NOT failures and are NOT lost — markers cleaned, re-queued for tomorrow once you re-link WA from your phone/VNC.
+- **IG: 1 follow+DM** (@roconnor1978 ROC BoxFit — the only untouched handle; everything else already IG'd or junk-scraped usernames I filtered out).
+- **No hunt needed** — you had 194 valid email leads banked, I sent 100.
+
+**🧹 Wave QA I did before sending (why the emails read properly):**
+- Fixed **59 junk-scraped names** ("Unknown Gym", "N/A", "Contactos"…) — derived real names from each gym's own email domain, so no "Hello Unknown Gym team" went out.
+- **Excluded 9 bad rows** so they never waste quota: 2 federations (fpi.it, fboxcv.com), placeholder email esempio@ilmiosito.com, 2 PEC cross-contaminations, 2 dead/parked domains, 2 dead sites.
+- Blocked active clients (Alvaro, Portuguese, Scorpion, Duramuk, Brazilian Fight Lisboa) and personal contacts from every pool — verified they stayed out.
+
+**🔧 Fixed so it doesn't happen again:**
+- `day6_pipeline.py` rewritten as hardened v2: **mobile-prefix-only WA filter** (no more landline quota burn — verified 0 leaked), **WA-session-alive check before every send** (a dead session now stops the wave and queues leads instead of false-failing them), invalid-email auto-exclusion. Tested the guards live — they work.
+- Caught + fixed the Gmail tab freeze (fresh tab, session intact) before it could kill the email wave.
+- Excel trackers rebuilt, all pushed to GitHub (commit c89f82e).
+
+**📥 Client replies:** none new — 0 human replies from ~700 cold emails so far. Only auto-acks (Oosterbaan Gym NL "request received", VBSK "thanks for your email", karate.de "received confirmation" — good deliverability signals). Alvaro, Portuguese, Scorpion, Lucero, Duramuk: no movement, drafts ready when they reply.
+
+**⚠️ Needs you (morning):** **WA Web is logged out — re-link it from your phone** (VNC → scan QR, or "Link with phone number"). The moment it's back, tomorrow's run automatically re-sends to those 9 queued UK mobile leads first.
+
+**Campaign totals: 697 emailed · 74 WA · ~399 IG · 950 leads · 83 email ammo remaining** (2 PM gmaps scrape keeps topping up ~50–90/day).
+
+To stop or manage this job, send me a new message (e.g. "stop reminder daily-1am-outreach-pipeline").
