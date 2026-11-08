@@ -220,7 +220,14 @@ OTHER_TRADE = re.compile(
     # uniforms to resell:
     r'full service agency|brand agency|advertising agency|'
     r'event management|sports agency|athlete management|'
-    r'photography|film production|video production)', re.I)
+    r'photography|film production|video production|'
+    # business DIRECTORIES and aggregators list companies but are not
+    # them. easyoman.com is 'Find Businesses in Oman | 4,362+ Listings'.
+    r'find businesses|\d[,\.]\d{3}\+?\s*listings|business directory|'
+    r'listing[s]?|company profile|yellow pages|'
+    # a UN / reference / academic site is not a buyer
+    r'independent reference|not a un publication|'
+    r'encyclopaedia|encyclopedia|academic reference)', re.I)
 
 
 def title_hint(html):
@@ -239,6 +246,45 @@ def valid_email(e):
     if not e or not VALID_EMAIL.match(e):
         return False
     if JUNK_TLD.search(e):
+        return False
+    # PLACEHOLDER addresses. 'john@doe.com' is the Lorem Ipsum of
+    # emails - bidandwinauto.com published one and it was about to be
+    # recorded as a buyer contact.
+    #
+    # The DOMAIN is what makes an address a placeholder. 'john@doe.com'
+    # is a placeholder; 'john@johnaboxing.com' is a REAL boxing gym, and
+    # that lead was nearly deleted over the local part alone.
+    # The placeholder DOMAIN must be the WHOLE domain - 'my-club.it' is a
+    # real gym in Padova, and 'my-club' contains 'my'. Only an exact
+    # placeholder domain counts.
+    _pl, _, _pd = e.partition('@')
+    if _pd.lower() in ('doe.com', 'doe.org', 'doe.net', 'example.com',
+                       'example.org', 'example.net', 'domain.com',
+                       'email.com', 'name.com', 'test.com', 'company.com',
+                       'yourdomain.com', 'mydomain.com', 'yourname.com',
+                       'companyname.com', 'email.org', 'email.net'):
+        return False
+    if re.search(r'^(email|domain|name|test|company|your|my|example|site|'
+                 r'web|mail|host)[0-9]*\.(com|org|net|co|io|info|biz)$',
+                 _pd, re.I):
+        return False
+    # a generic local part is only a placeholder when the domain is
+    # generic too - otherwise it is a real person.
+    _local, _, _dom = e.partition('@')
+    _generic_local = re.match(
+        r'^(john|jane|james|mary|foo|bar|baz|abc|xyz|test|testing|asdf|'
+        r'qwerty|sample|demo|your|you|user|example|name|email|info|'
+        r'contact|admin|office)@', e, re.I)
+    # the domain must be ENTIRELY generic: 'myclub.it' is a real gym,
+    # 'my-club.it' is a real gym, only 'my.com' or 'my-domain.com' are
+    # placeholders. A domain with any real word in it is a real domain.
+    _generic_dom = re.fullmatch(
+        r'(email|domain|name|test|company|your|my|example|site|web|mail|'
+        r'host|info|sales|contact)[0-9]*'
+        r'([.:\-](email|domain|name|test|company|your|my|example|site|'
+        r'web|mail|host|info))?\.(com|org|net|co|io|info|biz|site|online)',
+        _dom, re.I)
+    if _generic_local and _generic_dom:
         return False
     local = e.split('@')[0]
     # a filename-ish local part
@@ -520,13 +566,22 @@ def _close_enough(a, b):
 
 
 def fuzzy_name_match(tokens, distinctive, body_low, domain, title_low):
-    """A spelling variant of the company name is still the company."""
+    """A spelling variant of the company name is still the company.
+
+    A SHORT TOKEN MUST MATCH EXACTLY. 'Um Abdullah Global Projects'
+    matched worldbody.org because 'Um' is one letter away from 'um' in
+    'worldbody'. A 2-3 character token carries no information, so it can
+    only ever match literally.
+    """
     hay = (body_low or '') + ' ' + (domain or '') + ' ' + (title_low or '')
     words = re.findall(r'[a-z]{4,}', hay)
     for t in (distinctive or tokens):
         tl = t.lower()
         if tl in hay:
             return True
+        if len(tl) <= 3:
+            # too short to fuzzy-match against anything
+            continue
         for w in words:
             if _close_enough(tl, w):
                 return True

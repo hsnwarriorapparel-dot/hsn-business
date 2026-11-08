@@ -314,3 +314,51 @@ hidden = [r[0] for r in rows
 15 rows had a full Status with no visible marker, but only 4 of them
 had actually been emailed. The other 11 were never sent, so their
 Status was full for an unrelated reason and they were left alone.
+
+## A PLACEHOLDER EMAIL IS DECIDED BY ITS DOMAIN, NEVER ITS LOCAL PART
+
+A first pass at the placeholder rule rejected any address whose local
+part looked generic. That deleted **two real leads**:
+
+- `john@johnaboxing.com` - John Andriacco Boxing, a real gym
+- `info@my-club.it` - 'My Club - Palestra Padova', a real gym in Padova
+
+Both were restored from git within minutes. **The domain is what makes an
+address a placeholder.**
+
+```python
+PLACEHOLDER_EMAIL_DOMAINS = {
+    'doe.com', 'doe.org', 'doe.net', 'example.com', 'example.org',
+    'example.net', 'domain.com', 'email.com', 'name.com', 'test.com',
+    'company.com', 'yourdomain.com', 'mydomain.com', 'yourname.com',
+    'companyname.com', 'email.org', 'email.net',
+}
+```
+
+A generic local part (`info@`, `your@`, `example@`, `test@`) only counts
+as a placeholder when the WHOLE DOMAIN is generic too:
+
+```python
+_GENERIC_DOMAIN = re.compile(
+    r'(email|domain|name|test|company|your|my|example|site|web|mail|'
+    r'host|info|sales|contact)[0-9]*'
+    r'([.:\-](email|domain|name|test|company|your|my|example|site|'
+    r'web|mail|host|info))?\.(com|org|net|co|io|info|biz|site|online)',
+    re.I)
+```
+
+`my-club.it` and `myclub.it` are REAL domains and must pass. Only
+`my.com` or `my-domain.com` are placeholders.
+
+**`company_reach.valid_email()` and `leads_safe_write.email_is_contactable()`
+must agree.** They were separate implementations and drifted, which is how
+a rule can reject an address in one place and accept it in another. The
+shared test `test_placeholder_email.py` checks both against the same
+cases and fails if they disagree.
+
+## WHEN A ROW HAS SEVERAL ADDRESSES
+
+`user@domain.com, nora.ermatinger@gmail.com` is not a placeholder row -
+it has one placeholder and one REAL address. Remove only the placeholder
+and keep the real one. A row is only deletable when EVERY address on it
+is a placeholder.

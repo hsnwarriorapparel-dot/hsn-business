@@ -94,6 +94,43 @@ JUNK_EMAIL_DOMAIN = re.compile(
     r'googleapis\.com|amazonaws\.com|mailchimp\.com|'
     r'list-manage\.com|hubspot\.com|facebook\.com)', re.I)
 
+# PLACEHOLDER EMAIL DOMAINS. The DOMAIN decides, never the local part:
+# 'john@doe.com' is the Lorem Ipsum of emails, while
+# 'john@johnaboxing.com' is a real boxing gym and 'info@my-club.it' is
+# a real gym in Padova. The domain must match EXACTLY - 'my-club.it'
+# contains 'my' but is a real domain.
+PLACEHOLDER_EMAIL_DOMAINS = {
+    'doe.com', 'doe.org', 'doe.net', 'example.com', 'example.org',
+    'example.net', 'domain.com', 'email.com', 'name.com', 'test.com',
+    'company.com', 'yourdomain.com', 'mydomain.com', 'yourname.com',
+    'companyname.com', 'email.org', 'email.net',
+}
+
+_GENERIC_LOCAL = re.compile(
+    r'^(john|jane|james|mary|foo|bar|baz|abc|xyz|test|testing|asdf|'
+    r'qwerty|sample|demo|your|you|user|example|name|email|info|'
+    r'contact|admin|office)@', re.I)
+
+_GENERIC_DOMAIN = re.compile(
+    r'(email|domain|name|test|company|your|my|example|site|web|mail|'
+    r'host|info|sales|contact)[0-9]*'
+    r'([.:\-](email|domain|name|test|company|your|my|example|site|'
+    r'web|mail|host|info))?\.(com|org|net|co|io|info|biz|site|online)',
+    re.I)
+
+
+def is_placeholder_email(email):
+    """True for an address that is obviously a template filler."""
+    e = (email or '').strip().lower()
+    if not e or '@' not in e:
+        return False
+    local, _, dom = e.partition('@')
+    if dom in PLACEHOLDER_EMAIL_DOMAINS:
+        return True
+    if _GENERIC_LOCAL.match(e) and _GENERIC_DOMAIN.fullmatch(dom):
+        return True
+    return False
+
 
 def email_is_contactable(email):
     """False for a form address, a no-reply sender or a privacy contact."""
@@ -104,6 +141,8 @@ def email_is_contactable(email):
     if JUNK_EMAIL_LOCAL.match(local):
         return False
     if JUNK_EMAIL_DOMAIN.search(dom):
+        return False
+    if is_placeholder_email(e):
         return False
     return True
 
