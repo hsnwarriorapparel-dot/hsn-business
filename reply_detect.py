@@ -78,11 +78,25 @@ OUR_OWN_MSG = re.compile(
     r'We are HSN|Your email Submission)', re.I)
 
 # The marker that starts the QUOTE of our own message inside the reply.
+#
+# DO NOT add a '^me,' alternative here. Gmail's list row for a thread we
+# started begins with "me, SUBJECT, TIME, <reply>", so a '^me,' marker
+# matched at position 0 and made the "reply head" empty - which threw away
+# every real reply. The quote of our own message is only identified by the
+# explicit "HSN (...) escribió" / "wrote:" markers.
 QUOTE_MARK = re.compile(
     r'(HSN\s*\(\s*<hsnwarriorapparel@gmail\.com>\s*\)\s*(escribi[oó]|wrote)|'
     r'HSN\s*<hsnwarriorapparel@gmail\.com>\s*(wrote|escribi[oó]|a [eé]crit)|'
     r'On\s.{0,60}?\bHSN\b.{0,30}?\bwrote:|'
-    r'--------\s*Original Message|^\s*me,\s)', re.I | re.M)
+    r'--------\s*Original Message)', re.I | re.M)
+
+# Gmail's list row format for a thread WE started:
+#     'me, SUBJECT, TIME, <the reply>, <the rest>'
+# The reply is the text AFTER the timestamp. If there is no timestamp the
+# whole tail after the subject is the reply.
+ROW_TAIL = re.compile(
+    r'\d{1,2}:\d{2}\s*[AP]M(?:\s*,\s*|\s+)|'
+    r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s*', re.I)
 
 # Notification / system senders.
 NOISE_SENDER = re.compile(
@@ -122,6 +136,23 @@ def detect_reply(line):
     q = QUOTE_MARK.search(line)
     head = line[:q.start()] if q else line
 
+    # Gmail's compact row: 'me, SUBJECT, TIME, <reply>'. When there is no
+    # quote marker, the reply is the text after the timestamp - not the
+    # whole line, because the line starts with our own thread label.
+    if q is None and re.match(r'\s*me,\s', line):
+        # Gmail's compact row for a thread WE started:
+        #     'me, SUBJECT, TIME, <the reply>'
+        # The reply is the text after the timestamp. Only this shape needs
+        # the row-tail rule - a normal thread line starts with the SENDER
+        # ('buyer@club.com :: Re: ...') and its whole body is the reply.
+        t = ROW_TAIL.search(line)
+        if t and t.start() > 0:
+            head = line[t.end():]
+        else:
+            m2 = re.match(r'\s*me,\s*[^,]{0,160}?,\s*', line)
+            if m2:
+                head = line[m2.end():]
+
     if not head.strip():
         return None, 'nothing-before-quote'
     # The SENDER of the reply is the part BEFORE the first '::'.
@@ -145,13 +176,20 @@ def detect_reply(line):
     #   'info@club.com :: unread, ...'            -> somebody else
     #   'shudokan.roje@gmail.com :: ...'          -> somebody else
     if q is None:
-        # No quote of our message anywhere in the line, and the line does
-        # not come from somebody else -> it is our own outbound message.
-        senders = re.findall(r'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+)\s*::', head)
-        senders = [s.lower() for s in senders]
-        others = [s for s in senders if s != 'hsnwarriorapparel@gmail.com']
-        if not others:
-            return None, 'our-own-message'
+        # No quote of our message anywhere in the line. Is the line somebody
+        # else's message, or ours?
+        #
+        # A thread row either starts with a SENDER span
+        # ('buyer@club.com :: Re: ...') or with Gmail's thread label
+        # ('me, SUBJECT, TIME, <reply>'). Only the first form proves the
+        # sender. So: if the line starts with 'me,' it is a thread WE
+        # started - the reply is in the tail - not our own message.
+        if not re.match(r'\s*me,\s', line):
+            senders = re.findall(r'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+)\s*::', head)
+            senders = [s.lower() for s in senders]
+            others = [s for s in senders if s != 'hsnwarriorapparel@gmail.com']
+            if not others:
+                return None, 'our-own-message'
     if NOT_INTERESTED.search(head):
         return None, 'not-interested'
     if OOO.search(head):
@@ -169,3 +207,27 @@ def detect_reply(line):
     if m:
         snip = head[m.end():]
     return snip.strip()[:240] or head.strip()[:240], 'HUMAN'
+
+
+# Instagram's own auto-replies - not a human on the other end.
+IG_AUTOREPLY = re.compile(
+    r'(danke f[u\u00fc]r deine nachricht|geh den offiziellen weg|'
+    r'anfragen zu probetraining|thanks for your message|'
+    r'we.ll get back to you|your message has been received)', re.I)
+
+
+def detect_ig_reply(line):
+    """Return (line, reason) for an Instagram inbox line."""
+    if not line or not line.strip():
+        return None, 'empty'
+    # Instagram renders the inbox as alternating lines: the contact name,
+    # then the message. OUR messages are prefixed "You:".
+    if line.startswith('You:') or line.startswith('You '):
+        return None, 'our-own-dm'
+    if NOISE_SUBJ.search(line):
+        return None, 'noise-subject'
+    if not HUMAN_HINT.search(line):
+        return None, 'no-hint'
+    if IG_AUTOREPLY.search(line):
+        return None, 'ig-auto-reply'
+    return line.strip(), 'HUMAN'

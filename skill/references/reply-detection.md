@@ -75,6 +75,84 @@ yet contains the buyer's reply further along.
 `test_reply_detect.py` - **18/18 PASS** on the real 2026-11-07 threads:
 6 real replies (EN/ES/PT/DE/PL) and 12 real non-replies.
 
+## GMAIL CHANGED ITS DOM ON 2026-11-08 - TWO SILENT BLIND SPOTS
+
+The sweep reported "0 human replies" even after the language fix. Two
+reasons, both of which fail **silently** (no error, just no results):
+
+### 1. THE ROW SELECTOR DIED
+
+`div[role="main"] div.adn.ads` returned **ZERO** elements. The current
+markup uses `div.afn` (compact row) and `tr.zA` (full row).
+
+The fix tries EVERY known selector and takes whichever returns the most:
+
+```js
+const sel=['div[role="main"] div.adn.ads','div[role="main"] div.afn',
+           'div[role="main"] tr.zA','div[role="main"] div.adx.ads',
+           'div[role="main"] div.zA'];
+```
+
+and if all of them are empty, it falls back to a **content-based scan**:
+find the outermost elements whose text matches a mail-row shape. A future
+Gmail redesign then cannot silently blind the sweep.
+
+### 2. GMAIL VIRTUALISES THE LIST - `innerText` IS EMPTY
+
+This is the real killer. Every row element existed (16 of them) but:
+
+```
+div.afn  -> n=16  textContentNonEmpty=15  innerTextNonEmpty=0
+tr.zA    -> n=15  textContentNonEmpty=15  innerTextNonEmpty=0
+```
+
+**`innerText` returned nothing. `textContent` had the full text.** So
+every row looked like an empty string and was filtered out.
+
+Always read `((e.textContent||'')+(e.innerText||''))` - one of the two
+will carry the data.
+
+### 3. THE ROW FORMAT IS `me, SUBJECT, TIME, <reply>`
+
+Gmail's compact row for a thread WE started begins with the thread label
+`me,`, NOT with a sender address:
+
+```
+me, SHUDOKAN 2, Custom martial arts gear for Shudokan, 1:19 PM,
+Buenos días, ¿podrías enviarme catálogo y listado de precios? ...
+```
+
+So the reply is the text **after the timestamp** (`ROW_TAIL`), and the
+line must NOT be treated as "our own message" just because it starts with
+`me,`.
+
+**CRITICAL: do not put a `^me,` alternative in the quote-marker regex.**
+When it did, the marker matched at position 0, the "reply head" became
+empty, and EVERY real reply was thrown away - the detector reported
+"nothing-before-quote" for Shudokan. The quote of our own message is only
+identified by the explicit `HSN (...) escribió` / `wrote:` markers.
+
+### THE TEST NOW HAS 26 CASES
+
+`test_reply_detect.py` - **26/26 PASS**: 6 synthetic replies (EN/ES/PT/
+DE/PL), 12 real non-replies, and **8 real Gmail DOM rows** captured
+verbatim from the live page on 2026-11-08.
+
+### LIVE VERIFICATION
+
+```
+LIVE inbox, fixed detector:
+  HUMAN count: 1
+  -> Buenos días,. ¿podrías enviarme catálogo y listado de precios?
+     Estaríamos | interesados en tus productos de Kickboxing. Un saludo.
+```
+
+The IG half had the same class of bug: it counted **our own outgoing DMs**
+as "human-reply candidates" (7 of them). Fixed by
+`detect_ig_reply()` - skip lines starting with `You:` and skip Instagram's
+own auto-replies ("Danke für deine Nachricht ... geh den offiziellen Weg").
+`test_ig_detect.py` - **24/24 PASS**.
+
 ## REPLIES ARE NOT COLD OUTREACH
 
 A reply to somebody who wrote to US must not eat the 100/day cold-email

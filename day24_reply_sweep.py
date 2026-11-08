@@ -96,8 +96,38 @@ class GmailSearch:
           const mm=t.match(/([\\d,]+)\\s*[–-]\\s*[\\d,]+\\s+of\\s+([\\d,]+)/);
           const nomatch=/No messages matched/i.test(t);
           const many=/of many/i.test(t);
-          const rows=Array.from(document.querySelectorAll('div[role="main"] div.adn.ads'))
-                    .slice(0,40).map(e=>(e.innerText||'').replace(/\\n/g,' | '));
+          // Gmail changed its row DOM on 2026-11-08: the old
+          // 'div.adn.ads' selector now returns ZERO rows, so the sweep
+          // silently found nothing. The current markup uses 'div.afn'
+          // (compact row) and 'tr.zA' (full row). Try every known
+          // selector and fall back to a content-based scan, so a future
+          // Gmail redesign cannot silently blind the sweep again.
+          const sel=['div[role="main"] div.adn.ads','div[role="main"] div.afn',
+                     'div[role="main"] tr.zA','div[role="main"] div.adx.ads',
+                     'div[role="main"] div.zA'];
+          let rows=[];
+          for(const s of sel){
+            const got=Array.from(document.querySelectorAll(s));
+            if(got.length>rows.length) rows=got;
+          }
+          if(!rows.length){
+            // content-based fallback: any element holding a mail row
+            const main=document.querySelector('div[role="main"]');
+            const re=/[A-Za-z0-9._%+-]+@[^\\s,]+ :: |(^|\\n)me, Mail/;
+            const all=Array.from(main.querySelectorAll('div,tr'));
+            const cand=all.filter(el=>{
+              const t=(el.innerText||'');
+              return re.test(t)&&t.length>60&&t.length<1200;
+            });
+            rows=cand.filter(el=>!cand.some(o=>o!==el&&el.contains(o)));
+          }
+          // Gmail VIRTUALISES the list: on 2026-11-08 every row's
+          // innerText was EMPTY while textContent had the full text.
+          // Read textContent first, fall back to innerText.
+          rows=rows.slice(0,40).map(e=>{
+            const t=((e.textContent||'')+(e.innerText||'')).trim();
+            return t.replace(/\\s*\\n\\s*/g,' | ').replace(/\\s{2,}/g,' ').trim();
+          }).filter(t=>t.length>8);
           return JSON.stringify({count:mm?mm[2]:null,nomatch:nomatch,many:many,
                                   box:box?box.value:'',rows:rows,head:t.slice(0,200)});
         })()""", await_promise=False)
@@ -127,7 +157,8 @@ NOISE_SUBJ = re.compile(
 #
 # The sweep also has to ignore OUR OWN outgoing message, which is echoed in
 # the thread - otherwise "please send" in our own copy counts as a reply.
-from reply_detect import detect_reply, HUMAN_HINT, NOISE_SUBJ  # noqa: E402
+from reply_detect import (detect_reply, detect_ig_reply, HUMAN_HINT,  # noqa: E402
+                          NOISE_SUBJ)
 
 # ---------- 1. Gmail reply sweep ----------
 log('--- Gmail reply sweep (7d inbox, TYPING method) ---')
@@ -203,12 +234,25 @@ try:
         itxt = js_eval(ws, """(() => (document.body?document.body.innerText:'').slice(0,4000))()""",
                        await_promise=False) or ''
         ig_human = 0
+        ig_reasons = {}
+        # Instagram renders the inbox as alternating lines: the contact
+        # name, then the message. OUR messages are prefixed "You:" and
+        # open with our standard opener - they must never count as a
+        # reply. The old check matched any line with an interest word, so
+        # 6 of our own outgoing DMs were counted as replies.
         for line in itxt.splitlines():
-            if line.strip():
-                log('    IG| ' + line.strip()[:140])
-                if HUMAN_HINT.search(line) and not NOISE_SUBJ.search(line):
-                    ig_human += 1
+            line = line.strip()
+            if not line:
+                continue
+            log('    IG| ' + line[:140])
+            snip, why = detect_ig_reply(line)
+            ig_reasons[why] = ig_reasons.get(why, 0) + 1
+            if snip is not None:
+                ig_human += 1
+                log('    IG HUMAN? | ' + snip[:150])
         log('  IG human-reply candidates: %d' % ig_human)
+        log('  IG rejection reasons: %s' % ', '.join(
+            '%s=%d' % (k, v) for k, v in sorted(ig_reasons.items(), key=lambda x: -x[1])))
         ws.close()
 except Exception as e:
     log('  IG sweep error: ' + str(e)[:200])

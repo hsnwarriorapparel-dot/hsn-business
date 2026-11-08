@@ -20,7 +20,8 @@ Key metrics: reply rate <15% = danger; block rate >2% = quality drop. Messages: 
 Critical: connection IP should match SIM country (PK number + US VPS IP = Layer-1 flag, warm up longer), real SIM not VoIP, honor STOP instantly, send 10:00-18:00 recipient local time, first message must identify business + reason. Scale ceiling ~50/day/number mature; user rule 10/day = safe.
 **Number-replacement re-contact:** when a new number replaces a banned one, re-open the old REPLIED conversations with the SAME personalized first-touch template they originally received — the user rejected apology/"our number changed" drafts. Then resume cold leads at warm-up pace; never re-send to contacts already messaged on the old number (WA_Pending_List sheet 3 = do-not-resend).
 
-## TWO GENUINE CLIENT REPLIES (2026-11-07) — draft `references/client-replies-2026-11.md`
+## TWO GENUINE CLIENT REPLIES (2026-11-07) — draft `references/client-replies-2026-11.md
+- references/reply-detection.md`
 
 **TOWASAN Karate Schulen (L3372, Munich) replied on WhatsApp:** *"What kind of class are you proposing, and what would your role be? Please share a short outline so our team can review it."* **Answer plainly: we do not run classes, we are the manufacturer.** Then a short forwardable outline (dobok per programme, belts, kickboxing gear, sparring pads for the kids groups, walkout wear for their 5 locations), real prices, and ONE question back. They are Kinderkarate ab 3 + Kickboxen with 5 locations and 5 age levels; **they have no email in our tracker - ask for it.** Draft ready at `/home/ubuntu/towasan_draft.py`, passes the spam checker, **NOT sent.**
 
