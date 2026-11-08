@@ -178,7 +178,13 @@ def add_rows(new_rows, retries=3):
             if r and r[0] and r[0] == 'Lead ID':
                 keep.append(r)
                 continue
-            if len(r) > _ei and not email_is_contactable(r[_ei]):
+            # An EMPTY email is not a bad email - a phone-only lead is
+            # legitimate and opens the WhatsApp channel. Only a NON-EMPTY
+            # undeliverable address is dropped. This must match
+            # read_rows(), or a phone-only lead is written and then
+            # vanishes on the next read.
+            if len(r) > _ei and (r[_ei] or '').strip() \
+                    and not email_is_contactable(r[_ei]):
                 dropped += 1
                 continue
             keep.append(r)

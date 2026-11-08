@@ -562,6 +562,20 @@ def phones_from_links(html):
         digits = re.sub(r'\D', '', raw)
         if not 8 <= len(digits) <= 15:
             continue
+        # a PLACEHOLDER phone - '+971 00 000 0000' is a CSS/JS mask that
+        # some sites ship in their contact widget. It was being recorded
+        # as a dialable contact.
+        if set(digits) <= {'0'}:
+            continue
+        _local = digits
+        for _cc in re.findall(r'\d{1,4}', raw[:6] if raw.startswith('+') else ''):
+            pass
+        if raw.startswith('+'):
+            _cc = re.sub(r'\D', '', raw)[:3]
+            if _cc and digits.startswith(_cc):
+                _local = digits[len(_cc):]
+        if not _local or set(_local) <= {'0'}:
+            continue
         # a wa.me link is always a FULL international number (60163648600)
         # - prefix it with '+'. A tel: link may be local ('03-62417296') -
         # leave it without a country code, never invent one.
@@ -603,6 +617,35 @@ def find_phones(text, country):
     out = []
     for m in PHONE_RUN_RE.finditer(text):
         run = m.group(0)
+        # A PLACEHOLDER phone: '+971 00 000 0000' is a CSS/JS mask, not a
+        # number. desertlinktrading.com carried one and it was recorded as
+        # a dialable contact. A real number has at least 7 significant
+        # digits and is not all zeros.
+        _digits = re.sub(r'\D', '', run)
+        if len(_digits) < 7 or set(_digits) <= {'0'}:
+            continue
+        # strip the country code before the zero check - '+971 00 000 0000'
+        # has digits '971000000000', which is not all zeros, but the number
+        # AFTER the code is.
+        # Strip whatever country code is present so the PLACEHOLDER check
+        # sees the subscriber part. The code may differ from the
+        # directory's country - desertlinktrading.com is listed under
+        # saudi-arabia but its own mask says '+971 00 000 0000'.
+        _local = _digits
+        if _digits.startswith('00'):
+            _local = _digits[2:]
+        else:
+            for _cc in (re.sub(r'\D', '', dial or ''),):
+                if _cc and _digits.startswith(_cc):
+                    _local = _digits[len(_cc):]
+                    break
+            else:
+                # a leading '+<2-4 digits>' that is not the directory's
+                # country - strip it anyway
+                if len(_digits) > 7:
+                    _local = _digits[3:] if len(_digits) - 3 >= 7 else _digits[4:]
+        if not _local or set(_local) <= {'0'}:
+            continue
         # the '+' / country code belongs to the FIRST group of the run
         prefix = ''
         body_run = run
@@ -732,6 +775,36 @@ def search_company(name, country):
     return out
 
 
+# Countries a company names on its OWN site. The directory's country can
+# be wrong - it lists the member's declared country, not where the
+# website's contact details point.
+SITE_COUNTRY_NAMES = {
+    'United Arab Emirates': ['Dubai', 'UAE', 'Emirates', 'Abu Dhabi',
+                             'Sharjah', 'Ajman', 'Ras Al Khaimah'],
+    'Saudi Arabia': ['Saudi', 'Riyadh', 'Jeddah', 'Dammam'],
+    'Oman': ['Oman', 'Muscat', 'Sohar'],
+    'Kuwait': ['Kuwait'],
+    'Qatar': ['Qatar', 'Doha'],
+    'Egypt': ['Egypt', 'Cairo', 'Alexandria'],
+    'Pakistan': ['Pakistan', 'Lahore', 'Karachi', 'Sialkot'],
+    'Malaysia': ['Malaysia', 'Kuala Lumpur', 'Penang', 'Johor'],
+    'Portugal': ['Portugal', 'Lisbon', 'Porto'],
+    'Israel': ['Israel', 'Tel Aviv'],
+    'India': ['India', 'Mumbai', 'Delhi', 'Ahmedabad', 'Surat', 'Coimbatore'],
+    'Bangladesh': ['Bangladesh', 'Dhaka'],
+    'Indonesia': ['Indonesia', 'Jakarta', 'Bali'],
+    'Vietnam': ['Vietnam', 'Ho Chi Minh', 'Hanoi'],
+    'Thailand': ['Thailand', 'Bangkok'],
+    'Brazil': ['Brazil', 'Sao Paulo'],
+    'Mexico': ['Mexico'],
+    'Canada': ['Canada', 'Toronto', 'Vancouver'],
+    'Australia': ['Australia', 'Sydney', 'Melbourne'],
+    'Ukraine': ['Ukraine', 'Kyiv', 'Odessa'],
+    'Japan': ['Japan', 'Tokyo', 'Osaka'],
+    'South Korea': ['South Korea', 'Seoul', 'Busan'],
+    'Turkey': ['Turkey', 'Istanbul', 'Izmir'],
+}
+
 def process(comp):
     name = comp['company']
     country = (comp.get('dir_country') or '').replace('-', ' ').title()
@@ -787,15 +860,36 @@ def process(comp):
         low = text.lower()
         if INFO_SITE.search(head_or_text(html, text)):
             continue
+        # THE PRODUCT MUST BE VISIBLE ON THE SITE, OR THE DIRECTORY MUST
+        # SAY SO AND THE SITE MUST BE A WHOLESALE BUSINESS.
+        #
+        # A general trading company whose site never says 'uniform' or
+        # 'boxing' used to be rejected outright. But go4WorldBusiness
+        # classified it as a buyer of martial-arts goods, and its own site
+        # is a wholesale operation with a working sales email
+        # (info@alwahaksa.com, info@desertlinktrading.com). The platform
+        # knows what they buy; the site just does not advertise it.
+        dir_cat = (comp.get('dir_category') or '').lower()
+        dir_is_ours = bool(re.search(
+            r'(uniform|karate|judo|taekwondo|boxing|fight|mma|martial|'
+            r'belt|glove|head-?gear|head-?guard|shin-?guard|mouth-?guard|'
+            r'hand-?wrap|kick-?pad|sportswear|sports-?wear|team-?wear|'
+            r'protective|sport)', dir_cat))
+        # A MINIMAL site lists no products at all (alwahaksa.com is one).
+        # The platform's own classification plus a working email on the
+        # company's own domain is enough for those.
+        _minimal = len(text) < 4500
         if not PRODUCT_WORDS.search(text):
-            continue
+            if not (dir_is_ours and (WHOLESALE_WORDS.search(text) or _minimal)):
+                continue
         # The product must be the company's actual business, not a passing
         # mention in a footer. 'Blue Chip Global - Pipes and Fittings
         # Suppliers' passed on the word 'sports' somewhere in its page; the
         # title and the top of the body have to show our product.
         head = (title_hint(html) + ' ' + text[:900]).lower()
         if not PRODUCT_WORDS.search(head):
-            continue
+            if not (dir_is_ours and (WHOLESALE_WORDS.search(head) or _minimal)):
+                continue
         # and it must not be obviously a different trade
         if OTHER_TRADE.search(text[:1200]):
             continue
@@ -901,10 +995,19 @@ def process(comp):
                 best = (e, score)
         if not best and not phones:
             continue
+        # The site's own text may name a country that differs from the
+        # directory's. desertlinktrading.com is listed under saudi-arabia
+        # but its own site says 'Dubai' and 'FZCO'. The site is right.
+        site_country = country
+        for _cc, _names in SITE_COUNTRY_NAMES.items():
+            if any(re.search(r'\b' + re.escape(n) + r'\b', text, re.I)
+                   for n in _names):
+                site_country = _cc
+                break
         return {'email': best[0] if best else '',
                 'phone': phones[0] if phones else '',
                 'website': 'https://' + d,
-                'matched': name, 'country': country,
+                'matched': name, 'country': site_country,
                 'category': comp.get('dir_category', '')}
     return None
 
@@ -961,6 +1064,14 @@ def main():
             # searched for as a business, so do not waste a search on it
             done[k] = {'status': 'dead-lead'}
             continue
+        if (v.get('dir_country') or '').lower() == 'pakistan':
+            # A PAKISTANI company on the buyer directory is a local
+            # competitor or a local trader, not an export buyer. 36 of the
+            # 43 companies that screened as 'ours' were Pakistani. They
+            # are a different business entirely - chasing them wastes the
+            # search budget on companies that cannot buy from us.
+            done[k] = {'status': 'local-pakistan'}
+            continue
         # THE DECISIVE CHECK: read the buyer's own go4WorldBusiness profile
         # and see what they say they buy. If it is not our product, stop
         # here - a web search for a buyer who wants inflatable rugby balls
@@ -1014,7 +1125,19 @@ def main():
                 continue
             ctext = strip_tags(chk)
             chead = (title_hint(chk) + ' ' + ctext[:900]).lower()
-            if not PRODUCT_WORDS.search(chead) or OTHER_TRADE.search(ctext[:1200]) \
+            # The self-check must apply the SAME product rule as
+            # process(), or it rejects exactly the companies process()
+            # just accepted.
+            _dcat = (comp.get('dir_category') or '').lower()
+            _dours = bool(re.search(
+                r'(uniform|karate|judo|taekwondo|boxing|fight|mma|martial|'
+                r'belt|glove|head-?gear|head-?guard|shin-?guard|mouth-?guard|'
+                r'hand-?wrap|kick-?pad|sportswear|sports-?wear|team-?wear|'
+                r'protective|sport)', _dcat))
+            _cminimal = len(ctext) < 4500
+            _cok = PRODUCT_WORDS.search(chead) or (
+                _dours and (WHOLESALE_WORDS.search(chead) or _cminimal))
+            if not _cok or OTHER_TRADE.search(ctext[:1200]) \
                     or OTHER_SPORTS.search(chead) or NOT_A_COMPANY.search(hit['website']):
                 print('    final check failed (site no longer matches) - skipping')
                 done[kid] = {'status': 'no-match', 'note': 'final check failed'}

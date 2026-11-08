@@ -642,3 +642,123 @@ still alive.
 The state file `buyer_reach_state.json` is still read by
 `g4wb_pipeline_report.py` for reporting only. The live company funnel
 uses `company_reach_state.json`.
+
+## WHY THE COMPANY FUNNEL WAS FINDING NOTHING (4 bugs, all fixed)
+
+The company funnel was reporting "no match" for almost every overseas
+company while the search itself was working fine. Four separate defects
+were stacked on top of each other.
+
+### 1. THE DIRECTORY CATEGORY IS A PRODUCT SIGNAL
+
+A general trading company whose site never says "uniform" or "boxing" was
+rejected outright by `PRODUCT_WORDS`. But go4WorldBusiness classified it
+as a buyer of martial-arts goods, and its own site is a wholesale
+operation with a working sales email:
+
+```
+info@alwahaksa.com        (Al Waha Middle East Co - Saudi Arabia)
+info@desertlinktrading.com (Desert Link Trading - Dubai)
+```
+
+**The platform knows what they buy. The site just does not advertise it.**
+The directory category now counts as a product signal when the site shows
+wholesale intent, or when the site is MINIMAL (under 4,500 characters of
+text - alwahaksa.com is a one-pager).
+
+**The final self-check must apply the SAME rule.** It was still using the
+strict version and rejected exactly the companies `process()` had just
+accepted.
+
+### 2. A PLACEHOLDER PHONE IS NOT A PHONE
+
+`desertlinktrading.com` ships a CSS/JS mask: `+971 00 000 0000`. It was
+being recorded as a dialable contact.
+
+The check has to strip the country code FIRST, and it has to strip ANY
+country code, not just the directory's - the site is listed under
+saudi-arabia but its own mask says +971:
+
+```python
+_local = _digits
+_cc = re.sub(r'\D', '', dial or '')
+if _cc and _digits.startswith(_cc):
+    _local = _digits[len(_cc):]
+else:
+    _local = _digits[3:] if len(_digits) - 3 >= 7 else _digits[4:]
+if not _local or set(_local) <= {'0'}:
+    continue
+```
+
+Both `find_phones()` and `phones_from_links()` need the guard.
+
+### 3. THE SITE'S OWN COUNTRY BEATS THE DIRECTORY'S
+
+`desertlinktrading.com` is listed under saudi-arabia; its own site says
+Dubai and FZCO. `SITE_COUNTRY_NAMES` maps 23 countries to the names a
+site uses, and the site's own text wins.
+
+### 4. PAKISTANI COMPANIES ARE NOT EXPORT BUYERS
+
+**36 of the 43 companies that screened as "ours" were Pakistani.** They
+are local competitors and traders, not buyers who can import from us.
+`company_reach.py` now marks them `local-pakistan` and skips them
+instantly.
+
+### THE SCREENER WAS WIPING ITS OWN WORK
+
+`screen_buyers.py` started from empty dicts and wrote only that run's
+`todo`, so every earlier verdict was destroyed. The file fell from **633
+entries to 200** on one run. It now merges with the previous screening.
+
+### A PHONE-ONLY LEAD IS LEGITIMATE
+
+`add_rows()` dropped any row with an empty email, but `read_rows()` kept
+them - so a phone-only lead was written and then vanished on the next
+read. The two guards must agree: an EMPTY email is not a bad email, only a
+NON-EMPTY undeliverable address is dropped. A phone-only lead opens the
+WhatsApp channel.
+
+## THE YIELD AFTER THE FIXES
+
+From 40 companies tried, **5 new buyer companies** were found:
+
+| Company | Contact | Country |
+|---|---|---|
+| Easy Source LLC | info@easysource.org.in | India |
+| Al Obaidani International LLC | connect@theomantoday.com | UAE |
+| Hijaz Circle Trading Company | info@alhijaztrading.com | Saudi Arabia |
+| East West Trading | retail@ew-trading.com | UAE |
+| Desert Link Trading | info@desertlinktrading.com | UAE |
+
+That is roughly **1 in 8**, against 0 in 30 before.
+
+## screen_buyers.py MUST MERGE, NEVER RESET
+
+The screener classifies each company by reading its own go4WorldBusiness
+profile and looking for the "Buys ..." sentence:
+
+- **ours** - the phrase names one of our products
+- **theirs** - a confirmed other trade (never search these again)
+- **unknown** - no "Buys" sentence, so the company might still be ours
+
+The old code started from empty dicts and wrote only the current run's
+`todo`. Every earlier verdict was destroyed on each run - the file fell
+from **633 entries to 200**. It now merges:
+
+```python
+prev = json.load(open(OUT))
+ours = dict(prev.get('ours', {}))
+theirs = dict(prev.get('theirs', {}))
+unknown = dict(prev.get('unknown', {}))
+```
+
+**A screening file that shrinks is a bug.** Check the total before
+trusting it.
+
+## THE DIRECTORY HARVEST MERGES BY MEMBER ID
+
+`g4wb_company_harvest.py` loads the existing file, skips member IDs it
+already has, and saves the merged set. A run reporting "1,080 total" can
+still leave 865 on disk if a later concurrent run wrote a smaller merge -
+check the file's mtime and count before acting on a run summary.
