@@ -362,3 +362,45 @@ cases and fails if they disagree.
 it has one placeholder and one REAL address. Remove only the placeholder
 and keep the real one. A row is only deletable when EVERY address on it
 is a placeholder.
+
+## A BAD EMAIL IS CLEARED, NEVER THE ROW DROPPED
+
+The first version of the contactability rule **skipped** any row whose
+email was not usable. That looked harmless, and it was not:
+
+- `read_rows()` returned 5 fewer rows than the file held
+- `write_rows()` then wrote that shorter list back
+- **5 real clubs were deleted**
+
+They were Fight Factory Manchester, SubZone Fight Academy, Fighting AC-92,
+Sportbox Berlin and Legends R Born - all real clubs with real websites and
+phones. Only their scraped email was a placeholder. They were restored
+from git.
+
+**The rule: clear the FIELD, keep the ROW.** A club with a fake email is
+still a club, reachable by phone and website.
+
+```python
+# read_rows()
+if len(r) > ei and (r[ei] or '').strip() \
+        and not email_is_contactable(r[ei]):
+    r = list(r)
+    r[ei] = ''
+clean.append(r)
+
+# add_rows() - same treatment
+if len(r) > _ei and (r[_ei] or '').strip() \
+        and not email_is_contactable(r[_ei]):
+    r = list(r)
+    r[_ei] = ''
+    cleared += 1
+keep.append(r)
+```
+
+**THE INVARIANT: `len(read_rows()) == len(csv.reader(file))`.** If the
+reader hides a row, any writer that reads and writes back will delete
+it. A reader that CLEARS a field keeps the two in step.
+
+`test_clear_not_drop.py` checks this: a row with a placeholder email
+survives, the address is cleared, the reader and the disk agree, and a
+read-write round trip loses nothing.

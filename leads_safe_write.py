@@ -169,9 +169,15 @@ def read_rows():
         return rows
     clean = [hdr]
     for r in rows[1:]:
+        # A row with a non-contactable email is NOT dropped - it is kept
+        # with the bad address CLEARED. Dropping the row would make the
+        # reader and the disk disagree, and any writer that reads and
+        # writes back would silently delete the lead. The club may still
+        # be reachable by phone or website.
         if len(r) > ei and (r[ei] or '').strip() \
                 and not email_is_contactable(r[ei]):
-            continue
+            r = list(r)
+            r[ei] = ''
         clean.append(r)
     return clean
 
@@ -210,6 +216,7 @@ def add_rows(new_rows, retries=3):
         _ei = _hdr.index('Email')
         keep = []
         dropped = 0
+        cleared = 0
         for r in new_rows:
             # NEVER touch the header row. Its Email cell contains the
             # literal text 'Email', which the guard would read as an
@@ -219,16 +226,21 @@ def add_rows(new_rows, retries=3):
                 continue
             # An EMPTY email is not a bad email - a phone-only lead is
             # legitimate and opens the WhatsApp channel. Only a NON-EMPTY
-            # undeliverable address is dropped. This must match
-            # read_rows(), or a phone-only lead is written and then
-            # vanishes on the next read.
+            # undeliverable address is a problem, and the fix is to CLEAR
+            # the address, not to drop the row: the club is still
+            # reachable by phone and website. This must match
+            # read_rows(), or a reader and a writer would disagree and
+            # the lead would vanish.
             if len(r) > _ei and (r[_ei] or '').strip() \
                     and not email_is_contactable(r[_ei]):
-                dropped += 1
-                continue
+                r = list(r)
+                r[_ei] = ''
+                cleared += 1
             keep.append(r)
         if dropped:
             print('dropped %d row(s) with a non-contactable email' % dropped)
+        if cleared:
+            print('cleared the email on %d row(s) - the lead is kept' % cleared)
         new_rows = keep
         if not new_rows:
             return len(read_rows())
