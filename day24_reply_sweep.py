@@ -121,11 +121,13 @@ NOISE_SUBJ = re.compile(
     r'password|verify your|welcome to|newsletter|promotion|offer|'
     r'tradewheel|go4worldbusiness|facebook|instagram|amazon|etsy|meta|'
     r'western union|yahoo|etsy|aliexpress|alibaba', re.I)
-HUMAN_HINT = re.compile(
-    r'we (are|would) (like|be interested)|interested in|quotation|quote|price list|'
-    r'catalog|how much|minimum order|moq|sample|interested|please send|'
-    r'could you send|can you send|can you share|would like to know', re.I)
-
+# A buyer reply does not have to be in English. Shudokan (Spain) asked for
+# "catálogo y listado de precios" and the sweep reported 0 human replies
+# because every hint word was English.
+#
+# The sweep also has to ignore OUR OWN outgoing message, which is echoed in
+# the thread - otherwise "please send" in our own copy counts as a reply.
+from reply_detect import detect_reply, HUMAN_HINT, NOISE_SUBJ  # noqa: E402
 
 # ---------- 1. Gmail reply sweep ----------
 log('--- Gmail reply sweep (7d inbox, TYPING method) ---')
@@ -142,13 +144,19 @@ try:
     r = gs.search(q_inbox, wait=10)
     log('  query applied: %r' % (r.get('box') or ''))
     log('  conversations: %s (many=%s nomatch=%s)' % (r.get('count'), r.get('many'), r.get('nomatch')))
+    # reply_detect.detect_reply() is the tested detector - it handles
+    # non-English replies, our own quoted message, auto-acks, out-of-office
+    # and 'not interested'. 18/18 on the real 2026-11-07 threads.
     human = []
+    reasons = {}
     for line in (r.get('rows') or []):
-        if NOISE_SUBJ.search(line):
-            continue
-        if HUMAN_HINT.search(line):
+        snip, why = detect_reply(line)
+        reasons[why] = reasons.get(why, 0) + 1
+        if snip is not None:
             human.append(line)
-            log('    HUMAN? | ' + line[:170])
+            log('    HUMAN? | ' + snip[:170])
+    log('  rejection reasons: %s' % ', '.join('%s=%d' % (k, v) for k, v in
+                                               sorted(reasons.items(), key=lambda x: -x[1])))
     log('  HUMAN client-reply candidates: %d' % len(human))
     if not human:
         for line in (r.get('rows') or [])[:12]:

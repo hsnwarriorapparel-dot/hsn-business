@@ -6,9 +6,12 @@ import re
 from collections import Counter
 
 CSV_PATH = '/home/ubuntu/leads.csv'
+# The live harvest files. The legacy shared file is NOT counted - it is the
+# old pre-split snapshot and counting it made the report show stale numbers
+# (811 identities / 60 filtered instead of 1662 / 212).
 RAW_FILES = ['/home/ubuntu/g4wb_buyer_harvest_dir.json',
              '/home/ubuntu/g4wb_buyer_harvest_search.json']
-RAW = '/home/ubuntu/g4wb_buyer_harvest_legacy_20261107.json'
+RAW = None
 COMPANIES = '/home/ubuntu/g4wb_company_harvest.json'
 FILT = '/home/ubuntu/g4wb_buyer_harvest_filtered.json'
 STATE = '/home/ubuntu/buyer_reach_state.json'
@@ -24,18 +27,25 @@ def jload(p, d):
 
 
 raw = {}
-for f in RAW_FILES + [RAW]:
+for f in RAW_FILES:
     for k, v in jload(f, {}).items():
         raw.setdefault(k, v)
 companies = jload(COMPANIES, {})
 filt = jload(FILT, {})
 reach = jload(STATE, {'processed': {}}).get('processed', {})
+# the COMPANY funnel has its own state file
+CREACH = '/home/ubuntu/company_reach_state.json'
+creach = jload(CREACH, {'processed': {}}).get('processed', {})
 queue = jload(QUEUE, [])
 qstate = jload(QSTATE, {})
 
 added = sum(1 for v in reach.values() if v.get('status') == 'added')
 nomatch = sum(1 for v in reach.values() if v.get('status') == 'no-match')
 dup = sum(1 for v in reach.values() if v.get('status') == 'duplicate')
+c_added = sum(1 for v in creach.values() if v.get('status') == 'added')
+c_nomatch = sum(1 for v in creach.values() if v.get('status') == 'no-match')
+c_dup = sum(1 for v in creach.values() if v.get('status') == 'duplicate')
+c_junk = sum(1 for v in creach.values() if v.get('status') == 'junk-name')
 
 # how many of the new leads are in leads.csv
 new_ids = [v.get('lead') for v in reach.values() if v.get('status') == 'added']
@@ -52,8 +62,17 @@ print('=== go4WorldBusiness buyer-directory funnel ===')
 print('  buyer COMPANIES harvested      : %d' % len(companies))
 print('  raw buyer identities harvested : %d' % len(raw))
 print('  filtered to our product space  : %d' % len(filt))
-print('  searched for a company         : %d' % len(reach))
-print('    -> company + email found     : %d  (in leads.csv: %d)' % (added, live))
+print()
+print('  -- by company name (the strong funnel) --')
+print('  searched for a company         : %d' % len(creach))
+print('    -> company + email/phone     : %d' % c_added)
+print('    -> already in tracker        : %d' % c_dup)
+print('    -> no match                  : %d' % c_nomatch)
+print('    -> junk name skipped         : %d' % c_junk)
+print()
+print('  -- by personal name (the weak funnel) --')
+print('  searched for a person          : %d' % len(reach))
+print('    -> company + email found     : %d' % added)
 print('    -> already in tracker        : %d' % dup)
 print('    -> no match                  : %d' % nomatch)
 print()

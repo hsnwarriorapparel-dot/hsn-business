@@ -297,6 +297,39 @@ the phone came from the challenge page.
 lead is marked `CLOUDFLARE-BLOCKED ... needs manual check` and KEPT - it may
 well be genuine, it just cannot be fetched from this host.
 
+## THE COMPANY FUNNEL IS 12x MORE PRODUCTIVE THAN THE PERSON FUNNEL
+
+Measured over the same window (2026-11-07):
+
+```
+-- by company name (the strong funnel) --
+searched for a company     : 90
+  -> company + email/phone  : 12      <-- 13% hit rate
+  -> already in tracker     :  1
+  -> no match               : 70
+  -> junk name skipped      :  7
+
+-- by personal name (the weak funnel) --
+searched for a person       : 25
+  -> company + email found  :  0      <-- 0% hit rate
+  -> no match               : 25
+```
+
+**A buyer's PERSONAL name leads nowhere.** The directory lists contact
+people, but a person's name does not identify a company web domain - the
+search returns other people with the same name, or directories. Searching
+the COMPANY name finds the actual business.
+
+So: put the reach budget into `company_reach.py`, and keep
+`buyer_reach.py` (person-name) on a small limit.
+
+### THE REPORT MUST SHOW BOTH FUNNELS
+`g4wb_pipeline_report.py` used to print only the personal-name numbers, so
+a night that added 12 real companies looked like "0 found". It now prints
+both, and it does NOT count the legacy shared harvest file - counting that
+old snapshot made it report 811 identities / 60 filtered instead of the
+live 1,670 / 212.
+
 ## WHY THE REACH RETURNS MOSTLY NOTHING (diagnosed 2026-11-07)
 
 `diagnose_reach.py` reports WHICH check rejected each company. On 10 Omani

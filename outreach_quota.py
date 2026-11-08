@@ -165,19 +165,51 @@ def ledger_entries():
     return out
 
 
+def reply_count_today():
+    """Replies to inbound buyers sent today.
+
+    A reply to somebody who wrote to US is not cold outreach. It must not
+    eat the 100/day cold-email allowance - the buyer already asked. It is
+    counted separately so the daily report can show it, and so a day of
+    heavy replying can never push the cold campaigns over their cap.
+    """
+    return sent_today(engine='reply')
+
+
+def reply_allowance():
+    """How many buyer replies may go out today.
+
+    Replies are not cold outreach, so they have their own ceiling. 30/day is
+    generous for a business where the reply rate is a handful a week, and
+    it still stops a runaway loop from flooding a buyer's inbox.
+    """
+    return max(0, 30 - reply_count_today())
+
+
 def sent_today(engine=None):
     """ACTUAL emails sent today, from the ledger.
 
     Counts EMAILS, not tracker rows - so one chain pitch that stamps 21
     location rows still counts as ONE email (BUG A).
+
+    With no engine, this counts COLD emails only. A reply to a buyer who
+    wrote to us is not cold outreach, so it must not eat the 100/day cold
+    allowance - the buyer already asked. Replies are counted separately by
+    reply_count_today() and have their own ceiling in reply_allowance().
     """
     day = day_tag()
     n = 0
     for e in ledger_entries():
         if e.get('day') != day:
             continue
-        if engine and e.get('engine') != engine:
-            continue
+        eng = e.get('engine')
+        if engine:
+            if eng != engine:
+                continue
+        else:
+            # no engine requested -> cold emails only
+            if eng == 'reply':
+                continue
         n += 1
     return n
 
