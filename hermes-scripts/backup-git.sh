@@ -43,6 +43,12 @@ for f in /home/ubuntu/.hermes/cron/*.json; do
   [ "$b" = "jobs.json" ] && continue
   cp -u "$f" "$BACKUP_DIR/hermes-cron/" 2>/dev/null
 done
+# The cron OUTPUT directory is a growing archive of every past run and the
+# runtime databases are live state. Neither is a definition, so neither is
+# backed up - they made every backup dirty and pushed hundreds of files.
+rm -rf "$BACKUP_DIR/hermes-cron/output" "$BACKUP_DIR/hermes-cron/notepad.db" \
+      "$BACKUP_DIR/hermes-cron/ticker_heartbeat" "$BACKUP_DIR/hermes-cron/ticker_last_success" \
+      "$BACKUP_DIR/hermes-cron/usage_audit.jsonl" 2>/dev/null
 
 # Sync website source (only changed files)
 cd /home/ubuntu/business-backup
