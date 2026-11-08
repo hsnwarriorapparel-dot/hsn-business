@@ -247,12 +247,20 @@ def add_rows(new_rows, retries=3):
     return None
 
 
-def update_row(lead_id, field, value, marker=None, append=False):
+def update_row(lead_id, field, value, marker=None, append=False,
+               prepend=False):
     """Update one lead's field in place, re-reading at write time.
 
-    append=True APPENDS to the field instead of replacing it (used for the
-    Status column, which is a ' | '-separated marker list).
+    append=True APPENDS to the field instead of replacing it (used for
+    the Status column, which is a ' | '-separated marker list).
     A marker that is already present is not added twice.
+
+    prepend=True puts the value at the FRONT. THE STATUS COLUMN IS
+    TRUNCATED AT 250 CHARACTERS, so a marker appended at the end can be
+    cut off by a long note - and a send marker that is cut off is
+    invisible, which means the next wave emails the same lead again.
+    Three buyer companies were sent twice on 2026-11-08 for exactly
+    that reason. The send marker must go at the front.
     """
     for attempt in range(3):
         if not acquire():
@@ -265,7 +273,11 @@ def update_row(lead_id, field, value, marker=None, append=False):
                 if r and r[0] == lead_id:
                     fi = idx.get(field)
                     if fi is not None and fi < len(r):
-                        if append:
+                        if prepend:
+                            cur = (r[fi] or '').strip(' |')
+                            if value and value not in cur.split(' | '):
+                                r[fi] = (value + (' | ' + cur if cur else ''))[:250]
+                        elif append:
                             cur = r[fi] or ''
                             if value and value not in cur:
                                 r[fi] = (cur.rstrip(' |') + ' | ' + value)[:250]

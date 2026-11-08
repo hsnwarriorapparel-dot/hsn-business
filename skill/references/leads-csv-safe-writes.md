@@ -254,3 +254,63 @@ if re.search(r'\b(no|reg(?:istration)?|vat|crn|licen[cs]e|lc|gst|'
 ```
 
 This one was a genuine bug and the fix is worth keeping.
+
+## THE SEND MARKER MUST BE AT THE FRONT OF THE STATUS
+
+The Status column is truncated at **250 characters**. The buyer-company
+rows already carry a long HUNTED note, so a send marker APPENDED at the
+end was cut off:
+
+```
+L5284 Supa Sportsman LLC
+  Status length: 250
+  ends with:    ' apply. | verified-on-own-site (email found o'
+  'email sent' present: False
+```
+
+The wave's own dedupe reads the Status and looks for `email sent`. Not
+finding it, it emailed the same lead again. **Three buyer companies were
+sent twice on 2026-11-08** - Supa Sportsman, Cobra Sports and Apparel
+Point - and one more (TOWASAN, L3372) had the same hidden marker.
+
+Across the entire 163-send ledger history those were the ONLY
+double-sends, and all of them came from this one cause.
+
+**The marker is now PREPENDED:**
+
+```python
+update_row(lead_id, 'Status', 'COMPLETE: email sent (2026-11-08)',
+           prepend=True)
+```
+
+`update_row` gained a `prepend` flag:
+
+```python
+if prepend:
+    cur = (r[fi] or '').strip(' |')
+    if value and value not in cur.split(' | '):
+        r[fi] = (value + (' | ' + cur if cur else ''))[:250]
+elif append:
+    ...
+```
+
+**THE RULE: anything that must be READ BACK later goes at the FRONT of
+the Status.** The end of the column is not durable.
+
+### FINDING THE HIDDEN ONES
+
+To find every row whose send marker was swallowed, check the LEDGER -
+it is the truth about what was actually sent - against the Status
+column:
+
+```python
+sent_targets = {x['target'] for x in ledger}
+hidden = [r[0] for r in rows
+          if len(r[status]) >= 250
+          and 'email sent' not in r[status].lower()
+          and r[0] in sent_targets]
+```
+
+15 rows had a full Status with no visible marker, but only 4 of them
+had actually been emailed. The other 11 were never sent, so their
+Status was full for an unrelated reason and they were left alone.

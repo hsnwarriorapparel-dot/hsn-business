@@ -54,18 +54,24 @@ def load():
         return list(csv.reader(f))
 
 
-def update_status(lead_id, new_status):
-    """Append a status marker to one lead.
+def update_status(lead_id, new_status, prepend=False):
+    """Append (or prepend) a status marker to one lead.
 
     Routed through leads_safe_write.update_row(), which takes the leads.csv
     lock and re-reads at write time. The old version wrote the whole file
     back with no lock, so a row added by the ammo hunt or a reacher between
     its read and its write was silently destroyed.
+
+    prepend=True puts the marker at the FRONT of the Status field. The
+    Status column is truncated at 250 characters, so a marker appended at
+    the end can be cut off by a long note - and a send marker that is cut
+    off is invisible, which means the next wave emails the lead again.
     """
     import sys as _sys
     _sys.path.insert(0, '/home/ubuntu')
     from leads_safe_write import update_row
-    update_row(lead_id, 'Status', new_status, append=True)
+    update_row(lead_id, 'Status', new_status, append=not prepend,
+               prepend=prepend)
 
 
 def already_sent(lid):
@@ -332,7 +338,14 @@ for pos, lid in enumerate(ids, 1):
         ok = res.get('ok') if isinstance(res, dict) else ('sent' in str(res).lower())
         log(f"  [{pos}/{len(ids)}] EMAIL {lid} {name[:22]} -> {email}: {'OK' if ok else str(res)[:60]}")
         if ok:
-            update_status(lid, f"COMPLETE: email sent ({DAY})")
+            # The marker goes at the FRONT of the Status field. The
+            # Status column is truncated at 250 characters, and these
+            # buyer-company rows already carry a long HUNTED note - so a
+            # marker appended at the end was cut off, _is_sent() could
+            # not see it, and the next wave emailed the same lead again.
+            # Three buyer companies were sent twice on 2026-11-08 because
+            # of exactly that.
+            update_status(lid, f"COMPLETE: email sent ({DAY})", prepend=True)
             record_send('wave', lid, name[:40])
             sent += 1
         else:
