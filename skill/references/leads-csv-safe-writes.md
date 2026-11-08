@@ -94,8 +94,6 @@ lsw.CSV = '/home/ubuntu/leads.csv'   # always, before the real write
 
 ## THE BUG
 
-## THE BUG
-
 Every script used to do this:
 
 ```python

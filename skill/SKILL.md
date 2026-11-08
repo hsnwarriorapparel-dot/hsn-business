@@ -30,6 +30,69 @@ Critical: connection IP should match SIM country (PK number + US VPS IP = Layer-
 
 Both are DRAFT-ONLY until the user says send.
 
+## 🔴 EVERY OUTBOUND COPY RUNS THE FULL SPAM RULESET (mandatory)
+
+**Never hand-check copy against a short word list.** A short list
+silently PASSES copy that breaks the spam-word-checker skill - shipped
+RFQ inquiry copy carried `quote` (a high-risk banned word) and `MMA` (an
+ALL-CAPS violation) after it had already been checked and approved.
+
+```bash
+python3 /home/ubuntu/spam_check.py <messages.json>
+# or: python3 ~/.hermes/skills/spam-word-checker/scripts/spam_check.py <messages.json>
+```
+
+Fix the GENERATOR, not the generated copy, or the banned word returns on
+the next run. The traps in our RFQ copy: `quote`/`quoted` -> `priced`,
+`MMA` -> `mixed martial arts`, `Bank Transfer` -> `transfer in advance`,
+`30 Days Credit` -> `payment after delivery`, `Brand New` -> `fresh`.
+Rewrite the buyer's terms but keep the meaning exact.
+
+## 🔴 leads.csv READS THROUGH ONE MODULE, AND THE HEADER IS NEVER A DATA ROW
+
+**Always read and write leads.csv through `leads_safe_write.py`** -
+never `csv.reader(open(...))` directly. `read_rows()` applies the
+non-contactable-email filter (form addresses, `privacy@`, no-reply
+senders, `sentry.wixpress.com`); `write_rows()` refuses to write a file
+without a header.
+
+**The header row's Email cell contains the literal text `Email`.** Any
+filter that runs over the rows without skipping index 0 reads it as an
+address and DELETES THE HEADER - every later read is then off by one and
+the file looks intact while being wrong.
+
+**The invariant after any cleanup: `len(read_rows()) == len(csv.reader(file))`.**
+If they differ, the reader is filtering (good) or something dropped rows
+(bad). Rewrite the file from the reader's own clean view so they match.
+
+**Never mutate `leads_safe_write.CSV` in a test** - it is a module
+global, and a test that points it at a scratch file and forgets to
+restore it leaves the module writing to the scratch path while the live
+file stays stale, which looks exactly like the filter not working.
+
+Full detail: `references/leads-csv-safe-writes.md`.
+
+## 🔴 THE PERSON-NAME FUNNEL IS DEAD - NEVER RE-ENABLE IT
+
+`buyer_reach.py` searches for the BUYER'S OWN NAME to find their company.
+It produced **0 verified buyer companies** and added junk (a `privacy@`
+contact page, a Wix form hash, a personal site). Searching a person's name
+finds OTHER people - people-search sites, TikTok, BJJ profiles. The
+COMPANY funnel is **12x more productive** (12 hits from 90 companies vs 0
+from 25 people).
+
+It is commented out in `g4wb_dir_pipeline.sh`; the budget went to
+`company_reach.py` (limit 20 -> 30). **Do not re-add it.**
+
+Two guards keep the company funnel clean:
+- `is_dead_lead()` - the directory lists BUYER CONTACTS, so many
+  "companies" are a person's name or another trade (577 of 990 were dead).
+  A dead lead is skipped instantly instead of burning a search.
+- `fuzzy_name_match()` - one letter of difference must not kill a lead
+  ("Fashqua Buying Company" vs the company's own "Fashque Designs").
+
+Detail: `references/g4wb-buyer-company-funnel.md`.
+
 ## go4WorldBusiness STOREFRONT (profile fixed 2026-11-07) — read `references/go4worldbusiness-storefront.md`
 
 Member `hsnwarriorapparel_9` (JUNIOR). Profile now CORRECT and saved: PK phone +92 337 3336381, Sialkot Industrial Estate address, est. 2011, sales band, brand name + tagline, OEKO-TEX/REACH, export markets list, and a 1461-char company introduction.
@@ -37,6 +100,12 @@ Member `hsnwarriorapparel_9` (JUNIOR). Profile now CORRECT and saved: PK phone +
 **✅ FIRST BUYER INQUIRY SENT 2026-11-07: Karate Black Master Belt, 400 pcs, Krav Maga Federation (Israel) — status Open, tracked as L5261.** Verify at `/member/dashboard/inquiries/sent`.
 
 **THE THREE RULES:** (1) a buylead can only be inquired about **5 DAYS after it was posted** — the freshest RFQs are locked; (2) some RFQs are **PREMIUM MEMBERS ONLY** — locked regardless of age; (3) JUNIOR gets **1 buyer inquiry/day free, max 2 per week** (Premium = 100/day, 60 days, no auto-renewal). So target OLDER free RFQs.
+
+**THE /buyers/ PAGES ARE LIVE BUY REQUIREMENTS, NOT A COMPANY DIRECTORY.** `https://www.go4worldbusiness.com/buyers/<country>/<category>` blocks carry the PRODUCT, SPECIFICATION, QUANTITY, HS CODE, DESTINATION, PAYMENT TERMS and a contact - everything a quote needs. Two parsing traps: (a) splitting the page on `Wanted :` puts the `VERIFIED Nov-03-26` header at the END of the PREVIOUS block, so every requirement looks dated today unless you read the status+date from the tail of `parts[i-1]`; (b) the "Inquire Now" button is JS-driven, but the RAW html carries `data-entity-id` and the `/inquiries/send/buyleads/<id>/...` route - split the raw html on `Wanted\s*:` too so the ids line up. **The page category lies** (`fight-gear` lists steel scrap, `martial-arts-mats` lists prayer mats) - filter on the buyer's own `Buyer Of X` phrase against an exact whitelist, never on the directory slug.
+
+**DEEP-HARVEST THE RIGHT PAGES, NOT ALL OF THEM.** `g4wb_deep_harvest.py` gave 1,662 identities across 24 categories / 9 countries - a great scouting map, but each entry is thin. Work out which country/category pairs hold a live requirement (12 pairs held all 35), then fetch only those with `g4wb_live_rfq_fetch.py` (2.5 s pacing; the site throttles bursts with a ~2 KB stub that is NOT empty, so `curl()` treats a response under 8 KB as a failure). Result: `g4wb_live_rfq.json` with the status, date, full spec and the inquiry link. The inquiry queue prefers it, falls back to the RFQ harvest, and every message answers THAT requirement.
+
+**CLASSIFY WITH THE SHARED WHITELIST, NOT A LOCAL COPY.** `scripts/g4wb_our_product.py` (also `/home/ubuntu/g4wb_live_rfq_fetch.py` uses the same lists) holds the exact `Buyer Of X` whitelist, the wrong-trade blocklist and the ours-by-product list. `is_ours(category, product)` is the single classifier - never re-derive it inline, because a loose regex pulls in prayer mats and medical gloves.
 
 **COUNTRY: PAKISTAN IS ON THE PLATFORM — id 162** (corrected 2026-11-07; an earlier note claiming it was absent was wrong and came from the wrong country's list). The inquiry form's select has 240 countries with `162~Pakistan` (India 99, Kuwait 112) and the profile uses the same numbering. **The profile country now reads Pakistan** and every inquiry sends `countryId=162` — no support request needed. The country is set through `POST /signup/ajax/category-selection/supplier` (`g4wb_set_categories.py`), which ALSO resets some profile fields, so re-run `g4wb_fill_profile.py profile` straight after. **BUYER-INQUIRY LIMIT IS 1 PER DAY, not 5** — the platform refuses the second buyer inquiry with "As you are not a Premium GOLD/SILVER Member, you can only contact limited number of buyers." (5/day applies to suppliers and products; Premium gets 100 buyers/day). `g4wb_buyer_queue.py` keeps a ranked queue and sends the biggest eligible RFQ each day; the cron `g4wb-daily-buyer-inquiry` (09:05 UTC) runs it.
 
@@ -272,6 +341,7 @@ For ~2 weeks every report claimed WA was QR-dead and asked the user to re-link. 
 Before using ANY template for a new country/region/lead type, render it with a real lead's data and READ the full output. Check: (1) no hardcoded country or region names — the region phrase must be a template parameter, not literal text ("delivery to Spain" went to NL/DE/FR/UK/PL clients; "across Europe" went to USA leads — build_email takes region="USA" and renders "across the United States"), (2) sign-off matches lead's language context ("Gracias" went to non-Spanish clients — use "Best regards" default), (3) phone = +92 337 3336381, (4) no "free sample" claims, (5) brand = HSN Warrior Apparels only. Audit with: python3 -c "import sys; sys.path.insert(0,'/home/ubuntu'); import templates; print(templates.build_email('X','Y', region='USA'))"
 
 ## Data-Integrity Rules
+- **leads.csv goes through `leads_safe_write.py` only** (read AND write). `read_rows()` filters non-contactable emails; `write_rows()` refuses a headerless file. The header's Email cell holds the literal text `Email`, so any filter that does not skip index 0 DELETES THE HEADER and every later read is off by one. **Invariant after any cleanup: `len(read_rows()) == len(csv.reader(file))`** - if they differ, rewrite the file from the reader's clean view. Never mutate the module's `CSV` global in a test. Detail: `references/leads-csv-safe-writes.md`.
 - **Read back every CSV write:** after writing leads.csv, re-open it and check row count + last Lead ID before reporting counts — writes have reported success while never persisting. The heredoc `python3 << 'EOF'` pattern inside terminal calls is a known way a "success" print can come from a script that wrote a different or stale file — prefer execute_code or a script file for CSV writes, and always verify on disk. The gateway lifecycle guard can also refuse a long heredoc outright (scan budget exhausted) — in that case the code never ran at all; move it to a file via write_file and execute the file, never retry the same heredoc.
 - **Normalize scraped emails before storing; dedupe by the normalized value:** scraped pages yield addresses with URL-encoding/unicode prefixes (`%20info@…`, `u00a0info@…`) that bounce AND defeat dedupe — strip `^(%20|u00a0|\s)+`, lowercase, then compare. After every hunt, run one full normalized-email dedupe pass over the CSV — the same gym enters twice on different days under different name spellings; keep the first row, drop later duplicates.
 - **Never let a long-lived process own the whole leads.csv:** worker.py originally rewrote the entire file from memory; when it loaded a stale copy it wiped every lead added since. Its save is now row-targeted (re-reads disk, updates only dirty rows). Any new background writer must follow the same pattern, and if leads.csv ever reverts, restore from the git backup (`git show <newest-commit>:leads.csv`).
