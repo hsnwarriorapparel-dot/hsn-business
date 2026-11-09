@@ -1,66 +1,66 @@
-☀️ HSN MORNING BRIEFING — Thursday, 29 October 2026
+☀️ HSN MORNING BRIEFING — Monday, 09 November 2026
 
 ========================================
 
 📊 YOUR PIPELINE
-• Total leads tracked: 2540
+• Total leads tracked: 5236
 • USA batch (Day 5): 208
 • 🔥 HOT leads: 2
    - Uzbekistan Kurash Federation (L964)
    - Uzbekistan Kurash Federation (gmail) (L965)
 
 📰 BUSINESS NEWS (24h)
-• [Textile/Export] Vietnam’s textile, garment exports top 36 bn USD in nine months - Apparel Views
-  https://news.google.com/rss/articles/CBMiwAFBVV95cUxQRXJlaWJCUGh4Z1VxRk01aElvWlRkaGlQRFl0QndsMkduSjZjZzNGOEdseVE4RkhuWGhZNGR1SHNVcGprRmg5TG9MTDlYN29sQ0pjNTFvMnZuRVp4ak5fOEYtanI1QzJYckNUVGJpZ0t2eFdfSld0ZVQ1WTVtN0xrTVd4RnBNX0FlSzRxOFlHVzlDdWlrajRGcDc0bEFiQ01hZ1FLX2pWd2VZdVVKazYyOGw5TTlLajV0WEVXeVVkUlk?oc=5
-• [Textile/Export] Essential Sourcing Guide for a UK Buyer for BD Garments
-  https://news.google.com/rss/articles/CBMi1wFBVV95cUxQcWpSSEhWZVQxSmFjRDhtRGR2a1FZY1FldG1YUHYzVkFNa1hNeU9Banh0Q3NQZjhBcUpkYVR4U044MVF1dnhubXpxUTlsYzNEUFJrVGNYSlp0U1ZjdVJac2M0bWJkTEhDQkdta05GOFZUV1ZaNUNmTzl6NkRmWDk4ZDAzQk9kUDRxNl9MdVExZ1VfWEJ5blFYZVVvVGNLQUdxR0lERHNDaWdsWDk1ak14bjhmVmh0bFJuOC1vRU1aUjczYUJqWmhRRllIc3huWHlBM1R3UTR4MA?oc=5
-• [Textile/Export] APTMA praises PM, Dar: USD1bn improvement in net textile exports under EFS reforms - Business Recorder
-  https://news.google.com/rss/articles/CBMi7gFBVV95cUxNTXBWNDVZRHhQT2E0Z1dwTERGWXdWNzRYcjBaUkFpYVU0ZmdZM0Jwb3VnekhHS3d3X01TcTI1eGpPX0dQb21nS0tFX2lSY0U5VEFaaXJqczVMQ1hiMjFpcWw1SGJKbkxSc0NWMFhSMDlibHA2cU1LMnhuNWtQQk05d201OXkyWlg4N1RmY21FV2V1ZEJ5MHNGa2QtWE4zRFg2SmxsclRBOC1zWEdmNFBvXzNaSWg5QXdVSk8zdVBHdmM4bVN3SWszTDlXeTBiSDV6MVByWHVNdkFfN0FrbjJMVUNyOG5uZmw1MkxveGRR?oc=5
-• [B2B/Manufacturing] Pet Fair South East Asia 2026 Opens Global Trade Opportunities for Thailand’s Pet Industry - azcentral.com and The Arizona Republic
-  https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBUNnZhdG5ySURNcTFqdW10UzdCVlg4SlBjdDY4SUxIcmx6emYyNkdHaDNCYU9pMEgtUFMyM2t6alhOWW5fRkdQUmVCTllsaXQzOXh1YlBRcFh4RVVzVUhHMHVOaG5fOFU?oc=5
-• [B2B/Manufacturing] EPB to host 2nd Global Sourcing Expo Nov 15-17 to diversify exports - Bangladesh Sangbad Sangstha (BSS)
-  https://news.google.com/rss/articles/CBMiW0FVX3lxTE1VcXpqcmlmQWxSZ09ub3M2MGtQcWZ1Q21tRHYtUDdrbW91alZIdzNFdHZLNzMySzdhUVMzMVRWVWNlMHJZb3BrWEVGeExnWkRPQ1B2YVFkTDhnMGM?oc=5
-• [B2B/Manufacturing] Opening our doors to high-quality investment capital.
-  https://news.google.com/rss/articles/CBMingFBVV95cUxQcjlhcFZ1VXNYYTlndkUxN01qR2d1bzBCY0xyNjJMVTZqNWFlV1h1WTZ0LTBEaGJ6SmFDT0JkR0ItTzV3X3UxZUFaWHQ4cUhSZGdDcUlSVnFKcEctZ1QxT2tpYUxEY0xuT0J2dXN6di1hTmJzbi1VSVVYVnVwZ0Y2aURMbjRjZnJlRWFtalhic1BScUFleG5aZVRwRjlHZw?oc=5
+• [Textile/Export] Fabrics Market To 2035: Apparel and Technical Textiles Drive Forward Growth - News and Statistics
+  https://news.google.com/rss/articles/CBMizwFBVV95cUxOSWJ6R2ZMbXJ3b0NoWkItS1pTRVRkQkdZa2hUR3oyX0FrdmtPTlMtMzdUOFZDV0V4emJJUHNwdDVVUTVpQV9XZXVLMnUxOTdrdnZEMU5YaUVCbV9yby10UmxFWkNTc0gxbG5MNWU4VVR3Z25IU0doZV93ektkRGhabjVZWXZEM3ZtdHhPaXlzdFJaVGh6NE9mZy0wM2RXeER5RFZhSldMTmJ4WTJTSjhxY0xMTUhXbkQ4SjBRMDhmdzViRy1YcVpnaGlqQUhRMGc?oc=5
+• [Textile/Export] Uzbekistan links textile expansion with $2bn renewable energy investment - Textile Today
+  https://news.google.com/rss/articles/CBMi7AFBVV95cUxPdWhwdUxnN212cTBMTDBIRkZvMlFyNUpSU1VqRjY1cVRfa3VscFp1NVR4akNJUHdLSXQ3LTI4VVc5Z3hFdm1UZ1dHZ3M1QlFMZWs5MFhUZGtGaFlUZXhybU1VQ2R3QU9VbnRtQ2ZFZzZlM2JYRDJRdF9GWXpJTFFqR05HVFVTRTh4ai1kdGpGdHQ3YmpmMFRhNm1xRDlxZmtlLXd2ZlU1QWpib0hFVGpGZmFvNjRfQ2dpMTd4eldlVG5NdV82RzhfYWI1YnR0X1EyWEFhUzR6R1ZJRXZEMmhwSlBSdjVuZ1d4eXlGYtIB8gFBVV95cUxPN18wemJTUHdFcTYzbllkNnEzSENxT0g2cjkzdy1zZmRjdkE3UUdJS0FZY29DS3ZaQ3dwRmd0bjUyZ0toaXhUR2hHOUlyMXZQT0J0LVdiM1lzMDNBMFJaVmExUG1UZ2xuNl8taXRaSVRaQVZmU0NKaS15dFFfZGltVWl2dTRvTzRSQWtkbDFYVEU2VVRoTE5MeEV0YjlSQjFzSUpiM1dSSkZlNmFqZ3dsRW9OTFpZOElPd21GMENmSVExN0NRcXc5QmlJanBmT0tYaVFfWmdyeW1VY244WEdVNTNmdmRJNVY2VTYyaXU5eGpCQQ?oc=5
+• [Textile/Export] Fabric Tearing Machines Market To 2035: Recycling and Quality Control Fuel Growth - News and Statistics
+  https://news.google.com/rss/articles/CBMi4AFBVV95cUxOMF85VDV4NUlxZHdRN19zUjgwRGVKVGRQS1d1YTdXS2IzcXlpNDItNzJfdlVGZ01WdHUxbnlDNTh4U3cxSUc5QTJ3RW5XbjZvVUtFRjNnTl93SzlvSkN4XzlQYzV2bzY2TEwxSU54QTQ5SFIweTJSczhiNDRfYm9iZjAzRDhVdnBFaDMzMWU5MDJXSTdYUEhjTm5sRDE0NW9Vdm9EWnZpbFZUODk0Y2JqVE9ud2hMaXo2NUxxZGJveUdSZ1RKek9vWXFaeFFJRjZhVTNDbUgwaWh1WGlhc2VvVQ?oc=5
+• [Textile/Export] Vietnam’s textile, garment exports top 27 bln USD in seven months - Báo VietNamNet
+  https://news.google.com/rss/articles/CBMi3wFBVV95cUxNNTdPTVZwN20zc2t6YzVmZnp0VHlfeU1lTmI4UmdKb3pBdEtGNk5UMV9SR3FhZWMtMTkyT3ItMXlRT0xqVWhEU2dCTjNHa1EyQjVPX2hNbmZrUVY4OE9oQ2ZWcHUydmdpZnNyeTJnelpHd0VLcmJHUmZRM1pHcndsQWdZbngyVFVBRDcyTGtZT0RXbHVVUjVHdXg0VUZVOEpyTkpYTmF6dmhmaTdydUMwTWlfNzZ1Vlc2QjFBVTNEMUJnb3IxekNEN3o2SU9oZGd5b0NBYWt4WVhnV3BETTdV?oc=5
+• [Textile/Export] | Philippines' textile & apparel imports fall 4.65% in Jan-Sept 2026
+  https://news.google.com/rss/articles/CBMi3wFBVV95cUxNZWloMm1FS1N0RHNQdHdpbDVhTFViUWRjclVlb21KcGpQa25aRm1WYTBlMnpKRTk4UTJ3Vy1rRC1XbEJQcFVUa3hJeGgwd25nbnROT3lwbnMwYzNCOXlRYzZ0SERjRFpXenJvS05EQzBOcDdwZXNlM1RiSW1NRG14TElZMnU0bEVSYllPbUpsc0c3X21kLXVOeWhCSEQ3OFVPbXJDS0ozU0FIWHJISjFIYzNscnEtcmEwTVFlZ0RFTlk5Y1FsZUl4RkZ6T0JrbmdCaXkzckpaTlY3QU5UM0lN?oc=5
+• [Textile/Export] Experts urge competitiveness to tap US market potential - Daily Sun
+  https://news.google.com/rss/articles/CBMirgFBVV95cUxONlZ3cThvUUpWSlNyRDEybmx5UFZUWUxFN0tlOXBEN3JBbDJySjVrYnRoaGVfS1lNLWh0aERvc2FxNFRBd0p6NzJJN2F6dG9STTFvVFpnT2VYMkttUHlZb0xLVkdoZmJKYjhIcmxMTmc0dlc1WGtLME9Sa3lEOGRhNXo4UHE5OWxzRnhyYlFsZVJRM1kyd2s2VjR2dDF0dHI4TFljcTlzSktwYXpRakE?oc=5
 
 💻 HACKER NEWS — top of the morning
-• Ghostty 1.4 (1292 points)
-• Apple's git still trusts the compromised eMudhra certificates (1026 points)
-• Gemini 4 Carbon (772 points)
-• Why is this fingerprinting script creating bioweapons? (752 points)
-• Start Doing Graph Theory (564 points)
-• MacBook Pro with PROLED XDR Display and Touch (479 points)
-• Kentucky man becomes the first humanist granted religious exemption from AI (417 points)
-• The Grid, a factory-scale robot in Massachusetts that builds PCBs on demand (401 points)
+• Goodbye Claude, hello Pi (675 points)
+• Claude Code's "Don't Ask Again" exposes passwords in 1,122 public GitHub files (577 points)
+• Goldman Sachs is pulling Claude Code from its bankers and traders (539 points)
+• Llama-modchip: 284B DeepSeek on 64GB RAM, no GPU (343 points)
+• Nvidia Board of Directors Is Investigating Jensen Huang (331 points)
+• Declarative Dragging (273 points)
+• Writing as a thinking tool (258 points)
+• Nvidia CEO Jensen Huang's letter to staff about affair (237 points)
 
 🛠️ NEW TOOLS & LAUNCHES
-• Show HN: Show HN: Simple DeepSeek web search CLI written in TypeScript (fast/cheap)
-• Show HN: Show HN: Postbox – Personal Mailbox for Humans and Agents Hosted on Cloudflare
-• Show HN: Show HN: Starboard, Rules of the Road for Satellites
-• Show HN: Show HN: Open-source AI workspace with shared procedural memory
-• Show HN: Show HN: Chinese and Western Zodiac Calculator
+• Show HN: Show HN: Velorki - open-source bike navigation that works with just your phone
+• Show HN: Show HN:Free Web Tools
+• Show HN: Show HN: My first project, an AI-powered financial news analyzer
+• Show HN: Show HN: Remedy – Prompt stuff out of your feeds
+• Show HN: Show HN: Record, branch, and compare command runs in stdlib-only Python
 
 📈 MARKET & PRICING
-• Core-Spun Yarns Market in Latin America and the Caribbean: Size, Trends and Forecast to 2035 - Index
-• ICE cotton futures extend losses as dollar strengthens - Fibre2Fashion
-• The cost of exporting - Business Recorder
+• ICE cotton sees mixed trend as rain forecasts weaken sentiment - Fibre2Fashion
+• Envoy Textiles' Q1 profit jumps 40pc on higher exports, lower borrowing cost - The Financial Express
+• | Australia's T&amp;A imports down, fibre export dips in July-Sept 2026 - Fibre2Fashion
 
 💡 TIPS & TRICKS
 • Voice notes outperform text 2:1 in Southern Europe and Gulf markets
 • Follow up on sent samples after 5 days with: 'How did the quality feel?'
-• Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+• Ask for the logo early - clients who send logos are 3x more likely to order
 
 🎯 WHAT YOU NEED TO KNOW TODAY
-• Pipeline: 2540 total leads | USA 341/737 emailed, 362 still open | global ammo 129 leads ready to email
-• 2 leads have engaged so far - these are your warmest targets today
-• Gmail: inbox swept - zero genuine human business replies so far; every recent reply is an auto-ack or a bounce (30+ bounce notices)
-• WhatsApp Web session is DEAD (QR screen) - no WA sends since Oct 24. Re-link from phone/VNC to resume the 10/day quota
-• Instagram IS logged in - IG follow+DM pass is running normally
-• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added - list products so buyers can find us
+• Pipeline: 5236 total leads | USA 886/1904 emailed, 934 still open | global ammo 310 leads ready to email
+• 11 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
+• HUMAN business replies on the board: 4 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal, L3372 TOWASAN Karate Schulen, L5261 Krav Maga Federation (Karate Black Master Belt RFQ)) - reply is DRAFT-ONLY until the user says send
+• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
+• Session health NOT verified this run (sweep file is 8557 min old)
+• go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
 
 🎯 TODAY'S MOVES
 • Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
-• 129 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• 310 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
 • USA emails continue in US business hours (7 PM - 1 AM PKT)
 • Check Alvaro's sample order status - he is the closest to payment
 • Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)

@@ -16,6 +16,10 @@ mkdir -p "$BACKUP_DIR"
 # step can be killed by a timeout before it runs, which left the file stale in
 # the repo. The nightly backup must cover every generated artefact.
 cp -u /home/ubuntu/leads.csv /home/ubuntu/HWA_Lead_Tracker.xlsx /home/ubuntu/HSN_Warrior_Apparels_Catalog.pdf /home/ubuntu/HSN_Price_List.pdf /home/ubuntu/business-backup/ 2>/dev/null
+# The client acquisition report is the deliverable the owner reads. It was
+# NOT in the repo, so a lost VPS would have lost the write-up of the whole
+# campaign.
+cp -u /home/ubuntu/HSN_Client_Acquisition_Report_*.md /home/ubuntu/morning_briefing.md /home/ubuntu/business-backup/ 2>/dev/null
 cp -u /home/ubuntu/WA_Pending_List.xlsx /home/ubuntu/business-backup/ 2>/dev/null
 cp -u /home/ubuntu/*.py /home/ubuntu/business-backup/ 2>/dev/null
 # The skill directory holds EVERY hard-won rule (outreach protocols, price

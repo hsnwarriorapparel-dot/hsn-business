@@ -16,14 +16,14 @@ scheduled, all resumable, all capped.
 
 | Metric | Value |
 |---|---|
-| Leads in tracker | 5,227 |
-| Countries covered | 36 |
-| Leads with a verified email | 2,748 |
-| Leads with a phone number | 4,096 |
-| Cold emails sent | 2,112 |
-| Instagram accounts followed + messaged | 1,426 |
-| WhatsApp messages sent | 74 |
-| Buyer/import companies identified | 12 |
+| Leads in tracker | 5,233 |
+| Countries covered | 37 |
+| Leads with a verified email | 2,745 |
+| Leads with a phone number | 4,098 |
+| Cold emails sent | 2,182 |
+| Instagram accounts followed + messaged | 1,437 |
+| WhatsApp messages sent | 43 |
+| Buyer/import companies identified | 17 |
 | **Replies received (live buyers)** | **6** |
 | go4WorldBusiness requirements in hand | 4 verified |
 | go4WorldBusiness inquiries sent | 1 (confirmed by the platform) |
@@ -389,3 +389,84 @@ Everything in the last 24 hours was aimed at that one number.
 *All figures in this report were measured directly from the tracker, the send
 ledger and the platform's own responses on 8 November 2026. The tracker is
 backed up nightly to GitHub at `hsnwarriorapparel-dot/hsn-business`.*
+
+---
+
+## Appendix B — Findings from the 8–9 November verification pass
+
+Every number above was re-measured against the live system, and the pass
+surfaced five real faults. All five are fixed and recorded in the skill.
+
+### 1. The buyer-company screen was skipping 330 companies
+`screen_buyers.py` used the *reach* campaign's `processed` list as its skip
+list. `processed` means the company was **contacted**, not that its profile
+was **read**. 330 contacted companies had never been screened — and that
+pool held real buyers. The screen now uses its own output as the skip
+list.
+
+| | Before | After |
+|---|---|---|
+| Buyers confirmed (`ours`) | 61 | **112** |
+| Wrong product (`theirs`) | 0 | **151** |
+| Companies screened | 535 | **865** (complete) |
+
+The wrong-product filter had never fired at all before this fix.
+
+### 2. The reach campaign crashed on the exact condition it was written to handle
+`company_reach.py` called `log()` — a function that was never defined. It
+only raised `NameError` when a row failed to land, killing the campaign
+mid-run. Two further faults sat behind it:
+
+- the landing check ran **before** the write, so it verified a row that did
+  not exist yet and rejected every addition as `add-failed`;
+- new rows were written only at the **end** of the batch, so a kill lost
+  leads permanently while the state file claimed `added`.
+
+Now: write → verify, each row persisted immediately. Result — **L9906
+Intersafe International LLC** (`info@iavdubai.com`) and **L9908 Happy Life
+Co. Ltd** (Japan) landed, with zero `add-failed`.
+
+### 3. A regression test was writing into the live tracker
+`safe_write_csv(rows, path=CSV, ...)` captured the path at **import** time,
+so a test's `lsw.CSV = TMP` override was ignored and its round-trip write
+landed in the real `leads.csv`. Six `Placeholder Test Club` rows were
+planted in the live tracker. Both writers now resolve the path at call
+time.
+
+**A passing verdict is not proof of isolation.** All 36 tests are now run
+with a hash comparison of `leads.csv` before and after each one.
+
+### 4. The reply sweep was never scheduled
+`day24_reply_sweep.py` does three things the nightly pipeline did not:
+scan 30 days for STOP/opt-out phrases, mark 2-day bounces as failed, and
+sweep the Instagram inbox for replies. It only ran when somebody
+remembered to invoke it. It is now in the nightly pipeline, after
+`reply_engine.py`.
+
+`reply_engine.py` still only **drafts** unless `--send` is passed — a reply
+to a live buyer is prepared for review, never sent blind.
+
+### 5. The backup did not contain the automation
+The backup repo held the tracker, the code, the skill and the website — but
+**not** `.hermes/scripts/`. A lost VPS would have kept the data and lost
+everything that *runs* it. The nightly pipeline, the watchdog and
+`jobs.json` are now backed up too.
+
+### Also fixed this pass
+- **Gmail attachments were always reported as `attached=NONE`** while
+  actually being attached. The check now reads the chip element directly,
+  and the sent row is treated as the proof.
+- **Two malformed email addresses** (`//info@wonsbarcelona.es` and a
+  URL-encoded one) were corrected from the companies' own websites, and the
+  contactability guard now rejects malformed addresses.
+- **The daily bounce rate** is 3.37% (3 of 89). A bounce is usually a dead
+  mailbox on a live domain, not a dead domain — all three of today's were
+  on sites that still publish the address.
+- **A stale `company_reach.lock`** hung a campaign silently with an empty
+  log. The lock now confirms the live PID is actually a `company_reach`.
+
+### Still open — needs the owner
+1. **go4WorldBusiness Premium** — 4 verified requirements in hand; the
+   platform allows 1 inquiry per day. Without Premium the ceiling stays at
+   one requirement per day.
+2. **The Everlast-branded glove image** for the website hero.
