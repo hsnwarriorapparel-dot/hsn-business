@@ -142,7 +142,11 @@ def check(subject, body):
                'LC', 'TT', 'CFR', 'EXW', 'FCA', 'DDP', 'PVC', 'OE',
                'HSN', 'SIALKOT', 'PAKISTAN', 'EUR', 'USD', 'MMA', 'BJJ',
                'GI', 'DOBOK', 'MOQs', 'PVC', 'PU', 'SS', 'OEM', 'ODM',
-               'L/C', 'T/T', 'HSN', 'REPLIED', 'PDF', 'MOQ'}
+               'L/C', 'T/T', 'HSN', 'REPLIED', 'PDF', 'MOQ',
+               # Brand names that appear in OUR copy because the chain we
+               # are writing to is called that. 'TITLE Boxing Club' and
+               # 'UFC Gym' are the recipients' own names, not shouting.
+               'TITLE', 'UFC'}
     for m in re.finditer(r'\b[A-Z]{3,}\b', body or ''):
         if m.group(0) not in allowed:
             flags.append('fmt:allcaps:' + m.group(0))

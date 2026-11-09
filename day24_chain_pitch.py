@@ -41,48 +41,56 @@ BRANDS = {
         'evidence': '146 franchised locations (craft.co company profile); 13 tracked locations',
         'note': 'Independently owned and operated franchised locations, HQ Overland Park KS. '
                 'A central supply agreement covers every location at once.',
+        'desc': 'independently owned and operated franchised locations, HQ Overland Park KS',
     },
     'brooklynfitboxing.com': {
         'name': 'Brooklyn Fitboxing',
         'email': 'hello@brooklynfitboxing.com',
         'evidence': '21 tracked locations',
         'note': 'Boutique boxing fitness brand with a large location footprint.',
+        'desc': 'a boutique boxing fitness brand with a large location footprint',
     },
     'victoryma.com': {
         'name': 'Victory Martial Arts',
         'email': 'summerlin@victoryma.com',   # no central address published; best tracked location GM
         'evidence': '10 tracked locations',
         'note': 'Multi-location martial arts franchise.',
+        'desc': 'a multi-location martial arts franchise',
     },
     'ufcgym.com': {
         'name': 'UFC Gym',
         'email': 'contact@ufcgym.com',
         'evidence': '3 tracked locations; contact@ufcgym.com found on the live site',
         'note': 'Franchised UFC Gym network.',
+        'desc': 'a franchised UFC Gym network',
     },
     'moralesbox.com': {
         'name': 'Morales Box',
         'email': 'info@moralesbox.com',
         'evidence': '5 tracked locations; central address found on moralesbox.com',
         'note': 'Spanish boxing gym chain, multiple Bilbao locations.',
+        'desc': 'a boxing gym chain with multiple locations in Bilbao',
     },
     'rumbleboxinggym.com': {
         'name': 'Rumble Boxing',
         'email': 'tempe@rumbleboxinggym.com',   # no central address published; best tracked location
         'evidence': '6 tracked locations',
         'note': 'Boxing fitness brand with multiple gyms.',
+        'desc': 'a boxing fitness brand with multiple gyms',
     },
     'rockboxfitness.com': {
         'name': 'RockBox Fitness',
         'email': 'university@rockboxfitness.com',   # no central address published; best tracked location
         'evidence': '5 tracked locations',
         'note': 'RockBox Fitness brand, multiple sites.',
+        'desc': 'a RockBox Fitness brand with multiple sites',
     },
     'jabzboxing.com': {
         'name': 'Jabz Boxing',
         'email': 'nphoenix@jabzboxing.com',   # no central address published; best tracked location
         'evidence': '3 tracked locations',
         'note': 'Jabz Boxing brand, multiple locations.',
+        'desc': 'a boxing brand with multiple locations',
     },
 }
 
@@ -101,12 +109,30 @@ SUBJECT = ("{brand} - custom club equipment for {n} locations ({company})")
 
 
 def body_for(brand_key, b, n_locations):
-    region = REGIONS.get(brand_key, 'your market')
+    # The body must read as one coherent paragraph to a corporate buyer.
+    #
+    # It used to be:
+    #   "We work with multi-location ... brands, and {b['note']}"
+    #   "We have {b['evidence']}."
+    # The 'note' is a FRAGMENT ("Boutique boxing fitness brand with a
+    # large location footprint.") so it left a dangling clause, and
+    # 'evidence' is an INTERNAL research note - for TITLE it read
+    # "We have 146 franchised locations (craft.co company profile);
+    # 13 tracked locations", which leaked our source and a citation
+    # into a customer email.
+    #
+    # 'evidence' is now used only for the location count, and the
+    # description reads as a sentence.
+    # The description is about THEIR business, so it must read as a
+    # fragment attached to the sentence above - never lower-cased (that
+    # mangled 'Overland Park KS' into 'overland park ks') and never
+    # injected as a whole sentence (that left a dangling clause).
+    desc = (b.get('desc') or b.get('note') or '').strip().rstrip('.')
     return f"""{b['name']} team,
 
-We work with multi-location boxing and martial arts brands, and {b['note']}
+We supply multi-location boxing and martial arts brands like yours - {desc}.
 
-We have {b['evidence']}. Rather than pricing location by location, one supply
+Rather than pricing location by location, one supply
 setup can cover them all: your logo and colours on every item, one order
 consolidated for the whole network, and each location billed to its own cost
 centre if that is how you run it.
@@ -153,6 +179,43 @@ def day_tag():
         except Exception:
             continue
     return 'Daily ' + time.strftime('%Y-%m-%d', time.gmtime())
+
+
+CHAIN_STATE = '/home/ubuntu/chain_pitch_sent.json'
+
+
+def _pitched_today():
+    """The set of brands already pitched today.
+
+    The tracker marker alone is NOT enough: mark_sent() only stamps the
+    location rows whose email ends with the brand domain, so a brand whose
+    corporate address differs from its location addresses (Brooklyn
+    Fitboxing) records NOTHING. On 9 November that let the same pitch go
+    out twice to two corporate inboxes.
+    """
+    try:
+        with open(CHAIN_STATE, encoding='utf-8') as f:
+            d = json.load(f)
+    except Exception:
+        return set()
+    if d.get('date') != day_tag():
+        return set()
+    return set(d.get('brands') or [])
+
+
+def _record_pitched(brand):
+    try:
+        with open(CHAIN_STATE, encoding='utf-8') as f:
+            d = json.load(f)
+    except Exception:
+        d = {}
+    if d.get('date') != day_tag():
+        d = {'date': day_tag(), 'brands': []}
+    b = d.setdefault('brands', [])
+    if brand not in b:
+        b.append(brand)
+    with open(CHAIN_STATE, 'w', encoding='utf-8') as f:
+        json.dump(d, f, indent=2, ensure_ascii=False)
 
 
 def mark_sent(brand, to, subject):
@@ -244,6 +307,24 @@ def main():
         if len(hits) < args.min_locations:
             log_lines.append(f"SKIP {b['name']}: only {len(hits)} tracked locations")
             continue
+        # NEVER pitch the same brand twice. The engine rebuilds its list
+        # from scratch on every run, so without this guard a second run
+        # pitched the SAME corporate inbox again - TITLE Boxing Club and
+        # Brooklyn Fitboxing each received the identical pitch twice
+        # within seven minutes. A duplicate pitch to a corporate buyer
+        # reads as spam and burns the relationship.
+        #
+        # The marker is written to every tracked location row of the brand
+        # by mark_sent(), so check those rows.
+        _marker = 'chain pitch sent (%s, corporate)' % day_tag()
+        _already_pitched = any(
+            _marker in ((r[idx['Status']] if idx['Status'] < len(r) else '') or '')
+            for r in hits)
+        if b['name'] in _pitched_today():
+            _already_pitched = True
+        if _already_pitched:
+            log_lines.append(f"SKIP {b['name']}: already pitched today")
+            continue
         # a brand with a live reply or HOT lead is a relationship - never
         # auto-send a corporate pitch over the top of it.
         replied = any(re.search(r'replied|reply from|interested|HOT LEAD', r[idx['Status']] or '', re.I) for r in hits)
@@ -301,17 +382,31 @@ def main():
             # The chain engine is also capped at chain_reserve so it cannot
             # eat the follow-up engine's reserved slice.
             _sent_today = _count_sent_today()
-            _cap = _chain_cap()
-            if _sent_today >= _cap:
-                print(f"  QUOTA/CAP REACHED ({_sent_today}/{_cap}) - stopping, {len(ready)-i+1} pitch(es) deferred")
+            _daily_cap = allocation()['daily']
+            # The remaining chain ALLOWANCE is how many more chain pitches
+            # may go out. It must be compared against the chain pitches
+            # already sent, NOT against the total sent by every engine.
+            #
+            # The old code compared `_sent_today` (all engines, 92) with
+            # `_chain_cap()` (the remaining allowance, 8), so `92 >= 8`
+            # was true and the engine stopped before sending anything.
+            # Not one chain pitch had ever gone out.
+            _chain_left = _chain_cap()
+            _chain_used = _count_chain_today()
+            if _sent_today >= _daily_cap or _chain_left <= 0:
+                print(f"  QUOTA/CAP REACHED (sent {_sent_today}/{_daily_cap}, "
+                      f"chain left {_chain_left}) - stopping, "
+                      f"{len(ready)-i+1} pitch(es) deferred")
                 break
-            print(f"  [{i}/{len(ready)}] {p['brand']} -> {p['to']}  (sent today {_sent_today}/{_cap})")
+            print(f"  [{i}/{len(ready)}] {p['brand']} -> {p['to']}  "
+                  f"(sent today {_sent_today}/{_daily_cap}, chain {_chain_used}/{_chain_used+_chain_left})")
             res = gmail_send(p['to'], p['subject'], p['body'])
             print('      ', res)
             if res == 'sent':
                 sent += 1
                 p['status'] = 'SENT'
                 record_send('chain', p['brand'], p['to'])
+                _record_pitched(p['brand'])
                 marked = mark_sent(p['brand_key'], p['to'], p['subject'])
                 print(f'       marked {marked} location rows')
                 time.sleep(40)
