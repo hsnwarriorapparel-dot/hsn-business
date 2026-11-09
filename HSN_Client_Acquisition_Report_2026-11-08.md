@@ -470,3 +470,36 @@ everything that *runs* it. The nightly pipeline, the watchdog and
    platform allows 1 inquiry per day. Without Premium the ceiling stays at
    one requirement per day.
 2. **The Everlast-branded glove image** for the website hero.
+
+### 6. Twenty verified buyers were being silently retired
+`company_reach.py` marked a company `no-match` whenever the web search
+failed to find its site. For a company the screen had already
+**confirmed** — it states on its own profile that it buys uniforms — that
+is a transient failure, not a rejection. Twenty verified buyers were
+retired this way: Al Tamauez Al Raqi (police uniforms), Danniyeh Royal
+Trading (military accessories), National Planet LLC (uniforms, coveralls),
+Salem Abdullah Al Qattan & Sons (school uniforms), and sixteen more.
+
+Three fixes were needed, because the retry had to survive three separate
+skip paths: the failure path, the unreachable-site path, and — the one
+that actually locked them out — `if k in done: continue`, which retired
+them permanently. Retries are now capped at three, after which a buyer is
+set aside as `buyer-no-site` for a manual look rather than looping
+forever.
+
+**Root cause of the search failure:** the go4WorldBusiness profile
+carries **no website link** — only the company name, country, category
+and the "Buys …" sentence. So the only route to a contact is a web
+search, and for these companies the search returns only directory
+listings, challenge walls and other trades. Traced end to end for Salem
+Abdullah Al Qattan & Sons: `dalil-alkuwait.com` is a Kuwait business
+directory, `bizmideast.com` sits behind a challenge wall, and
+`kuwaityello.com` is a directory listing. The filters are right; the
+company simply has no reachable site of its own.
+
+**This is a Premium question, not a filter question.** The filters were
+deliberately not loosened — `litoonline.com` is a children's formal-wear
+shop the directory filed under "sportswear", and accepting it would put
+us in the wrong place. The 33 confirmed-but-unreachable buyers are now on
+their own **Premium Buyers** sheet in the tracker, ready to work through
+the moment the paid tier is active.
