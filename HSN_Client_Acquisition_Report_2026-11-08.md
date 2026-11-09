@@ -503,3 +503,40 @@ shop the directory filed under "sportswear", and accepting it would put
 us in the wrong place. The 33 confirmed-but-unreachable buyers are now on
 their own **Premium Buyers** sheet in the tracker, ready to work through
 the moment the paid tier is active.
+
+### 7. The chain-pitch engine had never sent a single email
+
+The chain/franchise pitch is the highest-value action in the system: one
+corporate email to a brand can win every location it runs. Brooklyn
+Fitboxing alone has 21 locations; TITLE Boxing Club has 12 tracked and
+146 franchised.
+
+**Two bugs, both invisible until the first real send.**
+
+**The cap compared two different things.** The loop compared the day's
+*total* sends by every engine (92) against the *remaining chain
+allowance* (8). `92 >= 8` was always true, so the engine stopped before
+sending anything. Not one chain pitch had ever gone out — the log showed
+seven brands "READY" every night and nothing behind it.
+
+**Nothing prevented a duplicate.** The engine rebuilds its list from
+scratch each run, so the second run pitched the same corporate inbox
+again. TITLE Boxing Club and Brooklyn Fitboxing each received the
+identical pitch twice within seven minutes — a duplicate corporate pitch
+reads as spam. The tracker marker was not a usable guard, because
+`mark_sent()` only stamps rows whose email ends with the brand domain,
+and Brooklyn Fitboxing's corporate address differs from its location
+addresses, so it recorded nothing. A dedicated state file now holds the
+list.
+
+**The email body leaked our research notes.** The template read *"We have
+146 franchised locations (craft.co company profile); 13 tracked
+locations"* — a source citation and our internal research sent straight
+to a customer. The `evidence` field is internal; every brand now has a
+separate `desc` written as a phrase that fits the sentence.
+
+**Result: six chain pitches sent and verified in the sent folder** —
+TITLE Boxing Club, Brooklyn Fitboxing, Victory Martial Arts, UFC Gym,
+Morales Box and Rumble Boxing — 58 locations under seven corporate
+inboxes, in one run, for the first time. The day's total landed at
+exactly 100/100, so the hard cap was respected.
