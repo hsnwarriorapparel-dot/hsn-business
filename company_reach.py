@@ -1171,8 +1171,19 @@ def acquire_lock():
             try:
                 pid = int(open(LOCK).read().strip() or 0)
                 os.kill(pid, 0)
-                print('another company_reach is running (pid %d) - exiting' % pid)
-                return False
+                # The PID is alive - but it may be a DIFFERENT program that
+                # inherited the PID after the real reacher died. Confirm it
+                # is actually a company_reach before refusing to start.
+                try:
+                    _cmd = open('/proc/%d/cmdline' % pid, 'rb').read().decode(
+                        'utf-8', 'replace').replace('\x00', ' ')
+                except Exception:
+                    _cmd = ''
+                if 'company_reach' in _cmd:
+                    print('another company_reach is running (pid %d) - exiting' % pid)
+                    return False
+                print('stale reach lock (pid %d is not a company_reach) - reclaiming' % pid)
+                os.unlink(LOCK)
             except (ProcessLookupError, ValueError):
                 print('stale reach lock - reclaiming')
                 try:

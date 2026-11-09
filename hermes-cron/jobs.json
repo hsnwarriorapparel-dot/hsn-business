@@ -23,15 +23,15 @@
       "schedule_display": "every 30m",
       "repeat": {
         "times": null,
-        "completed": 1304
+        "completed": 1305
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-11T21:35:27.411710+00:00",
-      "next_run_at": "2026-11-08T23:48:00.206250+00:00",
-      "last_run_at": "2026-11-08T23:18:00.206250+00:00",
+      "next_run_at": "2026-11-09T00:19:00.377075+00:00",
+      "last_run_at": "2026-11-08T23:49:00.377075+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -51,8 +51,8 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-08T23:17:00.289015+00:00",
-        "dispatched_at": "2026-11-08T23:17:58.347541+00:00",
+        "scheduled_at": "2026-11-08T23:48:00.206250+00:00",
+        "dispatched_at": "2026-11-08T23:48:58.349761+00:00",
         "lateness_seconds": 58.1,
         "kind": "on_time"
       },
@@ -141,15 +141,15 @@
       "schedule_display": "0 0 * * *",
       "repeat": {
         "times": null,
-        "completed": 26
+        "completed": 27
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-15T17:23:21.828586+00:00",
-      "next_run_at": "2026-11-09T00:00:00+00:00",
-      "last_run_at": "2026-11-08T00:01:36.860050+00:00",
+      "next_run_at": "2026-11-10T00:00:00+00:00",
+      "last_run_at": "2026-11-09T00:01:36.276509+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -172,8 +172,8 @@
       "workdir": null,
       "fire_claim": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-08T00:00:00+00:00",
-        "dispatched_at": "2026-11-08T00:00:58.347969+00:00",
+        "scheduled_at": "2026-11-09T00:00:00+00:00",
+        "dispatched_at": "2026-11-09T00:00:58.347749+00:00",
         "lateness_seconds": 58.3,
         "kind": "on_time"
       }
@@ -527,5 +527,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-08T23:18:00.207734+00:00"
+  "updated_at": "2026-11-09T00:01:36.296400+00:00"
 }
