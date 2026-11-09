@@ -360,7 +360,13 @@ def update_row(lead_id, field, value, marker=None, append=False,
             release()
     return False
 
-def guarded_write_csv(rows, path=CSV, read_gen=None):
+def guarded_write_csv(rows, path=None, read_gen=None):
+    # Resolve the path AT CALL TIME. `path=CSV` as a default argument
+    # captures the value at import, so a test that sets `lsw.CSV = TMP`
+    # was ignored and the test wrote into the REAL leads.csv - which is
+    # how six 'Placeholder Test Club' rows got into the tracker.
+    if path is None:
+        path = CSV
     """Write the WHOLE file, but refuse if leads.csv changed underneath us.
 
     A stale process (one that started before this module existed) has an
@@ -379,7 +385,10 @@ def guarded_write_csv(rows, path=CSV, read_gen=None):
     return True
 
 
-def safe_write_csv(rows, path=CSV, expect_gen=None):
+def safe_write_csv(rows, path=None, expect_gen=None):
+    # Resolve the path AT CALL TIME - see guarded_write_csv for why.
+    if path is None:
+        path = CSV
     """Atomically write rows to a CSV, holding the shared lock.
 
     Every live writer goes through this so two processes can never write

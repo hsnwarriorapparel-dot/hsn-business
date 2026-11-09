@@ -456,3 +456,47 @@ real mailboxes - a `webmaster@` that was never created is rejected with
 'Address not found'. The 361 role addresses on Google-hosted domains are
 NOT all bad (`info@` is often a configured alias), and 68 leads carry both
 markers, so the bounce handler - not a guess - is what decides.
+
+## A DEFAULT ARGUMENT CAPTURES THE PATH AT IMPORT - THE TEST WROTE INTO THE REAL TRACKER
+
+`safe_write_csv(rows, path=CSV, ...)` captured `CSV` when the module was
+IMPORTED. A test that set `lsw.CSV = TMP` was therefore IGNORED, and the
+test's round-trip write went into the REAL `leads.csv`. Six
+`Placeholder Test Club` rows (L9901-L9905, L9907) ended up in the live
+tracker - and because the reach campaign assigns IDs from the current
+max, a real buyer (Happy Life) was pushed to L9908 with a gap at L9907.
+
+Resolve the path AT CALL TIME:
+
+```python
+def safe_write_csv(rows, path=None, expect_gen=None):
+    if path is None:
+        path = CSV
+```
+
+The same fix was needed in `guarded_write_csv`.
+
+**CHECK THE HASH, NOT JUST THE VERDICT.** The test printed
+`VERDICT: PASS` while corrupting the live tracker - a passing verdict
+proves the assertion held, not that the test was isolated. Verify:
+
+```python
+before = sha256(leads.csv)
+run_the_test()
+assert sha256(leads.csv) == before
+```
+
+Run EVERY test and compare the hash after each one; a single test that
+writes to the live file is enough to plant junk.
+
+## A PHONE WITH NO COUNTRY CODE IS NOT WHATSAPP-REACHABLE
+
+`company_reach.py` marks a local number as
+`05058986100 (local - country unconfirmed)` when no country dial code
+could be matched. That number must NOT go to WhatsApp - dialling it
+without a country code reaches the wrong party, and some numbers belong
+to someone entirely different.
+
+The `wa.me` route is different and safe: a `wa.me` link is by
+definition a full international number, so it is always usable even when
+the stored phone lacks a leading `+`.
