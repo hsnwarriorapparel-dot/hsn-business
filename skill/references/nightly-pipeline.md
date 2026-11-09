@@ -72,3 +72,60 @@ keys on the campaign day, not on all-time history, so the brands
 re-pitch at 20:55 each day. That is deliberate - a franchise pitch
 every night to the same corporate inbox would be spam, so check that
 the state file's date format matches the engine's `day_tag()` exactly.
+
+## THE PIPELINE FAILED THREE NIGHTS RUNNING AND NOTHING SAID SO
+
+The nightly pipeline was killed by the 1-hour cron timeout inside the IG
+pass. The log's last line was an ordinary progress line, so a partial
+run looked like a normal run that happened to stop. The tracker rebuild,
+the WA list, the reply sweep and the final verify were **never reached**,
+three nights in a row, and the cron only reported a generic timeout.
+
+**The cause was a batch size set to exactly double what fits.**
+
+| | |
+|---|---|
+| measured cost | 37.4 seconds per IG account |
+| batch size | 240 accounts |
+| time needed | 2.5 hours |
+| cron window | 3600 seconds |
+
+The IG pass is RESUMABLE - it skips any handle already touched - so the
+remainder is picked up on the next night. Sized to fit:
+
+```python
+IG_PASS_BATCH = 70      # 70 x 37.4s = 44 minutes
+```
+
+**MEASURE the per-item cost from the logs, never assume it.** The IG log
+carries a timestamp on every line:
+
+```python
+per = (sec(last) - sec(first)) / (len(lines) - 1)
+```
+
+## A SILENT PARTIAL RUN MUST BE IMPOSSIBLE
+
+The post-pipeline now writes `pipeline_completed.json` ONLY when every
+step has run. The watchdog reports a stale one.
+
+**Two traps in the watchdog implementation:**
+
+1. the check must come BEFORE any `exit 0` - the worker-restart branch
+   exits early when `worker_restart.lock` exists, so a check placed
+   after it never ran
+2. `python - <<'EOF'` does NOT execute the heredoc here - the
+   interpreter reads the script from stdin and the body is consumed
+   differently. Write the check to a temp file and run it:
+
+```bash
+_wd_check=$(mktemp)
+cat > "$_wd_check" <<'PYEOF'
+...
+PYEOF
+"$PY" "$_wd_check"
+rm -f "$_wd_check"
+```
+
+Test all three cases: a stale marker must be REPORTED, today's marker
+must be SILENT, and a missing marker must not crash.

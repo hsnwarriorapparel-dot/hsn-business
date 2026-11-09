@@ -9,7 +9,7 @@ Runs as one background chain so the steps never overlap with the email wave:
   5. copy both + leads.csv into business-backup, commit and push
   6. print the final verification counts
 """
-import subprocess, sys, time, os, glob
+import subprocess, sys, time, os, glob, json, datetime
 
 # discover the absolute interpreter path (never hardcode a numeric-looking dir:
 # it gets redacted in tool output and would silently corrupt the path)
@@ -73,7 +73,22 @@ run([PY, '/home/ubuntu/day24_ig_hunt.py'], 'IG HANDLE HUNT (today wave)')
 run([PY, '/home/ubuntu/day24_ig_hunt_backlog.py'], 'IG HANDLE HUNT (backlog + today)')
 
 # 3. IG follow+DM pass: today's wave leads + today's other hunted leads first
-run([PY, '/home/ubuntu/day24_ig_pass.py', '240'], 'IG FOLLOW+DM PASS')
+# IG PASS SIZE - MEASURED, NOT GUESSED.
+#
+# The pass was set to 240 accounts. The measured cost is 37.4 seconds per
+# account, so 240 accounts needs 2.5 HOURS - and the cron gives this
+# pipeline 3600 seconds. The pass was killed every single night at the
+# 1-hour mark, which meant the pipeline NEVER reached the tracker
+# rebuild, the WA list, the reply sweep or the final verify.
+# The job failed three nights running and nobody noticed, because the
+# log's last line was a normal-looking progress line.
+#
+# 70 accounts x 37.4s = 44 minutes, which fits inside the window with
+# room for the hunt steps that run before it. The pass is RESUMABLE - it
+# skips any handle already touched - so the remainder is picked up on
+# the next night.
+IG_PASS_BATCH = 70
+run([PY, '/home/ubuntu/day24_ig_pass.py', str(IG_PASS_BATCH)], 'IG FOLLOW+DM PASS')
 
 # 3. tracker rebuild (canonical: Leads + Summary + Day Summary + Countries)
 run([PY, '/home/ubuntu/rebuild_tracker_day.py'], 'TRACKER REBUILD')
@@ -111,6 +126,26 @@ log(f'git push rc={r.returncode}: {(r.stdout + r.stderr).strip()[:200]}')
 # 6. final counts
 run([PY, '/home/ubuntu/day24_reply_sweep.py'], 'REPLY SWEEP + STOP MARKING')
 run([PY, '/home/ubuntu/day24_verify.py'], 'FINAL VERIFY')
+
+# COMPLETION MARKER.
+#
+# The pipeline was killed by the 1-hour cron timeout inside the IG pass,
+# three nights running. The log's last line was an ordinary progress
+# line, so the failure looked like a normal run that happened to stop.
+# The tracker rebuild, the WA list, the reply sweep and the final verify
+# were never reached and nothing said so.
+#
+# Write a marker ONLY when every step above has run. The watchdog then
+# checks for it, and a missing marker is reported instead of passing
+# silently.
+try:
+    with open('/home/ubuntu/pipeline_completed.json', 'w') as _f:
+        json.dump({'date': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d'),
+                   'at': datetime.datetime.now(datetime.timezone.utc).strftime('%H:%M:%S'),
+                   'ig_batch': IG_PASS_BATCH}, _f, indent=2)
+    log('PIPELINE COMPLETED - all steps ran')
+except Exception as _e:
+    log('could not write the completion marker: %s' % _e)
 
 # release the lock so tomorrow's guard is free
 try:
