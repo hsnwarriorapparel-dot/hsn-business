@@ -45,3 +45,30 @@ cp -ru /home/ubuntu/.hermes/cron/jobs.json "$BACKUP_DIR/hermes-cron/" 2>/dev/nul
 growing archive - copying them made every backup dirty and pushed
 hundreds of files. The backup now holds 10 scripts + `jobs.json`, and
 the backed-up `jobs.json` must stay byte-identical to the live one.
+
+## THE CAMPAIGN DAY IS NOT THE CALENDAR DATE
+
+`day_tag()` returns the date in the NEWEST `dayNN_quota_state.json`, not
+today's date. `ensure_quota_state.py` creates that file at the start of
+each pipeline run, so the ledger, the quota and the chain guard all move
+to the next campaign day together.
+
+This matters when the pipeline has not run for a while: at 03:20 UTC on
+9 November the newest state was still `day25` (date 2026-11-08), so
+`sent_today()` reported 100 - the full quota - because the 100 emails
+sent after midnight still belonged to the 8 November campaign day.
+
+Running `ensure_quota_state.py` creates `day26_quota_state.json` for
+2026-11-09 and the counter correctly resets to 0. The 8 November sends
+stay archived under that day in the ledger.
+
+**The chain pitch has its OWN `day_tag()`** that returns
+`'Daily 2026-11-09'` (a different format from `outreach_quota`'s
+`'2026-11-09'`), because the chain state file stores the tracker-style
+day tag. Do not mix the two formats.
+
+**A brand pitched yesterday is available again today.** The chain guard
+keys on the campaign day, not on all-time history, so the brands
+re-pitch at 20:55 each day. That is deliberate - a franchise pitch
+every night to the same corporate inbox would be spam, so check that
+the state file's date format matches the engine's `day_tag()` exactly.
