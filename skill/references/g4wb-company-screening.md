@@ -290,3 +290,35 @@ correctly.
 
 **Always verify a newly added buyer against its own site before
 trusting it.** Two of the seventeen were wrong.
+
+## A REGRESSION TEST WAS ADDED FOR EVERY GATE
+
+Each name/trade fix above needs a test, or the next edit will undo it.
+The gate logic can be exercised WITHOUT the slow browser search by
+building a small HTML page and calling the same checks - that keeps the
+test under a second instead of minutes:
+
+```python
+# a minimal page with the company name - the case that used to raise
+html = ('<html><head><title>Intersafe International</title></head><body>'
+        + ('intersafe international uniforms ' * 80) + '</body></html>')
+```
+
+**ALWAYS exercise a new gate with BOTH a positive and a negative case.**
+The short-token rule accepted 'Intersafe International LLC' and rejected
+'CGS Company' in the same run.
+
+## A VARIABLE CAN BE USED BEFORE IT IS ASSIGNED
+
+Adding the country check between the `_minimal` assignment and its use
+raised `UnboundLocalError: cannot access local variable '_minimal'`.
+It was caught by the campaign's own `except` and printed as
+'error: ...' followed by 'no match' - so the company was silently
+skipped rather than the run crashing.
+
+**Read the campaign log for 'error:' lines, not just for 'no match'.**
+A single exception inside `process()` is swallowed by the per-company
+try/except, and the company is treated exactly like a failed search.
+
+Assign every variable before the first use, and re-run the gate test
+after any edit that inserts lines above it.
