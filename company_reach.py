@@ -1062,7 +1062,31 @@ def process(comp):
         # directory had filed under 'sportswear'. It must NOT be accepted
         # just because the page is small.
         _minimal = len(text) < 4500
-        _name_on_page = any(t.lower() in low for t in toks)
+        # A SHORT TOKEN MUST NOT IDENTIFY A COMPANY. 'CGS' is three
+        # letters; it appears in 'cgsglobal.com', so a minimal site with
+        # the letters C-G-S in its URL passed the name test and a UK
+        # payroll firm was added as a Saudi uniform buyer. A token has to
+        # be at least 4 characters to carry enough information to name a
+        # company on its own.
+        _long_toks = [t for t in toks if len(t) >= 4]
+        _name_on_page = bool(_long_toks) and any(
+            t.lower() in low for t in _long_toks)
+        # The country the directory gives is a SIGNAL, not a veto. Eight
+        # of our seventeen real buyer sites never mention their country
+        # on the page, so a hard check would reject good buyers. It only
+        # matters for a SHORT name token, where the token itself says
+        # nothing: 'CGS' appears in 'cgsglobal.com', which is a UK
+        # payroll firm, not a Saudi uniform buyer.
+        _country_ok = True
+        if country:
+            _first = country.split()[0].lower()
+            _country_ok = (bool(re.search(r'\b%s' % re.escape(_first), low))
+                           or country.lower() in low)
+        _short_token = not _long_toks
+        if _short_token and country and not _country_ok:
+            # the only name evidence is 3 letters and the page does not
+            # place the company in the stated country - refuse it
+            continue
         _is_academy = bool(ACADEMY_WORDS.search(text[:1500]))
         if not PRODUCT_WORDS.search(text):
             if not (dir_is_ours and

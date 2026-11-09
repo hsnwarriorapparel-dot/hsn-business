@@ -240,3 +240,53 @@ food packaging|packaging solution|wrapping material`.
 supplier that offers screen printing as a service. That is a garment
 service, not a packaging trade. Check the new patterns against the
 existing buyer companies before keeping them.
+
+## A 3-LETTER NAME TOKEN ADDED THE WRONG COMPANY
+
+'CGS Company' (Saudi Arabia, category 'uniforms') was matched to
+`cgsglobal.com` - a UK **payroll** firm. Three things let it through:
+
+1. `company_tokens('CGS Company')` returns `['CGS']`, and 'CGS' appears
+   in the URL, so the name check passed
+2. the site is minimal (1,938 chars) and mentions no product, so the
+   **minimal-site escape** (`_minimal and _name_on_page`) accepted it
+3. `OTHER_TRADE` had no pattern for payroll/software
+
+**A token shorter than 4 characters must not name a company on its own:**
+
+```python
+_long_toks = [t for t in toks if len(t) >= 4]
+_name_on_page = bool(_long_toks) and any(t.lower() in low for t in _long_toks)
+```
+
+And the country becomes a SIGNAL rather than a veto, because eight of
+the seventeen real buyer sites never mention their country on the page:
+
+```python
+_country_ok = bool(re.search(r'\b%s' % re.escape(country.split()[0].lower()), low))
+_short_token = not _long_toks
+if _short_token and country and not _country_ok:
+    continue          # the only name evidence is 3 letters and the page
+                      # does not place it in the stated country
+```
+
+A hard country veto would reject Muscat Sports, GymNation, Adeem
+Uniforms, Linkwell Uniforms, Dream Uniform, Intersafe and Happy Life -
+all real buyers whose pages simply do not name their country.
+
+## A BUSINESS DIRECTORY WAS ADDED AS A BUYER
+
+'Al Obaidani International LLC' was matched to `theomantoday.com`, and
+the contact recorded was `connect@theomantoday.com' - **the directory's
+own address, not Al Obaidani's**. The listing agent is not the buyer.
+
+`business directory` is already in `OTHER_TRADE`, so the current code
+rejects it - the lead had been added before that list was complete.
+Its real candidates are `obaidani.com` (also rejected - a different
+trade) and `al-obaidani.com` ('Traditional Omani Attire Since 1964'), a
+JavaScript-rendered retail brand whose curl output is 51 characters.
+The minimal-site path needs `len(text) > 900`, so it is rejected
+correctly.
+
+**Always verify a newly added buyer against its own site before
+trusting it.** Two of the seventeen were wrong.
