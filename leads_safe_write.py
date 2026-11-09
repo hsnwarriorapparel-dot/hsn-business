@@ -227,7 +227,10 @@ def add_rows(new_rows, retries=3):
             _hdr = next(csv.reader(f))
         _ei = _hdr.index('Email')
         keep = []
-        dropped = 0
+        # 'dropped' is gone: a row with an undeliverable address is
+        # CLEARED, never dropped. The old branch could never fire but it
+        # printed 'dropped N row(s) with a non-contactable email', which
+        # reads like leads are being lost when nothing was.
         cleared = 0
         for r in new_rows:
             # NEVER touch the header row. Its Email cell contains the
@@ -249,8 +252,6 @@ def add_rows(new_rows, retries=3):
                 r[_ei] = ''
                 cleared += 1
             keep.append(r)
-        if dropped:
-            print('dropped %d row(s) with a non-contactable email' % dropped)
         if cleared:
             print('cleared the email on %d row(s) - the lead is kept' % cleared)
         new_rows = keep

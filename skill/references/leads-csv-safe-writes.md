@@ -500,3 +500,40 @@ to someone entirely different.
 The `wa.me` route is different and safe: a `wa.me` link is by
 definition a full international number, so it is always usable even when
 the stored phone lacks a leading `+`.
+
+## A DEAD BRANCH PRINTED A MISLEADING MESSAGE
+
+`add_rows()` had a `dropped` counter that was initialised to 0 and
+**never incremented**, but it still printed:
+
+```
+dropped 2 row(s) with a non-contactable email
+```
+
+The behaviour was correct - a row with an undeliverable address is
+CLEARED and kept, because the club may still be reachable by phone or
+website. But the message read like leads were being lost, and on a log
+review it looked like data loss that had never happened.
+
+**A message that can never fire is worse than no message** - it teaches
+the reader to distrust the log. Removed.
+
+## TEST THE LOGIC, NOT TODAY'S NUMBERS
+
+The chain-cap test asserted 'the new check does not block'. It failed
+the moment the quota was genuinely full, because blocking was then the
+CORRECT behaviour. A test that depends on live state gives a false
+failure.
+
+Test the logic with synthetic values:
+
+```python
+cases = [
+    (92, 8, 100, False),   # the case that silently killed it
+    (100, 8, 100, True),   # daily cap reached
+    (92, 0, 100, True),    # no chain allowance left
+]
+```
+
+and assert the decision for each, independently of what the quota
+happens to be right now.
