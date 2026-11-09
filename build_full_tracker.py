@@ -12,6 +12,7 @@ Sheets:
   8. Countries       - coverage by country
   9. Funnel          - the pipeline from scrape to reply
  10. Pipeline Report - how the system runs, the schedule, the limits
+ 11. Premium Buyers  - confirmed buyers whose contact needs go4WorldBusiness Premium
 """
 import csv
 import json
@@ -322,6 +323,24 @@ def main():
     autosize(ws, maxw=46)
 
     # ---------------- 10. Pipeline Report ----------------
+    # ---------------- 11. Premium Buyers ----------------
+    # Confirmed buyers whose contact we cannot reach on the free tier.
+    # The go4WorldBusiness profile carries no website link, so their
+    # contact details sit behind the Premium membership. This sheet is
+    # the list to work through once Premium is active.
+    ws = wb.create_sheet('Premium Buyers')
+    ph = ['g4wb ID', 'Company', 'Country', 'Category', 'What they buy',
+          'Profile link', 'Status']
+    ws.append(ph)
+    _prem_path = '/home/ubuntu/g4wb_premium_buyers.csv'
+    if os.path.exists(_prem_path):
+        with open(_prem_path, newline='', encoding='utf-8') as _pf:
+            for _pr in csv.DictReader(_pf):
+                ws.append([_pr.get('g4wb_id', ''), _pr.get('Company', ''),
+                           _pr.get('Country', ''), _pr.get('Category', ''),
+                           _pr.get('Buys', ''), _pr.get('Profile', ''),
+                           _pr.get('Status', '')])
+
     ws = wb.create_sheet('Pipeline Report')
     ws.column_dimensions['A'].width = 26
     ws.column_dimensions['B'].width = 96

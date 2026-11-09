@@ -20,6 +20,9 @@ cp -u /home/ubuntu/leads.csv /home/ubuntu/HWA_Lead_Tracker.xlsx /home/ubuntu/HSN
 # NOT in the repo, so a lost VPS would have lost the write-up of the whole
 # campaign.
 cp -u /home/ubuntu/HSN_Client_Acquisition_Report_*.md /home/ubuntu/morning_briefing.md /home/ubuntu/business-backup/ 2>/dev/null
+# The Premium buyer list is the work queue for the paid go4WorldBusiness
+# tier - it must survive a lost VPS.
+cp -u /home/ubuntu/g4wb_premium_buyers.csv /home/ubuntu/business-backup/ 2>/dev/null
 cp -u /home/ubuntu/WA_Pending_List.xlsx /home/ubuntu/business-backup/ 2>/dev/null
 cp -u /home/ubuntu/*.py /home/ubuntu/business-backup/ 2>/dev/null
 # The skill directory holds EVERY hard-won rule (outreach protocols, price

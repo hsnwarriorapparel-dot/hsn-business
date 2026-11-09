@@ -1196,6 +1196,29 @@ def acquire_lock():
     return False
 
 
+def _retry_count(prev):
+    """How many times this company has already been retried."""
+    if isinstance(prev, dict):
+        return int(prev.get('tries') or 0)
+    return 0
+
+
+def _is_confirmed_buyer(kid):
+    """True when the screen confirmed this company buys OUR product.
+
+    A company that says on its own go4WorldBusiness profile that it buys
+    uniforms / martial-arts gear is worth retrying when the web search
+    fails to locate its site. Only companies with no such statement may
+    be retired after one failed search.
+    """
+    try:
+        with open('/home/ubuntu/g4wb_company_screened.json', encoding='utf-8') as f:
+            sc = json.load(f)
+        return kid in sc.get('ours', {})
+    except Exception:
+        return False
+
+
 def main():
     if not acquire_lock():
         return
@@ -1209,7 +1232,18 @@ def main():
     todo = []
     for k, v in harvest.items():
         if k in done:
-            continue
+            # A buyer whose search failed is RETRYABLE, not done. The
+            # plain `if k in done: continue` retired it forever, which is
+            # how 20 verified buyers were lost. Let it back in until the
+            # retry cap is reached.
+            _st = done.get(k)
+            _stt = _st.get('status') if isinstance(_st, dict) else _st
+            if _stt == 'retry-buyer':
+                if _retry_count(_st) >= 3:
+                    continue          # cap reached - set aside for review
+                # else: fall through and retry it
+            else:
+                continue
         if JUNK_NAME.match((v.get('company') or '').strip()):
             done[k] = {'status': 'junk-name'}
             continue
@@ -1274,8 +1308,16 @@ def main():
             # fail on the next fetch, and the site can have changed.
             chk = curl(hit['website'], timeout=18)
             if not chk:
-                print('    final check failed (site unreachable) - skipping')
-                done[kid] = {'status': 'no-match', 'note': 'final check failed'}
+                # The site did not LOAD. For a confirmed buyer that is a
+                # transient failure, not a rejection - the company still
+                # states on its profile that it buys our product. Keep it
+                # retryable instead of retiring it.
+                if _is_confirmed_buyer(kid):
+                    print('    confirmed buyer - site unreachable, re-queued')
+                    done[kid] = {'status': 'retry-buyer', 'note': 'site unreachable'}
+                else:
+                    print('    final check failed (site unreachable) - skipping')
+                    done[kid] = {'status': 'no-match', 'note': 'final check failed'}
                 continue
             ctext = strip_tags(chk)
             chead = (title_hint(chk) + ' ' + ctext[:900]).lower()
@@ -1414,7 +1456,30 @@ def main():
                              'lead': row[idx['Lead ID']]}
         else:
             print('    no match')
-            done[kid] = {'status': 'no-match'}
+            # A CONFIRMED BUYER whose web search failed is NOT done. The
+            # company states on its own profile that it buys our product,
+            # so it is worth trying again - the search simply did not find
+            # its site this time.
+            #
+            # Marking it 'no-match' retired it forever, and 20 verified
+            # buyers (police uniforms, military uniforms, school uniforms)
+            # were retired that way. They are now re-queued.
+            if _is_confirmed_buyer(kid):
+                # Cap the retries. A confirmed buyer deserves more than one
+                # attempt, but the search cannot find every site - after
+                # three tries it is left for a manual look rather than
+                # looping forever.
+                tries = _retry_count(done.get(kid))
+                if tries >= 3:
+                    done[kid] = {'status': 'buyer-no-site', 'note': 'search failed 3x',
+                                 'tries': tries}
+                    print('    confirmed buyer - 3 tries exhausted, set aside for review')
+                else:
+                    done[kid] = {'status': 'retry-buyer', 'note': 'search found no site',
+                                 'tries': tries}
+                    print('    confirmed buyer - re-queued (try %d)' % (tries + 1))
+            else:
+                done[kid] = {'status': 'no-match'}
         state['processed'] = done
         json.dump(state, open(STATE, 'w'), indent=2, ensure_ascii=False)
 

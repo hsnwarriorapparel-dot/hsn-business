@@ -114,3 +114,71 @@ The NVIDIA shield's adaptive rate had dropped to 1 RPM after a 429, so
 each company takes 1-2 minutes (it runs several LLM calls per company).
 A 12-company batch needs ~25 minutes. Run it in the BACKGROUND - a
 foreground call gets killed by the timeout.
+
+## A CONFIRMED BUYER WHOSE SEARCH FAILS MUST NOT BE RETIRED
+
+`company_reach.py` marked a company `no-match` whenever the web search
+failed to find its site. For a company that had already been CONFIRMED by
+the screen - it states on its own profile that it buys uniforms - that is
+a transient failure, not a rejection. **20 verified buyers were retired
+this way** (police uniforms, military uniforms, school uniforms).
+
+Three fixes, all needed:
+
+```python
+def _is_confirmed_buyer(kid):
+    try:
+        with open('/home/ubuntu/g4wb_company_screened.json', encoding='utf-8') as f:
+            sc = json.load(f)
+        return kid in sc.get('ours', {})
+    except Exception:
+        return False
+```
+
+1. the failure path must set `retry-buyer`, not `no-match`
+2. an unreachable site must set `retry-buyer`, not `no-match`
+3. **the skip list must let them back in** - `if k in done: continue`
+   retires them permanently, so `retry-buyer` entries have to be allowed
+   through until the cap:
+
+```python
+if k in done:
+    _st = done.get(k)
+    _stt = _st.get('status') if isinstance(_st, dict) else _st
+    if _stt == 'retry-buyer':
+        if _retry_count(_st) >= 3:
+            continue          # cap reached - set aside for review
+    else:
+        continue
+```
+
+Cap the retries at 3, then set them aside as `buyer-no-site` for a manual
+look. Without a cap the campaign loops on the same company forever.
+
+## WHY THE SEARCH FAILS FOR MANY OF THESE BUYERS
+
+The go4WorldBusiness profile carries **no website link** - it has the
+company name, country, category and the 'Buys ...' sentence, and nothing
+else. So the only route to a contact is a web search.
+
+Traced end to end for Salem Abdullah Al Qattan & Sons (Kuwait):
+
+| step | result |
+|---|---|
+| `search_company` | finds `dalil-alkuwait.com`, `bizmideast.com`, `kuwaityello.com` |
+| domain filters | all three pass |
+| `dalil-alkuwait.com` | loads (28 KB) but is a Kuwait **business directory**, not the company - correctly rejected |
+| `bizmideast.com` | behind a **challenge wall** |
+| `kuwaityello.com` | an **INFO_SITE** directory listing |
+| `emails_from('https://dalil-alkuwait.com')` | DOES find `kw-29@hotmail.com` |
+
+**The filters are right; the company simply has no site of its own that
+the search can reach.** This is exactly what the go4WorldBusiness
+Premium membership is for - it reveals a member's contact details
+directly. The JUNIOR tier allows 1 buyer inquiry per day; Premium allows
+100/day.
+
+**Do not loosen the product gate to compensate.** `litoonline.com` is a
+children's formal-wear shop the directory filed under 'sportswear', and
+`dalil-alkuwait.com` is a directory listing. A confirmed buyer with no
+findable site is a Premium question, not a filter question.
