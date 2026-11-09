@@ -82,3 +82,35 @@ the unit lives in `~/.config/systemd/user/`. The correct check is
 `systemctl --user is-active nvidia-shield.service` - it is active,
 enabled and `Linger=yes`, running 4 days, and its adaptive rate had
 correctly dropped to 1 RPM after a 429.
+
+## THREE LATENT CRASHES IN company_reach.py
+
+**1. `log()` was called but NEVER DEFINED.** It looked correct in review
+and only raised `NameError` the moment a row failed to land - which
+killed the whole campaign mid-run and lost the batch. Use `print()`.
+
+**2. New rows were written at the END of the batch.** The state file
+said `'added'` while the row still sat in memory, so a kill between the
+two lost that lead FOREVER - the state marked it done so it was never
+retried. Write each row as soon as it is built:
+
+```python
+from leads_safe_write import add_rows
+add_rows([row])
+```
+
+**3. The lock could go stale.** `company_reach.lock` held the PID of a
+process that had died, so `acquire_lock` refused to start and the
+campaign hung silently with an empty log. Confirm the live PID is
+really a `company_reach` before refusing (see above).
+
+**A silent hang is worse than a crash** - a crash shows a traceback, a
+stale lock just produces an empty log file. After any timeout, check
+the lock file and the log before assuming the campaign did nothing.
+
+## THE REACH CAMPAIGN IS SLOW BY DESIGN
+
+The NVIDIA shield's adaptive rate had dropped to 1 RPM after a 429, so
+each company takes 1-2 minutes (it runs several LLM calls per company).
+A 12-company batch needs ~25 minutes. Run it in the BACKGROUND - a
+foreground call gets killed by the timeout.

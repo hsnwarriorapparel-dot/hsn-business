@@ -1377,6 +1377,19 @@ def main():
                 print('    ADDED %s | %s | %s | %s' % (row[idx['Lead ID']], name[:30],
                                                        (email or ('phone:' + phone)),
                                                        hit['website']))
+                # WRITE THE ROW NOW, not at the end of the batch. The
+                # state file said 'added' while the row still sat in
+                # memory - a kill between the two lost that lead FOREVER,
+                # because the state marked it done so it was never retried.
+                #
+                # WRITE FIRST, THEN VERIFY. The verification used to run
+                # BEFORE the write, so it checked a row that did not exist
+                # yet and every single addition was rejected as
+                # 'add-failed' - which is why the buyer-company count
+                # never moved.
+                from leads_safe_write import add_rows
+                add_rows([row])
+                new_rows = []
                 # VERIFY the lead actually landed before recording
                 # 'added'. A state file that claims 'added' for a lead
                 # that is not in the tracker means the company is never
@@ -1392,8 +1405,8 @@ def main():
                 except Exception:
                     _landed = True      # cannot verify - do not block
                 if not _landed:
-                    log('    NOT LANDED - %s is not in leads.csv, '
-                        're-queueing the company' % row[idx['Lead ID']])
+                    print('    NOT LANDED - %s is not in leads.csv, '
+                          're-queueing the company' % row[idx['Lead ID']])
                     done[kid] = {'status': 'add-failed',
                                  'email': email, 'phone': phone}
                     continue
@@ -1405,9 +1418,11 @@ def main():
         state['processed'] = done
         json.dump(state, open(STATE, 'w'), indent=2, ensure_ascii=False)
 
-    # save - append safely so nothing written while we worked is lost
-    from leads_safe_write import add_rows
-    add_rows(new_rows)
+    # anything still buffered (a row built but not yet appended) is saved
+    # here too, so nothing written while we worked is lost
+    if new_rows:
+        from leads_safe_write import add_rows
+        add_rows(new_rows)
     try:
         os.unlink(LOCK)
     except Exception:
