@@ -210,6 +210,18 @@ OTHER_TRADE = re.compile(
     r'auto spare parts|automotive parts|car mats|cement|steel|aluminium|'
     r'printer|copier|toner|office supplies|medical|pharmaceutical|'
     r'food|beverage|spice|rice|tea|coffee|cashew|nuts|'
+    # PACKAGING AND PRINTING. These surface under an apparel or
+    # 'uniform' category but trade in wrappers, cartons and ink, not
+    # garments. 'al tamayoz al raqi co.' says 'Packaging Materials' in
+    # its title and sells 'the first wrap to the final seal'.
+    r'packaging material|packaging suppl|packaging and print|'
+    r'carton|corrugated|shrink wrap|stretch film|polypropylene|'
+    r'printed packaging|labels and print|'
+    # NOT 'screen print' - Apparel Point Trading is a real uniform
+    # supplier that offers screen printing as a service. That is a
+    # garment service, not a packaging trade.
+    r'paper products|paper suppl|disposable cup|plastic cup|'
+    r'food packaging|packaging solution|wrapping material|'
     r'prayer mat|carpet|rug|linoleum|vinyl flooring|rubber flooring|'
     # trades that surface under a 'sports' or 'apparel' category but
     # cannot buy our goods:
@@ -535,11 +547,26 @@ GENERIC_WORDS = {
 }
 
 
+def _is_vowelish(ch):
+    """True for the letters that stand in for Arabic short vowels.
+
+    'y' counts because it is used as a vowel in transliteration
+    ('Tamayoz' for 'Tamauez').
+    """
+    return ch in 'aeiouy'
+
+
 def _close_enough(a, b):
     """True when two tokens are near-identical (one letter apart).
 
     The directory said 'Fashqua Buying Company'; the company writes 'Fashque
     Designs'. A single-letter spelling difference must not kill the lead.
+
+    It must also survive a TRANSPOSED pair of letters. The directory says
+    'Al Tamauez Al Raqi LLC'; the company's own site says 'al tamayoz al
+    raqi co.'. 'Tamauez' vs 'Tamayoz' is 'ue' swapped for 'uy' - one
+    edit by Damerau-Levenshtein, but two by plain Levenshtein, so the
+    old check rejected the company's own website.
     """
     a = (a or '').lower()
     b = (b or '').lower()
@@ -547,6 +574,40 @@ def _close_enough(a, b):
         return False
     if a == b:
         return True
+    # A TRANSPOSITION of two adjacent letters. Check it first: a
+    # transposition keeps the length, so the edit-distance path below
+    # would see two differences and reject it.
+    if len(a) == len(b):
+        diffs = [i for i in range(len(a)) if a[i] != b[i]]
+        if len(diffs) == 2:
+            i, j = diffs
+            if j == i + 1 and a[i] == b[j] and a[j] == b[i]:
+                return True
+    # An ARABIC TRANSLITERATION VARIANT. The directory says 'Al Tamauez Al
+    # Raqi LLC'; the company's own site says 'al tamayoz al raqi co.'.
+    # 'Tamauez' and 'Tamayoz' differ at two positions and BOTH pairs are
+    # vowels - 'ue' rendered as 'uy/o'. That is the same name, spelled
+    # the way a different clerk spelled it.
+    #
+    # The rule is deliberately narrow, because a loose vowel rule starts
+    # accepting different companies:
+    #   - same length, at least 6 characters
+    #   - exactly TWO positions differ
+    #   - both sides of each difference are vowels
+    #   - the CONSONANTS must be identical and in the same order
+    #
+    # 'Tamauez'/'Tamayoz' passes: consonants t-m-z at the same places.
+    # 'Sultan'/'Soltan' fails: 'u' vs 'o' is a vowel change but the
+    # consonant skeleton also shifts, and one vowel swap in a short word
+    # is too weak a signal on its own.
+    if len(a) == len(b) and len(a) >= 6:
+        diffs = [i for i in range(len(a)) if a[i] != b[i]]
+        if len(diffs) == 2 and all(_is_vowelish(a[i]) and _is_vowelish(b[i])
+                                   for i in diffs):
+            ca = ''.join(a[i] for i in range(len(a)) if i not in diffs)
+            cb = ''.join(b[i] for i in range(len(b)) if i not in diffs)
+            if ca == cb:
+                return True
     if abs(len(a) - len(b)) > 1:
         return False
     # one insertion / deletion / substitution
@@ -1338,8 +1399,24 @@ def main():
                             (_cminimal and _cname and len(ctext) > 900)))
             if not _cok or OTHER_TRADE.search(ctext[:1200]) \
                     or OTHER_SPORTS.search(chead) or NOT_A_COMPANY.search(hit['website']):
-                print('    final check failed (site no longer matches) - skipping')
-                done[kid] = {'status': 'no-match', 'note': 'final check failed'}
+                # The site was FOUND but it does not match. For a company
+                # the screen CONFIRMED, that is one bad candidate - the
+                # company may have another site, or the next search may
+                # surface it. Re-queue instead of retiring it.
+                if _is_confirmed_buyer(kid):
+                    tries = _retry_count(done.get(kid))
+                    if tries >= 3:
+                        done[kid] = {'status': 'buyer-no-site',
+                                     'note': 'site did not match, 3 tries', 'tries': tries}
+                        print('    confirmed buyer - 3 tries exhausted, set aside')
+                    else:
+                        done[kid] = {'status': 'retry-buyer',
+                                     'note': 'site did not match', 'tries': tries}
+                        print('    confirmed buyer - site did not match, re-queued (try %d)'
+                              % (tries + 1))
+                else:
+                    print('    final check failed (site no longer matches) - skipping')
+                    done[kid] = {'status': 'no-match', 'note': 'final check failed'}
                 continue
             email = hit.get('email') or ''
             phone = hit.get('phone') or ''

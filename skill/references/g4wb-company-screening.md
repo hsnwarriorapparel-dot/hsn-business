@@ -182,3 +182,61 @@ directly. The JUNIOR tier allows 1 buyer inquiry per day; Premium allows
 children's formal-wear shop the directory filed under 'sportswear', and
 `dalil-alkuwait.com` is a directory listing. A confirmed buyer with no
 findable site is a Premium question, not a filter question.
+
+## THE NAME MATCH REJECTED THE COMPANY'S OWN SITE
+
+`altamayozalraqi.com` IS the site of 'Al Tamauez Al Raqi LLC' - the
+directory spells the name one way and the company spells it another.
+The site was rejected by the signature-token check.
+
+`_close_enough` allowed ONE edit. 'Tamauez' vs 'Tamayoz' differs at two
+positions and both pairs are vowels ('ue' rendered as 'uy/o') - an
+Arabic transliteration variant, which is exactly what the Gulf buyer
+list is full of.
+
+Two additions, both deliberately narrow:
+
+```python
+# a TRANSPOSITION of two adjacent letters
+if len(a) == len(b):
+    diffs = [i for i in range(len(a)) if a[i] != b[i]]
+    if len(diffs) == 2:
+        i, j = diffs
+        if j == i + 1 and a[i] == b[j] and a[j] == b[i]:
+            return True
+
+# an ARABIC TRANSLITERATION VARIANT
+if len(a) == len(b) and len(a) >= 6:
+    diffs = [i for i in range(len(a)) if a[i] != b[i]]
+    if len(diffs) == 2 and all(_is_vowelish(a[i]) and _is_vowelish(b[i])
+                               for i in diffs):
+        ca = ''.join(a[i] for i in range(len(a)) if i not in diffs)
+        cb = ''.join(b[i] for i in range(len(b)) if i not in diffs)
+        if ca == cb:
+            return True
+```
+
+**Why it must be this narrow.** A loose vowel rule starts accepting
+different companies. 'Sultan'/'Soltan' must stay REJECTED, and the
+consonant-skeleton check is what rejects it - 'tamauez'/'tamayoz' keeps
+t-m-z in the same places, 'sultan'/'soltan' does not. A minimum length of
+6 characters also matters: a 2-3 character token carries no information.
+
+## A PACKAGING SUPPLIER WAS NOT IN THE 'OTHER TRADE' LIST
+
+With the name fixed, `altamayozalraqi.com` finally passed the name
+check - and then it should have been rejected for a different reason.
+Its title is 'Al Tamayoz Al Raqi Co. - Packaging Materials' and it sells
+'from the first wrap to the final seal'. `OTHER_TRADE` had no packaging
+patterns, so a packaging company filed under 'uniforms' would have been
+accepted.
+
+Added: `packaging material|packaging suppl|packaging and print|carton|
+corrugated|shrink wrap|stretch film|polypropylene|printed packaging|
+labels and print|paper products|paper suppl|disposable cup|plastic cup|
+food packaging|packaging solution|wrapping material`.
+
+**Do NOT add `screen print`** - Apparel Point Trading is a real uniform
+supplier that offers screen printing as a service. That is a garment
+service, not a packaging trade. Check the new patterns against the
+existing buyer companies before keeping them.

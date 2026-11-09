@@ -23,15 +23,15 @@
       "schedule_display": "every 30m",
       "repeat": {
         "times": null,
-        "completed": 1308
+        "completed": 1309
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-11T21:35:27.411710+00:00",
-      "next_run_at": "2026-11-09T01:52:01.075893+00:00",
-      "last_run_at": "2026-11-09T01:22:01.075893+00:00",
+      "next_run_at": "2026-11-09T02:23:01.363358+00:00",
+      "last_run_at": "2026-11-09T01:53:01.363358+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -51,9 +51,9 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-09T01:21:01.221879+00:00",
-        "dispatched_at": "2026-11-09T01:21:58.349162+00:00",
-        "lateness_seconds": 57.1,
+        "scheduled_at": "2026-11-09T01:52:01.075893+00:00",
+        "dispatched_at": "2026-11-09T01:52:58.351452+00:00",
+        "lateness_seconds": 57.3,
         "kind": "on_time"
       },
       "fire_claim": null
@@ -88,7 +88,7 @@
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-12T15:45:07.111547+00:00",
-      "next_run_at": "2026-11-09T02:00:00+00:00",
+      "next_run_at": "2026-11-10T02:00:00+00:00",
       "last_run_at": "2026-11-08T02:01:02.013787+00:00",
       "last_status": "ok",
       "last_error": null,
@@ -109,12 +109,15 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-08T02:00:00+00:00",
-        "dispatched_at": "2026-11-08T02:00:58.347797+00:00",
+        "scheduled_at": "2026-11-09T02:00:00+00:00",
+        "dispatched_at": "2026-11-09T02:00:58.347531+00:00",
         "lateness_seconds": 58.3,
         "kind": "on_time"
       },
-      "fire_claim": null
+      "fire_claim": {
+        "at": "2026-11-09T02:01:00.809975+00:00",
+        "by": "myvps-vnic:349063:0aed4bd2638545d8b0872f01c5dea8e0"
+      }
     },
     {
       "id": "f8b8d47f5151",
@@ -527,5 +530,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-09T01:22:01.078245+00:00"
+  "updated_at": "2026-11-09T02:01:00.811039+00:00"
 }
