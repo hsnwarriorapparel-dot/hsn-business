@@ -23,15 +23,15 @@
       "schedule_display": "every 30m",
       "repeat": {
         "times": null,
-        "completed": 1355
+        "completed": 1371
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-11T21:35:27.411710+00:00",
-      "next_run_at": "2026-11-10T02:09:00.254604+00:00",
-      "last_run_at": "2026-11-10T01:39:00.254604+00:00",
+      "next_run_at": "2026-11-10T10:46:41.287378+00:00",
+      "last_run_at": "2026-11-10T10:16:41.287378+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -51,10 +51,10 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-10T01:38:00.244221+00:00",
-        "dispatched_at": "2026-11-10T01:38:58.347439+00:00",
-        "lateness_seconds": 58.1,
-        "kind": "on_time"
+        "scheduled_at": "2026-11-10T09:54:01.904369+00:00",
+        "dispatched_at": "2026-11-10T10:16:39.335360+00:00",
+        "lateness_seconds": 1357.4,
+        "kind": "catch_up"
       },
       "fire_claim": null
     },
@@ -81,7 +81,7 @@
       "schedule_display": "0 2 * * *",
       "repeat": {
         "times": null,
-        "completed": 28
+        "completed": 29
       },
       "enabled": true,
       "state": "scheduled",
@@ -89,7 +89,7 @@
       "paused_reason": null,
       "created_at": "2026-10-12T15:45:07.111547+00:00",
       "next_run_at": "2026-11-11T02:00:00+00:00",
-      "last_run_at": "2026-11-09T02:01:02.929974+00:00",
+      "last_run_at": "2026-11-10T02:01:02.483675+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -114,10 +114,7 @@
         "lateness_seconds": 58.4,
         "kind": "on_time"
       },
-      "fire_claim": {
-        "at": "2026-11-10T02:01:00.103437+00:00",
-        "by": "myvps-vnic:349063:55283f65b1684f5e817c8484f36a32b9"
-      }
+      "fire_claim": null
     },
     {
       "id": "f8b8d47f5151",
@@ -264,15 +261,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 22
+        "completed": 23
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-21T08:32:50.709149+00:00",
-      "next_run_at": "2026-11-10T09:00:00+00:00",
-      "last_run_at": "2026-11-09T09:37:59.212326+00:00",
+      "next_run_at": "2026-11-11T09:00:00+00:00",
+      "last_run_at": "2026-11-10T09:38:52.251381+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -294,8 +291,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-09T09:00:00+00:00",
-        "dispatched_at": "2026-11-09T09:00:58.347860+00:00",
+        "scheduled_at": "2026-11-10T09:00:00+00:00",
+        "dispatched_at": "2026-11-10T09:00:58.347840+00:00",
         "lateness_seconds": 58.3,
         "kind": "on_time"
       },
@@ -438,21 +435,24 @@
       "schedule_display": "5 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 2
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T10:05:49.473126+00:00",
-      "next_run_at": "2026-11-10T09:05:00+00:00",
-      "last_run_at": "2026-11-09T09:24:28.136159+00:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-11-11T09:05:00+00:00",
+      "last_run_at": "2026-11-10T10:06:03.685032+00:00",
+      "last_status": "error",
+      "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
-      "last_failure": null,
-      "failure_streak": 0,
+      "last_failure": {
+        "at": "2026-11-10T10:06:03.685032+00:00",
+        "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh"
+      },
+      "failure_streak": 1,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -465,9 +465,9 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-09T09:05:00+00:00",
-        "dispatched_at": "2026-11-09T09:05:58.619886+00:00",
-        "lateness_seconds": 58.6,
+        "scheduled_at": "2026-11-10T09:05:00+00:00",
+        "dispatched_at": "2026-11-10T09:05:58.351092+00:00",
+        "lateness_seconds": 58.4,
         "kind": "on_time"
       },
       "fire_claim": null
@@ -495,24 +495,24 @@
       "schedule_display": "25 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 2
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T12:54:09.661741+00:00",
-      "next_run_at": "2026-11-10T09:25:00+00:00",
-      "last_run_at": "2026-11-09T10:26:02.068113+00:00",
+      "next_run_at": "2026-11-11T09:25:00+00:00",
+      "last_run_at": "2026-11-10T10:20:31.440179+00:00",
       "last_status": "error",
-      "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh",
+      "last_error": "Script exited with code -15\nstdout:\n=== g4wb buyer-directory pipeline 2026-11-10 09:26:01 UTC ===\nbuyers already harvested: 2006\n  united-kingdom fitness-equipment-sports-goods       blocks=50  buyers=50  new=49  ->next\n  germany        martial-arts-gloves                  blocks=0   buyers=0   new=0\n  germany        martial-arts-belts                   blocks=0   buyers=0   new=0\n  germany        martial-arts-mats                    blocks=50  buyers=50  new=41  ->next\n  germany        martial-arts-goods-and-accessories   blocks=1   buyers=1   new=1\n  germany        boxing-gloves                        blocks=1   buyers=1   new=1\n  germany        boxing-head-guards                   blocks=0   buyers=0   new=0\n  germany        boxing-accessories                   blocks=3   buyers=3   new=1\n  germany        kick-pads                            blocks=50  buyers=50  new=42  ->next\n  germany        sports-goods-equipments              blocks=30  buyers=30  new=23  ->next\n  germany        uniforms                             blocks=2   buyers=2   new=2\n  germany        gym-gloves                           blocks=0   buyers=0   new=0\n  germany        sportswear                           blocks=14  buyers=14  new=13  ->next\n  germany        sports-apparel                       blocks=0   buyers=0   new=0\n  germany        team-uniforms                        blocks=30  buyers=30  new=21\n  germany        sports-jerseys                       blocks=50  buyers=50  new=27  ->next\n  germany        football-jerseys                     blocks=10  buyers=10  new=0  ->next\n  germany        fight-gear                           blocks=50  buyers=50  new=42  ->next\n  germany        head-protection                      blocks=50  buyers=50  new=43  ->next\n  germany        mouth-guards                         blocks=10  buyers=10  new=6\n  germany        shin-guards                          blocks=8   buyers=8   new=1\n  germany        hand-wraps                           blocks=50  buyers=50  new=41  ->next\n  germany        protective-equipment                 blocks=0   buyers=0   new=0\n  germany        sports-clothing                      blocks=0   buyers=0   new=0\n  germany        karate-uniforms                      blocks=3   buyers=3   new=0\n  germany        taekwondo-uniforms                   blocks=3   buyers=3   new=0\n  germany        judo-uniforms                        blocks=3   buyers=3   new=0\n  germany        fight-wear                           blocks=50  buyers=50  new=26  ->next\n  germany        mixed-martial-arts                   blocks=50  buyers=50  new=26  ->next\n  germany        self-defense                         blocks=50  buyers=50  new=39  ->next\n  germany        boxing-wear                          blocks=0   buyers=0   new=0\n  germany        fitness-equipment-sports-goods       blocks=30  buyers=30  new=0  ->next\n\nNEW buyers this run: 445 | total harvested: 2451\nsaved -> /home/ubuntu/g4wb_buyer_harvest_dir.json\nharvested 2456 -> filtered 324 buyers in our product space\n  countries: [('Australia', 56), ('United States', 46), ('United Arab Emirates', 42), ('Oman', 24), ('Germany', 24), ('Malaysia', 20), ('Saudi Arabia', 17), ('United Kingdom', 17), ('Israel', 8), ('Kuwait', 8)]\n   Nabil Al Raisi           | Oman               | Buyer Of Martial Arts Goods and A  | Not specified\n   Ali Aref                 | Egypt              | Buyer Of Boxing Accessories   |    | 500 - 1,000 Piec\n   Heba                     | Egypt              | Buyer Of Yoga & Gym Mats           | Not specified\n   Jit                      | Malaysia           | Buyer Of Gym Gloves   |   Gloves   | 1 Twenty-Foot Co\n   Chan                     | Malaysia           | Buyer Of Sports Goods & Equipment  | 500 Pairs\n   Faizul Safuan Yunus      | Malaysia           | Buyer Of Martial Arts Goods and A  | 3,500 Pieces\n   Skantan                  | Malaysia           | Buyer Of Yoga & Gym Mats           | Not specified\n   Jit                      | Kuala Lumpur, Mal  | Buyer Of Sports Goods & Equipment  | Not specified\n   Pedro Bernardo           | Portugal           | Buyer Of Martial Arts Belts        | 100 Pieces\n   Tiago Pedrosa David      | Portugal           | Buyer Of Boxing Accessories   |    | Not specified\n   Tiago Pedrosa David      | Portugal           | Buyer Of Boxing Accessories        | Not specified\n   Dylan                    | Australia          | Buyer Of Gym Gloves   |   Gloves   | 1 Twenty-Foot Co\nbuyer companies already harvested: 1000\n  south-africa boxing-accessories                 companies=50  new=50\n  south-africa kick-pads                          companies=6   new=6\n  south-africa gym-gloves                         companies=8   new=8\n  south-africa sports-apparel                     companies=5   new=5\n  south-africa uniforms                           companies=4   new=3\n  south-africa sports-clothing                    companies=6   new=1\n  south-africa protective-equipment               companies=1   new=1\n  south-africa martial-arts-goods-and-accessorie  companies=50  new=32\n  south-africa head-protection                    companies=8   new=5\n  south-africa shin-guards                        companies=0   new=0\n  south-africa hand-wraps                         companies=13  new=12\n  south-africa sports-jerseys                     companies=26  new=11\n  south-africa football-jerseys                   companies=1   new=0\n  south-africa karate-uniforms                    companies=4   new=0\n  south-africa taekwondo-uniforms                 companies=4   new=0\n  south-africa fitness-equipment-sports-goods     companies=11  new=0\n  south-africa gym-equipment                      companies=50  new=46\n  south-africa sports-accessories                 companies=4   new=0\n  south-africa boxing-head-guards                 companies=9   new=2\n  south-africa martial-arts-mats                  companies=25  new=14\n  russia     sportswear                         companies=0   new=0\n  russia     sports-goods-equipments            companies=0   new=0\n  russia     team-uniforms                      companies=0   new=0\n  russia     fight-gear                         companies=0   new=0\n  russia     mouth-guards                       companies=0   new=0\n  russia     fight-wear                         companies=0   new=0\n  russia     martial-arts-belts                 companies=45  new=26\n  russia     martial-arts-gloves                companies=43  new=13\n  russia     boxing-gloves                      companies=14  new=12\n  russia     boxing-accessories                 companies=8   new=3\n  russia     kick-pads                          companies=5   new=3\n  russia     gym-gloves                         companies=42  new=34\n\nNEW companies this run: 287 | total: 1287\nsaved -> /home/ubuntu/g4wb_company_harvest.json",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-09T10:26:02.068113+00:00",
-        "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh"
+        "at": "2026-11-10T10:20:31.440179+00:00",
+        "detail": "Script exited with code -15\nstdout:\n=== g4wb buyer-directory pipeline 2026-11-10 09:26:01 UTC ===\nbuyers already harvested: 2006\n  united-kingdom fitness-equipment-sports-goods       blocks=50  buyers=50  new=49  ->next\n  germany        martial-arts-gloves                  blocks=0   buyers=0   new=0\n  germany        martial-arts-belts                   blocks=0   buyers=0   new=0\n  germany        martial-arts-mats                    blocks=50  buyers=50  new=41  ->next\n  germany        martial-arts-goods-and-accessories   blocks=1   buyers=1   new=1\n  germany        boxing-gloves                        blocks=1   buyers=1   new=1\n  germany        boxing-head-guards                   blocks=0   buyers=0   new=0\n  germany        boxing-accessories                   blocks=3   buyers=3   new=1\n  germany        kick-pads                            blocks=50  buyers=50  new=42  ->next\n  germany        sports-goods-equipments              blocks=30  buyers=30  new=23  ->next\n  germany        uniforms                             blocks=2   buyers=2   new=2\n  germany        gym-gloves                           blocks=0   buyers=0   new=0\n  germany        sportswear                           blocks=14  buyers=14  new=13  ->next\n  germany        sports-apparel                       blocks=0   buyers=0   new=0\n  germany        team-uniforms                        blocks=30  buyers=30  new=21\n  germany        sports-jerseys                       blocks=50  buyers=50  new=27  ->next\n  germany        football-jerseys                     blocks=10  buyers=10  new=0  ->next\n  germany        fight-gear                           blocks=50  buyers=50  new=42  ->next\n  germany        head-protection                      blocks=50  buyers=50  new=43  ->next\n  germany        mouth-guards                         blocks=10  buyers=10  new=6\n  germany        shin-guards                          blocks=8   buyers=8   new=1\n  germany        hand-wraps                           blocks=50  buyers=50  new=41  ->next\n  germany        protective-equipment                 blocks=0   buyers=0   new=0\n  germany        sports-clothing                      blocks=0   buyers=0   new=0\n  germany        karate-uniforms                      blocks=3   buyers=3   new=0\n  germany        taekwondo-uniforms                   blocks=3   buyers=3   new=0\n  germany        judo-uniforms                        blocks=3   buyers=3   new=0\n  germany        fight-wear                           blocks=50  buyers=50  new=26  ->next\n  germany        mixed-martial-arts                   blocks=50  buyers=50  new=26  ->next\n  germany        self-defense                         blocks=50  buyers=50  new=39  ->next\n  germany        boxing-wear                          blocks=0   buyers=0   new=0\n  germany        fitness-equipment-sports-goods       blocks=30  buyers=30  new=0  ->next\n\nNEW buyers this run: 445 | total harvested: 2451\nsaved -> /home/ubuntu/g4wb_buyer_harvest_dir.json\nharvested 2456 -> filtered 324 buyers in our product space\n  countries: [('Australia', 56), ('United States', 46), ('United Arab Emirates', 42), ('Oman', 24), ('Germany', 24), ('Malaysia', 20), ('Saudi Arabia', 17), ('United Kingdom', 17), ('Israel', 8), ('Kuwait', 8)]\n   Nabil Al Raisi           | Oman               | Buyer Of Martial Arts Goods and A  | Not specified\n   Ali Aref                 | Egypt              | Buyer Of Boxing Accessories   |    | 500 - 1,000 Piec\n   Heba                     | Egypt              | Buyer Of Yoga & Gym Mats           | Not specified\n   Jit                      | Malaysia           | Buyer Of Gym Gloves   |   Gloves   | 1 Twenty-Foot Co\n   Chan                     | Malaysia           | Buyer Of Sports Goods & Equipment  | 500 Pairs\n   Faizul Safuan Yunus      | Malaysia           | Buyer Of Martial Arts Goods and A  | 3,500 Pieces\n   Skantan                  | Malaysia           | Buyer Of Yoga & Gym Mats           | Not specified\n   Jit                      | Kuala Lumpur, Mal  | Buyer Of Sports Goods & Equipment  | Not specified\n   Pedro Bernardo           | Portugal           | Buyer Of Martial Arts Belts        | 100 Pieces\n   Tiago Pedrosa David      | Portugal           | Buyer Of Boxing Accessories   |    | Not specified\n   Tiago Pedrosa David      | Portugal           | Buyer Of Boxing Accessories        | Not specified\n   Dylan                    | Australia          | Buyer Of Gym Gloves   |   Gloves   | 1 Twenty-Foot Co\nbuyer companies already harvested: 1000\n  south-africa boxing-accessories                 companies=50  new=50\n  south-africa kick-pads                          companies=6   new=6\n  south-africa gym-gloves                         companies=8   new=8\n  south-africa sports-apparel                     companies=5   new=5\n  south-africa uniforms                           companies=4   new=3\n  south-africa sports-clothing                    companies=6   new=1\n  south-africa protective-equipment               companies=1   new=1\n  south-africa martial-arts-goods-and-accessorie  companies=50  new=32\n  south-africa head-protection                    companies=8   new=5\n  south-africa shin-guards                        companies=0   new=0\n  south-africa hand-wraps                         companies=13  new=12\n  south-africa sports-jerseys                     companies=26  new=11\n  south-africa football-jerseys                   companies=1   new=0\n  south-africa karate-uniforms                    companies=4   new=0\n  south-africa taekwondo-uniforms                 companies=4   new=0\n  south-africa fitness-equipment-sports-goods     companies=11  new=0\n  south-africa gym-equipment                      companies=50  new=46\n  south-africa sports-accessories                 companies=4   new=0\n  south-africa boxing-head-guards                 companies=9   new=2\n  south-africa martial-arts-mats                  companies=25  new=14\n  russia     sportswear                         companies=0   new=0\n  russia     sports-goods-equipments            companies=0   new=0\n  russia     team-uniforms                      companies=0   new=0\n  russia     fight-gear                         companies=0   new=0\n  russia     mouth-guards                       companies=0   new=0\n  russia     fight-wear                         companies=0   new=0\n  russia     martial-arts-belts                 companies=45  new=26\n  russia     martial-arts-gloves                companies=43  new=13\n  russia     boxing-gloves                      companies=14  new=12\n  russia     boxing-accessories                 companies=8   new=3\n  russia     kick-pads                          companies=5   new=3\n  russia     gym-gloves                         companies=42  new=34\n\nNEW companies this run: 287 | total: 1287\nsaved -> /home/ubuntu/g4wb_company_harvest.json"
       },
-      "failure_streak": 1,
+      "failure_streak": 2,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -525,13 +525,13 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-09T09:25:00+00:00",
-        "dispatched_at": "2026-11-09T09:25:58.359935+00:00",
+        "scheduled_at": "2026-11-10T09:25:00+00:00",
+        "dispatched_at": "2026-11-10T09:25:58.361646+00:00",
         "lateness_seconds": 58.4,
         "kind": "on_time"
       },
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-10T02:01:00.105798+00:00"
+  "updated_at": "2026-11-10T10:20:31.460177+00:00"
 }
