@@ -43,3 +43,37 @@ if ! pgrep -f "/home/ubuntu/.hermes/tools/python-3.14.7+20260901-linux-arm64/bin
     fi
     cd /home/ubuntu && { /home/ubuntu/.hermes/tools/python-3.14.7+20260901-linux-arm64/bin/python3 /home/ubuntu/worker.py >> worker_stdout.txt 2>&1 & }
 fi
+
+# BROWSER STACK RESTART
+#
+# A gateway restart kills the Xvnc display and the Chromium work browser
+# together, and NOTHING brought them back - so the WhatsApp, Instagram,
+# Gmail and go4WorldBusiness channels went dark until someone noticed.
+#
+# It bit twice on 2026-11-10. The second time a screen_buyers.py job was
+# stuck in a retry loop against the dead CDP endpoint, holding the whole
+# go4WorldBusiness funnel for 30+ minutes.
+#
+# Restore in this order: the X server, then the window manager, then the
+# browser. launch_work_browser.sh picks a LIVE display itself and refuses
+# to start without one, so the display must come first.
+if ! curl -s -m 6 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+    if ! xdpyinfo -display :21 >/dev/null 2>&1; then
+        (DISPLAY=:21 nohup Xvnc :21 -geometry 1920x1080 -depth 24 \
+          -rfbport 5922 -localhost no -rfbauth /home/ubuntu/.vncpassfile \
+          > /tmp/xvnc.log 2>&1 &)
+        sleep 4
+    fi
+    if xdpyinfo -display :21 >/dev/null 2>&1; then
+        (DISPLAY=:21 nohup xfwm4 --display=:21 --replace --compositor=off \
+          > /tmp/xfwm4.log 2>&1 &)
+        sleep 1
+    fi
+    bash /home/ubuntu/launch_work_browser.sh >>/home/ubuntu/work_browser.log 2>&1
+    sleep 4
+    if curl -s -m 6 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+        echo "BROWSER RESTARTED (cdp 9222 is back)"
+    else
+        echo "BROWSER STILL DOWN - CDP 9222 is not answering"
+    fi
+fi
