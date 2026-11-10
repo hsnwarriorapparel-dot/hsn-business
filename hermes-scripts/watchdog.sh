@@ -14,11 +14,6 @@
 PY=$(ls -d /home/ubuntu/.hermes/tools/python-3*/bin/python3 2>/dev/null | sort -V | tail -1)
 MARK=/home/ubuntu/pipeline_completed.json
 if [ -n "$PY" ] && [ -f "$MARK" ]; then
-  # Write the check to a temp file and run it. A `python -` heredoc does
-  # NOT work here: the interpreter reads the SCRIPT from stdin, and the
-  # heredoc body is consumed as the script only when the redirect is
-  # attached to the interpreter's stdin in the right form. It printed
-  # nothing at all, so the check silently never fired.
   _wd_check=$(mktemp)
   cat > "$_wd_check" <<'PYEOF'
 import json, os, datetime
@@ -27,7 +22,6 @@ try:
     done = datetime.datetime.strptime(d.get('date'), '%Y-%m-%d').date()
     today = datetime.datetime.now(datetime.timezone.utc).date()
     age = (today - done).days
-    # Flag only if a full day has passed with no completed pipeline.
     if age >= 1:
         print('PIPELINE INCOMPLETE - last completed %s (%d days ago)' % (d.get('date'), age))
 except Exception:
@@ -37,11 +31,11 @@ PYEOF
   rm -f "$_wd_check"
 fi
 
-if ! pgrep -f "/home/ubuntu/.hermes/tools/python-3.14.7+20260901-linux-arm64/bin/python3 /home/ubuntu/worker.py" > /dev/null; then
+if ! pgrep -f "/home/ubuntu/.hermes/tools/python-3.14.7+202****0901-linux-arm64/bin/python3 /home/ubuntu/worker.py" > /dev/null; then
     if [ -f /home/ubuntu/worker_restart.lock ]; then
         exit 0
     fi
-    cd /home/ubuntu && { /home/ubuntu/.hermes/tools/python-3.14.7+20260901-linux-arm64/bin/python3 /home/ubuntu/worker.py >> worker_stdout.txt 2>&1 & }
+    cd /home/ubuntu && { /home/ubuntu/.hermes/tools/python-3.14.7+202****0901-linux-arm64/bin/python3 /home/ubuntu/worker.py >> worker_stdout.txt 2>&1 & }
 fi
 
 # BROWSER STACK RESTART
@@ -59,14 +53,11 @@ fi
 # to start without one, so the display must come first.
 if ! curl -s -m 6 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
     if ! xdpyinfo -display :21 >/dev/null 2>&1; then
-        (DISPLAY=:21 nohup Xvnc :21 -geometry 1920x1080 -depth 24 \
-          -rfbport 5922 -localhost no -rfbauth /home/ubuntu/.vncpassfile \
-          > /tmp/xvnc.log 2>&1 &)
+        (DISPLAY=:21 nohup Xvnc :21 -geometry 1920x1080 -depth 24           -rfbport 5922 -localhost no -rfbauth /home/ubuntu/.vncpassfile           > /tmp/xvnc.log 2>&1 &)
         sleep 4
     fi
     if xdpyinfo -display :21 >/dev/null 2>&1; then
-        (DISPLAY=:21 nohup xfwm4 --display=:21 --replace --compositor=off \
-          > /tmp/xfwm4.log 2>&1 &)
+        (DISPLAY=:21 nohup xfwm4 --display=:21 --replace --compositor=off           > /tmp/xfwm4.log 2>&1 &)
         sleep 1
     fi
     bash /home/ubuntu/launch_work_browser.sh >>/home/ubuntu/work_browser.log 2>&1
@@ -78,18 +69,50 @@ if ! curl -s -m 6 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
     fi
 fi
 
-
-# OFFICE-PORT-RELAY RESTART
+# NOVNC (port 6080) - Hermes desktop UI access from phone
 #
-# The office-port-relay serves the 3D office on /office via port 9119.
-# If it dies, the phone can't access the office. Check and restart if needed.
-if ! curl -s -m 6 http://127.0.0.1:9119/office >/dev/null 2>&1; then
-    echo "OFFICE RELAY DOWN - restarting on 9119"
-    cd /home/ubuntu/claw3d/server && PORT=9119 nohup node office-port-relay.js > /tmp/office-relay.log 2>&1 &
-    sleep 2
-    if curl -s -m 6 http://127.0.0.1:9119/office >/dev/null 2>&1; then
-        echo "OFFICE RELAY RESTARTED"
+# noVNC proxies the Xvnc display :21 (RFB 5922) to HTTP 6080.
+# If it dies, phone can't access Hermes desktop UI.
+if ! curl -s -m 6 http://127.0.0.1:6080/ >/dev/null 2>&1; then
+    echo "NOVNC DOWN - restarting on 6080"
+    pkill -f "websockify.*6080" 2>/dev/null
+    sleep 1
+    (cd /home/ubuntu && nohup websockify --web /usr/share/novnc/ 6080 localhost:5922 > /tmp/novnc.log 2>&1 &)
+    sleep 3
+    if curl -s -m 6 http://127.0.0.1:6080/ >/dev/null 2>&1; then
+        echo "NOVNC RESTARTED"
     else
-        echo "OFFICE RELAY STILL DOWN"
+        echo "NOVNC STILL DOWN"
     fi
 fi
+
+# HERMES DESKTOP IN VNC - ensure it's running on display :21
+#
+# The Hermes desktop app runs inside the VNC session.
+if ! pgrep -f "hermes.*desktop" | grep -v grep > /dev/null; then
+    echo "HERMES DESKTOP DOWN - restarting on DISPLAY=:21"
+    (DISPLAY=:21 nohup hermes desktop > /tmp/hermes-desktop.log 2>&1 &)
+    sleep 5
+    if pgrep -f "hermes.*desktop" | grep -v grep > /dev/null; then
+        echo "HERMES DESKTOP RESTARTED"
+    else
+        echo "HERMES DESKTOP STILL DOWN"
+    fi
+fi
+
+# HERMES DASHBOARD (port 9119) - serves the office-3d plugin
+#
+# The dashboard serves the NEW 3D office plugin at /office.
+if ! curl -s -m 6 http://127.0.0.1:9119/ >/dev/null 2>&1; then
+    echo "HERMES DASHBOARD DOWN - restarting on 9119"
+    pkill -f "hermes dashboard" 2>/dev/null
+    sleep 1
+    (cd /home/ubuntu && nohup hermes dashboard --port 9119 > /tmp/hermes-dashboard.log 2>&1 &)
+    sleep 8
+    if curl -s -m 6 http://127.0.0.1:9119/ >/dev/null 2>&1; then
+        echo "HERMES DASHBOARD RESTARTED"
+    else
+        echo "HERMES DASHBOARD STILL DOWN"
+    fi
+fi
+
