@@ -25,6 +25,62 @@ and the last stages (git backup, reply sweep, final verify) never ran.
 The per-step cap matters as much as the outer one: the IG pass alone is 2h21m,
 so a 4h per-step cap on a long chain leaves no headroom for a retry.
 
+## 🔴 THE OUTER CRON KILL IS 3600s - NEITHER INTERNAL CAP PROTECTS YOU
+
+**A `no_agent: true` cron job runs its script under a hard 1-hour ceiling.**
+There is no `timeout` key in the job record, so nothing set in jobs.json
+changes it. The 10h launcher cap and the 6h per-step cap above are
+INSIDE the script - the outer 3600s fires first and kills the whole job.
+
+So the pipeline must fit its WORK inside 1 hour, not merely fit its own
+internal caps. That is why the IG follow+DM pass was sized to 240
+accounts: at the measured **37.4 s per account** that is 2.5 hours, so
+the pass was killed every night at the 1-hour mark and the tracker
+rebuild, the WA list, the reply sweep and the final verify NEVER RAN -
+three nights in a row, with `last_status: error` and a `failure_streak`
+of 3 on the cron record that nobody read.
+
+**The IG pass is resumable** (it skips any handle already touched), so
+size it to fit and let the remainder roll forward:
+
+```python
+IG_PASS_BATCH = 70      # 70 x 37.4s = 44 minutes
+```
+
+**MEASURE the per-item cost from the logs, never assume it.** The IG log
+carries a timestamp on every line:
+
+```python
+per = (sec(last) - sec(first)) / (len(lines) - 1)
+```
+
+## A SILENT PARTIAL RUN MUST BE IMPOSSIBLE
+
+Because the log's last line was an ordinary progress line, a partial run
+looked like a normal run that happened to stop. The post-pipeline now
+writes `pipeline_completed.json` ONLY when every step has run, and
+`watchdog.sh` reports a stale marker.
+
+Two traps when adding that check:
+
+1. it must sit BEFORE any `exit 0` - the worker-restart branch exits
+   early when `worker_restart.lock` exists, so a check placed after it
+   never runs
+2. `python - <<'EOF'` does NOT execute the heredoc here - write the
+   check to a temp file and run it:
+
+```bash
+_wd_check=$(mktemp)
+cat > "$_wd_check" <<'PYEOF'
+...
+PYEOF
+"$PY" "$_wd_check"
+rm -f "$_wd_check"
+```
+
+Test all three cases: a stale marker must be REPORTED, today's marker
+must be SILENT, and a missing marker must not crash.
+
 ## Rule: measure, then set the cap
 
 Never guess a timeout. Run the chain once, sum the stages, and set the cap
