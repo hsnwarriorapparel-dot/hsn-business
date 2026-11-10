@@ -77,3 +77,19 @@ if ! curl -s -m 6 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
         echo "BROWSER STILL DOWN - CDP 9222 is not answering"
     fi
 fi
+
+
+# OFFICE-PORT-RELAY RESTART
+#
+# The office-port-relay serves the 3D office on /office via port 9119.
+# If it dies, the phone can't access the office. Check and restart if needed.
+if ! curl -s -m 6 http://127.0.0.1:9119/office >/dev/null 2>&1; then
+    echo "OFFICE RELAY DOWN - restarting on 9119"
+    cd /home/ubuntu/claw3d/server && PORT=9119 nohup node office-port-relay.js > /tmp/office-relay.log 2>&1 &
+    sleep 2
+    if curl -s -m 6 http://127.0.0.1:9119/office >/dev/null 2>&1; then
+        echo "OFFICE RELAY RESTARTED"
+    else
+        echo "OFFICE RELAY STILL DOWN"
+    fi
+fi
