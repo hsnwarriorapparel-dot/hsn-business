@@ -23,15 +23,15 @@
       "schedule_display": "every 30m",
       "repeat": {
         "times": null,
-        "completed": 1494
+        "completed": 1540
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-11T21:35:27.411710+00:00",
-      "next_run_at": "2026-11-13T02:24:59.436576+00:00",
-      "last_run_at": "2026-11-13T01:54:59.436576+00:00",
+      "next_run_at": "2026-11-14T02:10:59.499450+00:00",
+      "last_run_at": "2026-11-14T01:40:59.499450+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -51,9 +51,9 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-13T01:53:59.495551+00:00",
-        "dispatched_at": "2026-11-13T01:54:57.831668+00:00",
-        "lateness_seconds": 58.3,
+        "scheduled_at": "2026-11-14T01:39:59.589233+00:00",
+        "dispatched_at": "2026-11-14T01:40:57.831683+00:00",
+        "lateness_seconds": 58.2,
         "kind": "on_time"
       },
       "fire_claim": null
@@ -81,15 +81,15 @@
       "schedule_display": "0 2 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-12T15:45:07.111547+00:00",
-      "next_run_at": "2026-11-14T02:00:00+00:00",
-      "last_run_at": "2026-11-12T02:00:13.224771+00:00",
+      "next_run_at": "2026-11-15T02:00:00+00:00",
+      "last_run_at": "2026-11-13T02:01:01.778686+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -109,14 +109,14 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-13T02:00:00+00:00",
-        "dispatched_at": "2026-11-13T02:00:57.833060+00:00",
+        "scheduled_at": "2026-11-14T02:00:00+00:00",
+        "dispatched_at": "2026-11-14T02:00:57.831783+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
       "fire_claim": {
-        "at": "2026-11-13T02:00:59.421775+00:00",
-        "by": "myvps-vnic:1648:cd5bec092197411daffd0202420f7f00"
+        "at": "2026-11-14T02:00:59.360181+00:00",
+        "by": "myvps-vnic:1648:de36787252b34ed8bec7e1d8b09c86c3"
       }
     },
     {
@@ -144,15 +144,15 @@
       "schedule_display": "0 0 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-15T17:23:21.828586+00:00",
-      "next_run_at": "2026-11-14T00:00:00+00:00",
-      "last_run_at": "2026-11-13T00:02:53.566839+00:00",
+      "next_run_at": "2026-11-15T00:00:00+00:00",
+      "last_run_at": "2026-11-14T00:03:04.746778+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -175,8 +175,8 @@
       "workdir": null,
       "fire_claim": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-13T00:00:00+00:00",
-        "dispatched_at": "2026-11-13T00:00:57.831584+00:00",
+        "scheduled_at": "2026-11-14T00:00:00+00:00",
+        "dispatched_at": "2026-11-14T00:00:57.835084+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       }
@@ -204,24 +204,24 @@
       "schedule_display": "0 20 * * *",
       "repeat": {
         "times": null,
-        "completed": 25
+        "completed": 26
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-18T19:12:14.423564+00:00",
-      "next_run_at": "2026-11-13T20:00:00+00:00",
-      "last_run_at": "2026-11-12T21:01:00.592405+00:00",
+      "next_run_at": "2026-11-14T20:00:00+00:00",
+      "last_run_at": "2026-11-13T21:01:00.520993+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/daily_outreach_pipeline.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-12T21:01:00.592405+00:00",
+        "at": "2026-11-13T21:01:00.520993+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/daily_outreach_pipeline.sh"
       },
-      "failure_streak": 7,
+      "failure_streak": 8,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -234,8 +234,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T20:00:00+00:00",
-        "dispatched_at": "2026-11-12T20:00:57.831328+00:00",
+        "scheduled_at": "2026-11-13T20:00:00+00:00",
+        "dispatched_at": "2026-11-13T20:00:57.832793+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -264,15 +264,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 25
+        "completed": 26
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-21T08:32:50.709149+00:00",
-      "next_run_at": "2026-11-13T09:00:00+00:00",
-      "last_run_at": "2026-11-12T09:37:53.442871+00:00",
+      "next_run_at": "2026-11-14T09:00:00+00:00",
+      "last_run_at": "2026-11-13T09:39:02.060330+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -294,8 +294,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T09:00:00+00:00",
-        "dispatched_at": "2026-11-12T09:00:57.833140+00:00",
+        "scheduled_at": "2026-11-13T09:00:00+00:00",
+        "dispatched_at": "2026-11-13T09:00:57.831925+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -324,15 +324,15 @@
       "schedule_display": "55 20 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 7
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-06T22:55:03.987044+00:00",
-      "next_run_at": "2026-11-13T20:55:00+00:00",
-      "last_run_at": "2026-11-12T21:07:21.295641+00:00",
+      "next_run_at": "2026-11-14T20:55:00+00:00",
+      "last_run_at": "2026-11-13T21:07:20.510624+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -351,8 +351,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T20:55:00+00:00",
-        "dispatched_at": "2026-11-12T20:55:57.831705+00:00",
+        "scheduled_at": "2026-11-13T20:55:00+00:00",
+        "dispatched_at": "2026-11-13T20:55:57.832103+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -381,24 +381,24 @@
       "schedule_display": "10 21 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 7
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-06T22:55:04.052309+00:00",
-      "next_run_at": "2026-11-13T21:10:00+00:00",
-      "last_run_at": "2026-11-12T22:11:01.530065+00:00",
+      "next_run_at": "2026-11-14T21:10:00+00:00",
+      "last_run_at": "2026-11-13T22:11:01.553269+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/followup_daily.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-12T22:11:01.530065+00:00",
+        "at": "2026-11-13T22:11:01.553269+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/followup_daily.sh"
       },
-      "failure_streak": 2,
+      "failure_streak": 3,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -411,8 +411,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T21:10:00+00:00",
-        "dispatched_at": "2026-11-12T21:10:57.831889+00:00",
+        "scheduled_at": "2026-11-13T21:10:00+00:00",
+        "dispatched_at": "2026-11-13T21:10:57.831489+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -441,24 +441,24 @@
       "schedule_display": "5 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 6
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T10:05:49.473126+00:00",
-      "next_run_at": "2026-11-13T09:05:00+00:00",
-      "last_run_at": "2026-11-12T10:06:01.830509+00:00",
+      "next_run_at": "2026-11-14T09:05:00+00:00",
+      "last_run_at": "2026-11-13T10:06:00.518034+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-12T10:06:01.830509+00:00",
+        "at": "2026-11-13T10:06:00.518034+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh"
       },
-      "failure_streak": 3,
+      "failure_streak": 4,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -471,8 +471,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T09:05:00+00:00",
-        "dispatched_at": "2026-11-12T09:05:57.844535+00:00",
+        "scheduled_at": "2026-11-13T09:05:00+00:00",
+        "dispatched_at": "2026-11-13T09:05:57.831624+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -501,24 +501,24 @@
       "schedule_display": "25 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 6
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T12:54:09.661741+00:00",
-      "next_run_at": "2026-11-13T09:25:00+00:00",
-      "last_run_at": "2026-11-12T10:26:01.497416+00:00",
+      "next_run_at": "2026-11-14T09:25:00+00:00",
+      "last_run_at": "2026-11-13T10:26:01.473798+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-12T10:26:01.497416+00:00",
+        "at": "2026-11-13T10:26:01.473798+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh"
       },
-      "failure_streak": 4,
+      "failure_streak": 5,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -531,13 +531,13 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-12T09:25:00+00:00",
-        "dispatched_at": "2026-11-12T09:25:57.831589+00:00",
+        "scheduled_at": "2026-11-13T09:25:00+00:00",
+        "dispatched_at": "2026-11-13T09:25:57.832268+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-13T02:00:59.422600+00:00"
+  "updated_at": "2026-11-14T02:00:59.360958+00:00"
 }
