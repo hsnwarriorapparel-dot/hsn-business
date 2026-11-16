@@ -33,6 +33,56 @@ env var and ignore `model.base_url`.
 the cap and is what produced the recurring "AI model service was rate-limited
 (too many requests)" failures in cron jobs.
 
+The shield also NORMALIZES request bodies before forwarding: it strips
+`reasoning_content` from assistant messages in the `messages` history and
+re-serializes the JSON so duplicate keys collapse. NVIDIA's strict parser
+rejects both with HTTP 400 `duplicate field reasoning_content` when a
+reasoning model's response is replayed back in conversation history — which
+Hermes does. If a 400 mentions a duplicate field, check the normalizer is
+running (grep `shield_proxy.py` for `_normalize_chat_body`) before touching
+Hermes config.
+
+## "Connection error" on NVIDIA = the SHIELD is down, not NVIDIA
+
+`Connection error.` (openai.APIConnectionError) on EVERY NVIDIA call means
+nothing is listening on 127.0.0.1:8743. Diagnose in this order:
+
+1. `systemctl --user status nvidia-shield.service` — active or failed?
+2. `ss -tlnp | grep 8743` — a listener MUST exist.
+3. `journalctl --user -u nvidia-shield.service -n 30` — the exact Python
+   traceback lives here, NOT in Hermes' error logs (those only show the
+   downstream APIConnectionError).
+
+**The shield runs from its own venv** (`/home/ubuntu/nvidia-shield/venv`,
+selected first in `start-shield.sh`). Never point the launcher back at the
+`~/.hermes/tools/python-3*` glob: a Hermes toolchain upgrade replaces that
+interpreter and DROPS its site-packages (httpx vanished this way),
+crash-looping the shield tens of thousands of times while systemd still
+reported the unit "enabled". After any change: `systemctl --user restart
+nvidia-shield.service`, then re-check the listener before testing calls.
+
+## The /v1/models list LIES — verify a model with a real completion
+
+This account lacks NVIDIA's "Public API Endpoints" entitlement for
+third-party models:
+
+- `GET /v1/models` returns ~80 models, 200 OK — that proves NOTHING.
+- A third-party model (meta/*, mistralai/*, deepseek-ai/*) 404s with
+  `Function '…': Not found for account '…'` — live catalog, unprovisioned
+  endpoint for this account. 410 Gone = end of life. Either way: never
+  configure that model.
+- A hang that accepts the connection but returns 0 bytes is ALSO a failure.
+
+Before putting ANY model into `fallback_providers` or `auxiliary`, send a
+real `chat/completions` through the shield and require actual content.
+Verified working on this account (re-verify before relying — NVIDIA
+deprovisions without notice):
+
+- `poolside/laguna-xs-2.1` — plain completions, no reasoning trace
+- `nvidia/nemotron-3-ultra-550b-a55b` — reasoning (emits `reasoning_content`)
+- `nvidia/nemotron-3.5-lightning-30b-a3b` — reasoning
+- `nvidia/nemotron-3.5-super-vl-120b-a12b` — vision (auxiliary.vision)
+
 Health check: `curl -s http://127.0.0.1:8743/shield/health` reports
 `rpm_current`, `rpm_ceiling`, `spacing_s` and `window_requests_last_60s`.
 
