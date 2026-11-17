@@ -23,15 +23,15 @@
       "schedule_display": "every 30m",
       "repeat": {
         "times": null,
-        "completed": 1633
+        "completed": 1679
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-11T21:35:27.411710+00:00",
-      "next_run_at": "2026-11-16T02:13:59.523237+00:00",
-      "last_run_at": "2026-11-16T01:43:59.523237+00:00",
+      "next_run_at": "2026-11-17T02:30:57.877673+00:00",
+      "last_run_at": "2026-11-17T01:29:59.682825+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -51,12 +51,15 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-16T01:42:59.508237+00:00",
-        "dispatched_at": "2026-11-16T01:43:57.831614+00:00",
-        "lateness_seconds": 58.3,
+        "scheduled_at": "2026-11-17T01:59:59.682825+00:00",
+        "dispatched_at": "2026-11-17T02:00:57.833033+00:00",
+        "lateness_seconds": 58.2,
         "kind": "on_time"
       },
-      "fire_claim": null
+      "fire_claim": {
+        "at": "2026-11-17T02:00:59.797551+00:00",
+        "by": "myvps-vnic:1648:ce94d28ff3e04dda843b12db083a09de"
+      }
     },
     {
       "id": "8d87b574012b",
@@ -81,15 +84,15 @@
       "schedule_display": "0 2 * * *",
       "repeat": {
         "times": null,
-        "completed": 34
+        "completed": 35
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-12T15:45:07.111547+00:00",
-      "next_run_at": "2026-11-17T02:00:00+00:00",
-      "last_run_at": "2026-11-15T02:01:01.589647+00:00",
+      "next_run_at": "2026-11-18T02:00:00+00:00",
+      "last_run_at": "2026-11-16T02:01:01.577868+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -109,14 +112,14 @@
       "workdir": null,
       "failure_deliver": "local",
       "last_dispatch": {
-        "scheduled_at": "2026-11-16T02:00:00+00:00",
-        "dispatched_at": "2026-11-16T02:00:57.831859+00:00",
+        "scheduled_at": "2026-11-17T02:00:00+00:00",
+        "dispatched_at": "2026-11-17T02:00:57.833033+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
       "fire_claim": {
-        "at": "2026-11-16T02:00:59.378431+00:00",
-        "by": "myvps-vnic:1648:bd2d32074b79453c8b7dae852f5e887a"
+        "at": "2026-11-17T02:00:59.729455+00:00",
+        "by": "myvps-vnic:1648:8d8297d9f48e483187cf2ec3079f282c"
       }
     },
     {
@@ -144,15 +147,15 @@
       "schedule_display": "0 0 * * *",
       "repeat": {
         "times": null,
-        "completed": 34
+        "completed": 35
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-15T17:23:21.828586+00:00",
-      "next_run_at": "2026-11-17T00:00:00+00:00",
-      "last_run_at": "2026-11-16T00:01:34.877834+00:00",
+      "next_run_at": "2026-11-18T00:00:00+00:00",
+      "last_run_at": "2026-11-17T00:01:35.781469+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -175,22 +178,22 @@
       "workdir": null,
       "fire_claim": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-16T00:00:00+00:00",
-        "dispatched_at": "2026-11-16T00:00:57.833245+00:00",
+        "scheduled_at": "2026-11-17T00:00:00+00:00",
+        "dispatched_at": "2026-11-17T00:00:57.831925+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       }
     },
     {
       "id": "22c8a5498741",
-      "name": "daily-1am-outreach-pipeline",
+      "name": "outreach-pipeline-stage1-ammo-hunt",
       "prompt": "Daily outreach pipeline for HSN Warrior Apparels (fires 1:00 AM PKT = 20:00 UTC).\n\nRUN IT THIS WAY (do not re-implement the pipeline, do not hunt by hand):\n  /home/ubuntu/.hermes/tools/python-3.14.7+202****0901-linux-arm64/bin/python3 /home/ubuntu/run_today_outreach.py\n\nThat launcher resolves TODAY's dayNN_* script family automatically, takes an exclusive lock (so a retry never races the original), and is RESUMABLE: the wave runner marks each lead 'email sent' in /home/ubuntu/leads.csv the moment it succeeds, so re-running continues where it stopped instead of starting from zero. If the launcher exits non-zero or times out, WAIT 10 minutes and run it again (up to 4 times) - it resumes, it never double-sends. Do NOT hand-write a wave, do NOT call day6_pipeline.py (that script is from 2026-10-19 and is obsolete), do NOT run the hunt by hand.\n\nIF AMMO IS LOW: the launcher reports the ammo count in its log (/home/ubuntu/outreach_pipeline.log). If it is under 100, hunt more EU/UK/USA martial-arts gym leads using web_search queries like 'boxing gym Milano contact email', 'Boxgym Muenchen Kontakt E-Mail', 'boksport Amsterdam contact', 'boxing gym Texas contact email', then fetch each URL with Python urllib, extract emails (regex), skip federation sites (ffjudo, ffkarate, fijlkam, judobund, wako, britishjudo, ffboxe, kickboxen-deutschland, fkb.nl, usaboxing, trouver-un-club, kombazen, ffsavate) and generic gmail/hotmail/yahoo addresses, append to /home/ubuntu/leads.csv with the next L### ID, dedupe against existing emails/phones. Only hunt if the ammo count is actually under 100.\n\nQUOTA: hard limit 100 cold emails per calendar day ACROSS every sender. The launcher and the wave runner both enforce this from dayNN_quota_state.json.\n\nWHATSAPP: max 10 new sends/day, and NEVER touch personal contacts (Sayyam Bhai, Shamas Ali, Afzal Bhai, Chacho Nadeem). Verify the chat header before AND read the transcript after every WA send.\n\nWHEN DONE: read the real counts back from /home/ubuntu/leads.csv, rebuild HWA_Lead_Tracker.xlsx, commit+push /home/ubuntu/business-backup with GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/hsn_backup_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no'. Report counts + client replies (business only) to Telegram. Client replies = DRAFT ONLY, never send.\n\nIMPORTANT - PROVIDER RATE LIMIT: all NVIDIA model calls now go through the local shield at http://127.0.0.1:8743, which enforces one shared sliding-window RPM cap for the whole account and retries 429s itself. Do NOT point anything back at integrate.api.nvidia.com and do NOT try to raise the rate. If you see HTTP 429, the shield is already throttling you - wait and let it retry; do not start a second pipeline to 'get around it'.\n\nIf the agent's own model call fails with 429, that is handled by the shield - just wait and continue.",
       "skills": [],
       "skill": null,
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "daily_outreach_pipeline.sh",
+      "script": "daily_outreach_pipeline_stage1.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -204,24 +207,24 @@
       "schedule_display": "0 20 * * *",
       "repeat": {
         "times": null,
-        "completed": 28
+        "completed": 29
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-18T19:12:14.423564+00:00",
-      "next_run_at": "2026-11-16T20:00:00+00:00",
-      "last_run_at": "2026-11-15T21:01:01.533478+00:00",
+      "next_run_at": "2026-11-17T20:00:00+00:00",
+      "last_run_at": "2026-11-16T21:01:01.612696+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/daily_outreach_pipeline.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-15T21:01:01.533478+00:00",
+        "at": "2026-11-16T21:01:01.612696+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/daily_outreach_pipeline.sh"
       },
-      "failure_streak": 10,
+      "failure_streak": 11,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -234,8 +237,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T20:00:00+00:00",
-        "dispatched_at": "2026-11-15T20:00:57.833103+00:00",
+        "scheduled_at": "2026-11-16T20:00:00+00:00",
+        "dispatched_at": "2026-11-16T20:00:57.831965+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -264,15 +267,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 28
+        "completed": 29
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-21T08:32:50.709149+00:00",
-      "next_run_at": "2026-11-16T09:00:00+00:00",
-      "last_run_at": "2026-11-15T09:39:54.170836+00:00",
+      "next_run_at": "2026-11-17T09:00:00+00:00",
+      "last_run_at": "2026-11-16T09:39:28.903628+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -294,8 +297,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T09:00:00+00:00",
-        "dispatched_at": "2026-11-15T09:00:57.832226+00:00",
+        "scheduled_at": "2026-11-16T09:00:00+00:00",
+        "dispatched_at": "2026-11-16T09:00:57.831966+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -324,15 +327,15 @@
       "schedule_display": "55 20 * * *",
       "repeat": {
         "times": null,
-        "completed": 9
+        "completed": 10
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-06T22:55:03.987044+00:00",
-      "next_run_at": "2026-11-16T20:55:00+00:00",
-      "last_run_at": "2026-11-15T21:02:21.030282+00:00",
+      "next_run_at": "2026-11-17T20:55:00+00:00",
+      "last_run_at": "2026-11-16T21:02:22.393184+00:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -351,8 +354,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T20:55:00+00:00",
-        "dispatched_at": "2026-11-15T20:55:57.831869+00:00",
+        "scheduled_at": "2026-11-16T20:55:00+00:00",
+        "dispatched_at": "2026-11-16T20:55:57.831881+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -360,14 +363,14 @@
     },
     {
       "id": "e95b5241e947",
-      "name": "daily-followup-email-wave",
+      "name": "fast-followup-email-wave",
       "prompt": "",
       "skills": [],
       "skill": null,
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "followup_daily.sh",
+      "script": "followup_daily_fast.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -375,30 +378,30 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "10 21 * * *",
-        "display": "10 21 * * *"
+        "expr": "10 21,23,1,3,5,7,9,11,13,15,17,19 * * *",
+        "display": "10 21,23,1,3,5,7,9,11,13,15,17,19 * * *"
       },
-      "schedule_display": "10 21 * * *",
+      "schedule_display": "10 21,23,1,3,5,7,9,11,13,15,17,19 * * *",
       "repeat": {
         "times": null,
-        "completed": 9
+        "completed": 10
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-06T22:55:04.052309+00:00",
-      "next_run_at": "2026-11-16T21:10:00+00:00",
-      "last_run_at": "2026-11-15T22:08:26.803434+00:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-11-17T03:10:00+00:00",
+      "last_run_at": "2026-11-16T22:11:00.642345+00:00",
+      "last_status": "error",
+      "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/followup_daily.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-14T22:11:00.527003+00:00",
+        "at": "2026-11-16T22:11:00.642345+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/followup_daily.sh"
       },
-      "failure_streak": 0,
+      "failure_streak": 1,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -411,8 +414,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T21:10:00+00:00",
-        "dispatched_at": "2026-11-15T21:10:57.831864+00:00",
+        "scheduled_at": "2026-11-16T21:10:00+00:00",
+        "dispatched_at": "2026-11-16T21:10:57.831850+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -420,14 +423,14 @@
     },
     {
       "id": "d8fd4cf307aa",
-      "name": "g4wb-daily-buyer-inquiry",
+      "name": "g4wb-buyer-inquiry-batched",
       "prompt": "",
       "skills": [],
       "skill": null,
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "g4wb_buyer_inquiry.sh",
+      "script": "g4wb_buyer_inquiry_batched.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -441,24 +444,24 @@
       "schedule_display": "5 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 8
+        "completed": 9
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T10:05:49.473126+00:00",
-      "next_run_at": "2026-11-16T09:05:00+00:00",
-      "last_run_at": "2026-11-15T10:06:00.539145+00:00",
-      "last_status": "error",
-      "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh",
+      "next_run_at": "2026-11-17T09:05:00+00:00",
+      "last_run_at": "2026-11-16T09:56:26.520575+00:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
         "at": "2026-11-15T10:06:00.539145+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_buyer_inquiry.sh"
       },
-      "failure_streak": 6,
+      "failure_streak": 0,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -471,8 +474,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T09:05:00+00:00",
-        "dispatched_at": "2026-11-15T09:05:57.832052+00:00",
+        "scheduled_at": "2026-11-16T09:05:00+00:00",
+        "dispatched_at": "2026-11-16T09:05:57.836563+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
@@ -480,7 +483,7 @@
     },
     {
       "id": "f15ca8b631d6",
-      "name": "g4wb-buyer-directory-funnel",
+      "name": "g4wb-buyer-directory-funnel-fixed",
       "prompt": "",
       "skills": [],
       "skill": null,
@@ -501,24 +504,24 @@
       "schedule_display": "25 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 8
+        "completed": 9
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-07T12:54:09.661741+00:00",
-      "next_run_at": "2026-11-16T09:25:00+00:00",
-      "last_run_at": "2026-11-15T10:26:02.153558+00:00",
+      "next_run_at": "2026-11-17T09:25:00+00:00",
+      "last_run_at": "2026-11-16T10:26:00.639744+00:00",
       "last_status": "error",
       "last_error": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh",
       "last_delivery_error": null,
       "last_delivery_unverified": null,
       "last_failure": {
-        "at": "2026-11-15T10:26:02.153558+00:00",
+        "at": "2026-11-16T10:26:00.639744+00:00",
         "detail": "Script timed out after 3600s: /home/ubuntu/.hermes/scripts/g4wb_dir_pipeline.sh"
       },
-      "failure_streak": 7,
+      "failure_streak": 8,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -531,13 +534,163 @@
       "enabled_toolsets": null,
       "workdir": null,
       "last_dispatch": {
-        "scheduled_at": "2026-11-15T09:25:00+00:00",
-        "dispatched_at": "2026-11-15T09:25:57.844009+00:00",
+        "scheduled_at": "2026-11-16T09:25:00+00:00",
+        "dispatched_at": "2026-11-16T09:25:57.831843+00:00",
         "lateness_seconds": 57.8,
         "kind": "on_time"
       },
       "fire_claim": null
+    },
+    {
+      "id": "e2b0d1ba7644",
+      "name": "outreach-pipeline-stage2-site-verify-wave",
+      "prompt": "Outreach pipeline stage 2: site verification + build wave. Runs at 20:30 UTC (1:30 AM PKT). Completes in <10 min.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "daily_outreach_pipeline_stage2.sh",
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 20 * * *",
+        "display": "30 20 * * *"
+      },
+      "schedule_display": "30 20 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-11-17T01:36:31.799436+00:00",
+      "next_run_at": "2026-11-17T20:30:00+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "6647704880",
+        "chat_name": "HSN Bajwah",
+        "thread_id": null,
+        "user_id": "6647704880",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null
+    },
+    {
+      "id": "99f002daf72a",
+      "name": "outreach-pipeline-stage3-email-wave",
+      "prompt": "Outreach pipeline stage 3: email wave batch (25 emails per run at 38s pace = ~20 min). Runs every 30 min 21:00-23:30 UTC (2:00-4:30 AM PKT). 4 runs = 100 emails.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "daily_outreach_pipeline_stage3.sh",
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0,30 21-23 * * *",
+        "display": "0,30 21-23 * * *"
+      },
+      "schedule_display": "0,30 21-23 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-11-17T01:36:41.441407+00:00",
+      "next_run_at": "2026-11-17T21:00:00+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "6647704880",
+        "chat_name": "HSN Bajwah",
+        "thread_id": null,
+        "user_id": "6647704880",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null
+    },
+    {
+      "id": "2abdfde69871",
+      "name": "outreach-pipeline-stage4-post-pipeline",
+      "prompt": "Outreach pipeline stage 4: post pipeline (IG hunt + tracker rebuild + backup). Runs at 03:00 UTC (8:00 AM PKT). Completes in ~10-20 min.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "daily_outreach_pipeline_stage4.sh",
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 3 * * *",
+        "display": "0 3 * * *"
+      },
+      "schedule_display": "0 3 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-11-17T01:36:51.586618+00:00",
+      "next_run_at": "2026-11-17T03:00:00+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "6647704880",
+        "chat_name": "HSN Bajwah",
+        "thread_id": null,
+        "user_id": "6647704880",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null
     }
   ],
-  "updated_at": "2026-11-16T02:00:59.379244+00:00"
+  "updated_at": "2026-11-17T02:00:59.799163+00:00"
 }

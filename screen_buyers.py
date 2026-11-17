@@ -21,7 +21,14 @@ import company_reach as cr
 
 HARVEST = '/home/ubuntu/g4wb_company_harvest.json'
 OUT = '/home/ubuntu/g4wb_company_screened.json'
-LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 10_000
+def parse_args():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--limit', type=int, default=200, help='max companies to screen this run')
+    return ap.parse_args()
+
+args = parse_args()
+LIMIT = args.limit
 
 h = json.load(open(HARVEST))
 

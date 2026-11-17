@@ -1,66 +1,66 @@
-☀️ HSN MORNING BRIEFING — Monday, 16 November 2026
+☀️ HSN MORNING BRIEFING — Tuesday, 17 November 2026
 
 ========================================
 
 📊 YOUR PIPELINE
-• Total leads tracked: 5617
+• Total leads tracked: 5642
 • USA batch (Day 5): 208
 • 🔥 HOT leads: 2
    - Uzbekistan Kurash Federation (L964)
    - Uzbekistan Kurash Federation (gmail) (L965)
 
 📰 BUSINESS NEWS (24h)
+• [Textile/Export] India & Egypt to explore trade pact terms as trade rises 65%
+  https://news.google.com/rss/articles/CBMiwwFBVV95cUxNVzQ2ZHZ4N0dWSDN4dXFJdGExd3NKRGlMVUFQS2x3aU4ybjc3WGFFRm1peVFZM0xESmdwUWs3ekgxZmVGTjljdjN6eFFRYUJVeWpmUzg4NVVNR3QwNDNNRW9DckJXdVY3R015Y3ctYXB4bWhJUzFROXlyRDlGd2ZlVjF1LXNCSXJxM2xSbWJ0dkdnUllzQTJMWGpHNWtxOGg5RW9QTk9vYUxYVVg5Qm5UcnJYNlhmbGFKNk14UmtlRUFsQm8?oc=5
 • [Textile/Export] Band Knife Cutting Machines Market To 2035: Automation and Technical Textiles Fuel Growth - News and Statistics
-  https://news.google.com/rss/articles/CBMihwFBVV95cUxQTHlhWmpNMFNMVWFBVjN6QkQ2QzFqckc5VHZVY0g0MzVXZE4yMGlhbEk3R0VfZG9zOUEtVlVqTEdOcjc2NW1iYThfZl9wTmR0ZWdFNnYyc0hzZktMeHlOemlhRW15UkRZMlp0MVdDYWJIYnl0MDBKa3ZKMHFUV1JDSk8tMmF1U3M?oc=5
-• [Textile/Export] Cambodia achieves a first in global garment supply chain
-  https://news.google.com/rss/articles/CBMi2gFBVV95cUxORHk1UXVNUzZNZFAzcVJiS3V2ZkVwQVkzeDMyTl9lTmxUOEE0M09iRGlxamhXRThOajlFOVF1TVdVNDd6dHhWMFlfSG5sMXJRVGNxOUZfNnY1QzlZdHJDQnpYcnJlSWtfUWR3ZkhBWEZsdWpDRWtYVEt3Yk56am4xNGxTWi1vQzRfNkRWeURMOXU3SmxLLVBTMThOMF9Ma3Z0UXV4d1UzMGFZYlVVYi14QlduRDRQb3czNnFIa2s2cmkwY3J0TXlZV3NlSmU2aEZDU1dQV3JMVWFXZw?oc=5
-• [Textile/Export] Implementing VEFTA: Exporting businesses restructure their supply chains.
-  https://news.google.com/rss/articles/CBMidkFVX3lxTFBvRmtvLV9MbC1nX2RudWdiZ2xQUnpCRmtTTU0xNkF2eV96Zi1kUUhkVjlrMWNGUkVKZzZXRUdEQjN0eGZRS3AxSm1BWC0tbnVHOXU2LUJDNlR1eDVpY1B0N09Ga01xUG9XSzVRejNpOHRvREdBS3c?oc=5
-• [Textile/Export] North India cotton yarn steady despite continued push by spinners
-  https://news.google.com/rss/articles/CBMiwwFBVV95cUxNSTgtZmZ2YThVM2dlQlpxcmJNVFhmQW9XaTc5OUZrNlJ4LTc3TDNJRFlaZTBfTUcxWXZLaUtNLVR1Y21NTDRPRFlmb0o1RkM5Mkx5ZzAyMWp0aEVnYW1zaUc1MWVlNU5MVTVaYWxXZm9QU1pobWoxZGZHZHRDUGtHQXo4RWtoSXZVZGMzLVlrNzk0bjNTMmxXcmdzYVVJVFVhYXFpZmk1UHpVWnhveVRzYy1mLV8xX3RRRXBHYkZXdEdFU3c?oc=5
-• [B2B/Manufacturing] Italian Trade Agency to deepen Korea ties with food, beauty, and B2B push
-  https://news.google.com/rss/articles/CBMia0FVX3lxTFBZak1KdVY5b2lNREVuRUQtQTNDWko0U0dneHI2Szh2Tk5PWVZpa2FKMnlwbWFCZ00welFESDdSWUV0RG5rb3hBRUxjMC1qdURPLXNSTzhZUVpDVm1PVnE5Zkc5R2hDZUtHUXhR?oc=5
-• [Sportswear Industry] More clothing factories shut in Bangladesh as workers strike over pay
-  https://news.google.com/rss/articles/CBMipwFBVV95cUxQSjNlSElMQjl5QzY3Q2lSMmZvTGtvd1VBM0Nyc1NlWXNMS3BRdGV2SjdHZXBOd3hGZlRFV2VvY2ZMQkxNNUtuUnE0ZXhKdHFVdjltYTZkb2w0REZuNndRNm9EdFFDVklWdjNzdk9CSlVyN01nMkI5Q3lLTUF2ZDhtVFhZcWZ1N0VHdk1mZUIxRThWTG1pTDI1T3F5MXRENERFTnhKc3VCYw?oc=5
+  https://news.google.com/rss/articles/CBMi0gFBVV95cUxObmdEU0NSckJvOGl5VGtlWk90dy02Vm5PRE4zczcyTmNZUUJETS13alNsMHcyNE1JWHRpOVhwMW5Od1BDWVVBOXhzWGprU2dUWlVqWlVnbmh4VjkxZDRPTHRzWWhHejZBTzVNZXBQQWFzenJkVkNDbFUybWtVdEF6dFRmX1dFWnNjamxTcW9XWC15NHU4VkZOWUJVTk1qeTBDRWtsT3JHRHJZMHdvQVRGTWNJZGZ4RU5saVZVbjNobVFTNVVzRGZPaTVEMXpqby00cFE?oc=5
+• [Textile/Export] Punjab textile policy push puts smart fabrics and technical materials in focus - HT Tech
+  https://news.google.com/rss/articles/CBMiuAFBVV95cUxNOUliTzJiQU5remI5SDZTRHdHRWkwcjg4dHViUWVFaThMSmtVZ1NwMUpaVkF1dXZ4Z1NMbGVMd2c5amVNX0d5ZHhrY2RhUFlsY0JEaWJhUVg5b1RpeVY5RW1DVVlZRUJPdWdVMG5pOXg0NW95VWlBcjIxbnhHN2RKSlpnOWh0MTRfUWpRcnlmZDVSd1gzaWE3WUtPS2lvTkRSM21HeGM2LVhqR3pXOG9VT2FiRDNzakcw?oc=5
+• [Textile/Export] The foundation that will help Vietnam's textile and garment industry reach the $49 billion mark.
+  https://news.google.com/rss/articles/CBMilgFBVV95cUxORlZjelpRTXNhZUpzQ1BadHMzYkFaTF8xZ0xrMDl4T0NMWFYtalNoM0xkYzYtb0stb1JOS2ZpUThxYUJPcDh3OVhycUxkNV85ZkdtOFVHTmFHdWpiV013SmxqSXM1QXJoYVhIUXU3Mzh3TG02ak1hUkFyWFdKWjlJZ0RXZjNWRmczdVI1SUpYM2dwRmZHekE?oc=5
+• [Textile/Export] Elastic Fabrics Market Forecast to 2035: Sportswear and Medical Textiles Fuel Growth - News and Statistics
+  https://news.google.com/rss/articles/CBMiXkFVX3lxTE1mZHh6bC14RGVaWjU3dDhIc05EWk9mckhybGFyLWo2ZTVveU1rQkZfcDBXcmItSTlsN0RYUDRxT29sSHlWamFydG03U3JfbW5nZ0dYaXhyQlAybVNXN0E?oc=5
+• [Textile/Export] Bangladesh’s apparel exports to EU fall 11.9% to €13.48 billion in Jan-Sept - The Daily Star
+  https://news.google.com/rss/articles/CBMiuwFBVV95cUxNVHVVbzhZaDZ5TkpnWlV1bkZoRHpWQ0szWVUxa3o3QXdVMlhMald6ck9vVE4zNG55eWtIYmZGbVpWNGhIUXJtdmpKM0pRUkdSelJKRW9acXFCb0xHZTF2aWxRTFlTM3dGdTVMNFVaY2dDTHhUVkVwMlFRTDFwbU5Xc1UxVy11Xy1kbDg0NnBLTU9EOXZsSjg1OFRQTThDbGRQcXhxZlpPU2hYOWFoNVZucXprT2xhTnAxaWVj?oc=5
 
 💻 HACKER NEWS — top of the morning
-• All AI-generated code should be Open Source (1050 points)
-• The MacBook Pro's OLED PWM problem (397 points)
-• Microsoft 365 outage leads to chlorine gas poisoning of 15 hotel guests (332 points)
-• Claude Code and Codex reverse engineered my 1994 Jeep's ECU over a $3 Arduino [video] (310 points)
-• Why did some Apollo missions carry a grenade launcher? (2019) (221 points)
-• Understanding Positional Embeddings in Modern LLMs (190 points)
-• Things That Turbo Pascal Is Smaller Than (2011) (187 points)
-• Emacs Is My Browser (168 points)
+• Many of Amazon’s Black Friday and Cyber Monday “deals” offered no savings (805 points)
+• Technical issue at JPMorgan Chase triggers online banking delays for US banks (688 points)
+• Carnegie Mellon is putting computer science courses on YouTube for free (449 points)
+• The Secret ThinkPad Powerbutton Code to Bring Dead Laptops Back to Life (2007) (288 points)
+• Jiff 1.0: A datetime library for Rust (284 points)
+• Frame – 31.5" color ePaper display (269 points)
+• BugMeNot has closed (226 points)
+• Grazing sheep in fields with solar arrays (196 points)
 
 🛠️ NEW TOOLS & LAUNCHES
-• Show HN: Show HN: I rewrote Doom2D Forever in Rust, playable in browser
-• Show HN: Show HN: Wipeout-style mini racer written in C++ compiled to WASM for browser
-• Show HN: Show HN: Skillset: Easily curate and install agent skills collection
-• Show HN: Show HN: The Last Complication, a Zachtronics-style watchmaking puzzle game
-• Show HN: Show HN: Anarchy Chess
+• Show HN: Show HN: Doku, a browser-based Sudoku app I built
+• Show HN: Show HN: Listodo – A to-do list with an AI agent for every task
+• Show HN: Show HN: Sutra-OS – A self-hosted ontology platform
+• Show HN: Show HN: Standard Support – a convention for AI agents to file support tickets
+• Show HN: Show HN: One API and MCP Server to Publish to TikTok, Instagram and YouTube
 
 📈 MARKET & PRICING
-• ICE cotton extends losses on stronger US dollar, weaker crude oil - Fibre2Fashion
-• North India cotton yarn steady despite continued push by spinners - Fibre2Fashion
-• ICE cotton continues to rise on third day on positive factors - Fibre2Fashion
+• | USDA's 5.27 mn bale cotton gap: Why are mills still struggling? - Fibre2Fashion
+• Indian cotton yarn prices firm on stronger mill demand - CMB News
+• | Payment issues bother north Indian cotton yarn, demand slows - Fibre2Fashion
 
 💡 TIPS & TRICKS
-• Ask for the logo early - clients who send logos are 3x more likely to order
 • Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
 • Voice notes outperform text 2:1 in Southern Europe and Gulf markets
+• When quoting, always give 2-3 options (budget/premium) - choice increases conversion
 
 🎯 WHAT YOU NEED TO KNOW TODAY
-• Pipeline: 5617 total leads | USA 1000/2132 emailed, 1044 still open | global ammo 26 leads ready to email
+• Pipeline: 5642 total leads | USA 1000/2132 emailed, 1044 still open | global ammo 37 leads ready to email
 • 11 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
 • HUMAN business replies on the board: 4 (L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal, L3372 TOWASAN Karate Schulen, L5261 Krav Maga Federation (Karate Black Master Belt RFQ)) - reply is DRAFT-ONLY until the user says send
 • Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
-• Session health NOT verified this run (sweep file is 18637 min old)
+• Session health NOT verified this run (sweep file is 20077 min old)
 • go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
 
 🎯 TODAY'S MOVES
 • Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
-• 26 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• 37 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
 • USA emails continue in US business hours (7 PM - 1 AM PKT)
 • Check Alvaro's sample order status - he is the closest to payment
 • Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)

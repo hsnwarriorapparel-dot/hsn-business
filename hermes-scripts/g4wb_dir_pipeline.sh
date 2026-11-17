@@ -59,7 +59,8 @@ echo "=== g4wb buyer-directory pipeline $(date -u '+%Y-%m-%d %H:%M:%S UTC') ==="
 #     'martial-arts-gloves' says 'Buys industrial gloves, latex gloves'.
 #     The profile states what they actually buy, and reading it is one
 #     fetch instead of a web search plus a page fetch.
-"$PY" /home/ubuntu/screen_buyers.py 2>&1 | tee -a "$LOG"
+#     Process in batches (--limit 200) to stay within cron timeout.
+"$PY" /home/ubuntu/screen_buyers.py --limit 200 2>&1 | tee -a "$LOG"
 
 "$PY" /home/ubuntu/company_reach.py --limit 30 2>&1 | tee -a "$LOG"
 

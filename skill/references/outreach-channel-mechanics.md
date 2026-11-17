@@ -43,10 +43,11 @@ Step-by-step send procedures for the work browser. Always-on rules (verify-first
 
 ## Instagram
 1. Open `https://www.instagram.com/<handle>/` — confirm the profile exists.
-2. Click Follow (text "Follow") → verify it becomes "Following".
-3. Click Message → wait up to 12s for the composer → paste → Enter.
-4. If no Message button appears right after following, the page may need a reload — re-check before concluding the profile can't be DM'd.
-5. **Hunting a lead's email from IG** (ig_email_extractor.py): read the header/bio text and click the "more" toggle to expand truncation → open the Contact-button dialog (business accounts expose email/phone there) → follow the profile's external website link and scrape it. IG renders lazily — re-read once before declaring no email. The hunt is an enhancement, never a gate: a lead with no email still gets follow + DM.
+2. **Analyze the handle/profile for personalization** — see `references/instagram-profile-personalization.md` for signal extraction (sport, facility type, scale) and sport-specific SKU maps.
+3. Click Follow (text "Follow") → verify it becomes "Following".
+4. Click Message → wait up to 12s for the composer → paste → Enter.
+5. If no Message button appears right after following, the page may need a reload — re-check before concluding the profile can't be DM'd.
+6. **Hunting a lead's email from IG** (ig_email_extractor.py): read the header/bio text and click the "more" toggle to expand truncation → open the Contact-button dialog (business accounts expose email/phone there) → follow the profile's external website link and scrape it. IG renders lazily — re-read once before declaring no email. The hunt is an enhancement, never a gate: a lead with no email still gets follow + DM.
 
 **Working IG DM send method (React-compatible, verified 2026-10-29):** synthetic JS KeyboardEvents FAIL on IG React composers (typed text stays, nothing sends, verify=NOT_FOUND). Working method = CDP `Input.dispatchMouseEvent` (click composer) + `Input.insertText` (type) + `Input.dispatchKeyEvent` rawKeyDown/keyUp Enter (send) — same pattern as outreach.py Gmail flow.
    - Open thread: profile URL → click Message button → thread opens at /direct/t/<threadID>/ → composer is last textarea/contenteditable
