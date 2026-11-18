@@ -24,7 +24,7 @@ OUT = '/home/ubuntu/g4wb_company_screened.json'
 def parse_args():
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument('--limit', type=int, default=200, help='max companies to screen this run')
+    ap.add_argument('--limit', type=int, default=20, help='max companies to screen this run')
     return ap.parse_args()
 
 args = parse_args()
