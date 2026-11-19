@@ -291,7 +291,9 @@ def _lock_alive(pid):
 
 def claim_slot(engine, wait_s=0, log=None):
     """Exclusive lock on the Gmail tab. Returns True if we got it."""
-    for attempt in range(max(1, int(wait_s) + 1)):
+    max_attempts = max(1, int(wait_s) + 1)
+    attempt = 0
+    while attempt < max_attempts:
         try:
             fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             os.write(fd, ('%d %s' % (os.getpid(), engine)).encode())
@@ -305,12 +307,14 @@ def claim_slot(engine, wait_s=0, log=None):
                     if log:
                         log('stale gmail lock (pid %s gone) - reclaiming' % pid)
                     os.unlink(LOCK)
+                    # Retry immediately without counting as an attempt
                     continue
                 if log:
                     log('gmail send lock held by pid %s (%s) - waiting' % (pid, raw))
             except Exception:
                 pass
-            if attempt < int(wait_s):
+            attempt += 1
+            if attempt < max_attempts:
                 time.sleep(30)
                 continue
             return False

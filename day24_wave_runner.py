@@ -186,11 +186,15 @@ if _remaining <= 0:
 # the old order trimmed `ids` to the allowance FIRST, so a resumed wave always
 # re-picked the FIRST N wave ids - all of which were already sent - and the
 # wave reported "50 skipped, 0 sent" forever. Filter first, then trim.
+# FIX (2026-11-18): must check the DAY tag so leads sent on previous days
+# are NOT filtered out - only leads sent TODAY count as already-sent.
 def _is_sent(lid):
     for _r in _rows0[1:]:
         if _r and _r[0] == lid:
             _st = (_r[_idx0['Status']] if _idx0['Status'] < len(_r) else '') or ''
-            return 'email sent' in _st.lower()
+            for _part in _st.split('|'):
+                if 'email sent' in _part.lower() and DAY in _part:
+                    return True
     return False
 
 _before = len(ids)
