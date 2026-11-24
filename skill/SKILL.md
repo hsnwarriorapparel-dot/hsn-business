@@ -178,7 +178,15 @@ NEVER send AI-generated or dummy/sample pictures to any client — user's explic
 
 ## 🔴 CRITICAL CLIENT RULES
 1. **Client REPLIES = draft only.** NEVER send a reply to an existing conversation without user's explicit "send" command. Cold outreach to NEW leads stays autonomous.
-2. **Verify-first protocol (mandatory):** Before ANY WhatsApp send: (1) verify you are in the right chat — the header shows the client's exact number OR, once the client has messaged first, their saved contact NAME ('Álvaro Campeão' replaces '+971 50 489 4282'), so confirm via conversation-history markers only that thread can contain; a number-only header check wrongly ABORTS legitimate sends on saved contacts — build the check as a per-lead allowlist: expected saved NAME or the number's last 9 digits, either match passes. On a NEVER-CONTACTED number the chat pane renders blank for several seconds and js_eval can return None — make the header read None-safe and poll #main every ~8s up to ~24s before judging; a still-blank pane on a valid-length number means the number isn't on WhatsApp (landline or unregistered): mark it email-only and move on, don't retry. (2) send, (3) verify the message text appears in THAT chat's transcript. If a send turn was interrupted or the user repeats 'send', first COUNT occurrences of the message text in the transcript — an ok:true send can have landed even if the turn died — resend only if count is 0. Same principle for IG DMs and email recipients. **Re-running a partially-failed batch: send ONLY the failed subset** — edit the jobs list down to the recipients that aborted; adding SKIP/sentinel entries to the full list leaves the already-sent entries in place and they execute again (this is how duplicates landed once). Prevention: one-off multi-lead send scripts write per-recipient status (CSV status or a .done file) immediately after each successful send, so a re-run filters on it exactly like the nightly pipelines do. If a duplicate lands anyway, tell the user at once — the reliable fix is their phone (hold the message → Delete → Delete for everyone); don't burn session time on CDP delete automation — the right-click context menu opens fine but the Delete-for-everyone confirm modal never renders queryable via CDP, so the flow dead-ends after the Delete click.
+2. **Verify-first protocol (mandatory):** Before ANY WhatsApp send: (1) verify you are in the right chat — the header shows the client's exact number OR, once the client has messaged first, their saved contact NAME ('Álvaro Campeão' replaces '+971 50 489 4282'), so confirm via conversation-history markers only that thread can contain; a number-only header check wrongly ABORTS legitimate sends on saved contacts — build the check as a per-lead allowlist: expected saved NAME or the number's last 9 digits, either match passes. On a NEVER-CONTACTED number the chat pane renders blank for several seconds and js_eval can return None — make the header read None-safe and poll #main every ~8s up to ~24s before judging; a still-blank pane on a valid-length number means the number isn't on WhatsApp (landline or unregistered): mark it email-only and move on, don't retry. (2) send, (3) verify the message text appears in THAT chat's transcript. If a send turn was interrupted or the user repeats 'send', first COUNT occurrences of the message text in the transcript — an ok:true send can have landed even if the turn died — resend only if count is 0. Same principle for IG DMs and email recipients. **Re-running a partially-failed batch: send ONLY the failed subset** — edit the jobs list down to the recipients that aborted; adding SKIP/sentinel entries to the full list leaves the already-sent entries in place and they execute again (this is how duplicates landed once). Prevention: one-off multi-lead send scripts write per-recipient status (CSV status or a .done file) immediately after each successful send, so a re-run filters on it exactly like the nightly pipelines do. If a duplicate lands anyway, tell the user at once — the reliable fix is their phone (hold the message → Delete → Delete for everyone); don't burn session time on CDP delete automation — the right-click context menu opens fine but the Delete-for-everyone confirm modal never renders queryable via CDP, so the flow dead-ends... [truncated]
+3. **Every lead found = contact on every channel it has, same day:** IG follow + IG DM always; email if an address exists; WhatsApp if a number exists (normal mode). "No email on the site" ≠ "no email": hunt it from their IG profile (bio → Contact button → website link, ig_email_extractor.py) before settling for IG-only. Never skip follow+DM just because no email was found.
+4. **Sheet discipline:** Add IG username + profile link + email + phone + profile analysis IMMEDIATELY when a profile is found. Never leave a profile's contact info uncaptured.
+5. **Short professional messages** — no long paragraphs. No catalog/website links until user says they're ready (catalog/website were "not ready" as of 2026-10-13).
+6. **No "free sample" offers** (user removed them). Personalize each message by name — never identical templates.
+7. Personalize in client's language when needed (Google Translate for Italian/Spanish/etc. — user approved this approach for non-English clients).
+
+## 🔴 USER COMMUNICATION PREFERENCE (mandatory)
+**"Give me only reply that I copy and send"** — user wants PLAIN TEXT ONLY for client messages: no headers, no markdown, no bold/italic, no extra words, no "Here is the message:" preamble. Just the raw message text. This applies to ALL client-facing copy (email, WhatsApp, Instagram DM). The agent's analysis/strategy goes in chat; the deliverable is clean copy-paste text.
 3. **Every lead found = contact on every channel it has, same day:** IG follow + IG DM always; email if an address exists; WhatsApp if a number exists (normal mode). "No email on the site" ≠ "no email": hunt it from their IG profile (bio → Contact button → website link, ig_email_extractor.py) before settling for IG-only. Never skip follow+DM just because no email was found.
 4. **Sheet discipline:** Add IG username + profile link + email + phone + profile analysis IMMEDIATELY when a profile is found. Never leave a profile's contact info uncaptured.
 5. **Short professional messages** — no long paragraphs. No catalog/website links until user says they're ready (catalog/website were "not ready" as of 2026-10-13).
@@ -203,6 +211,61 @@ SPECIAL OFFER — martial arts & boxing products (EUROS):
 - Boxing Headgear Cowhide: €24 | Faux: €19
 Included with all: custom brand logo, tax-free shipping, competitive prices.
 **Sign-off rule for agent-sent client messages: company name only ("— HSN Warrior Apparels"), no personal name** — the user strips his own name and casual emojis (🙏 etc.) from drafts; price-list emojis (🥋🥊✅) stay. Personal intro format (“My name is Ghulam Hassan…”) is only used when the user dictates it verbatim for a specific message. **When the user dictates a full message, their words are final:** send near-verbatim (fix only punctuation/typos), never rewrite their draft into playbook voice — the user rejected agent-embellished rewrites of his own message.
+
+## 🔴 VERIFIED WORKING LINKS (updated 2026-11-23)
+- **Main Website:** https://hsnwarriorapparels.vercel.app ✓
+- **Price List PDF:** https://hsnwarriorapparels.vercel.app/price-list.pdf ✓ (MAIN DOMAIN)
+- **Catalog PDF:** https://hsnwarriorapparels.vercel.app/HSN_Warrior_Apparels_Catalog.pdf ✓ (MAIN DOMAIN)
+- **Preview domain (still works):** https://hsn-price-list-site.vercel.app/price-list.pdf
+
+**Rule: ALWAYS verify deployed URLs via browser before providing links.** The user caught incorrect links (main domain 404 for price list, catalog not deployed). Both PDFs are now deployed to the main domain via Vercel CLI.
+
+## Claw3D 3D Office — Business Visualization (installed 2026-11-23)
+**Plugin:** hermes-desktop-plugin-office-3d (https://github.com/oslook/hermes-desktop-plugin-office-3d)
+**Services running (all bound to 0.0.0.0, externally accessible via Oracle Cloud public IP 129.146.37.209):**
+- Claw3D Dev Server: port 3000 → http://129.146.37.209:3000/office (requires cookie)
+- Office Port Relay: port 9118 → http://129.146.37.209:9118/office (handles cookie forwarding)
+- Hermes Backend: port 9119 → http://129.146.37.209:9119 (headless backend)
+- Hermes Gateway Adapter: port 18789 → ws://129.146.37.209:18789 (WebSocket)
+- Hermes Dashboard: port 9000 → http://129.146.37.209:9000
+
+**STUDIO_ACCESS_TOKEN:** r/X96G/K0XgtNODswZ7EJOL4mcA0BIiWgTztBm49mFs=
+**Cookie for direct Claw3D access:** studio_access=r/X96G/K0XgtNODswZ7EJOL4mcA0BIiWgTztBm49mFs=
+
+**Oracle Cloud VCN Security List (ingress TCP allowed):** 22, 3389, 9119, 6080, 8080, 9000, 5922, 3000, 9118
+
+**Client-facing 3D showroom link:** http://129.146.37.209:9118/office (use relay URL — handles cookie automatically)
+
+## Lead Generation System — /home/ubuntu/lead_gen_system/ (built 2026-11-23)
+**18 scripts covering full pipeline:** ICP config, daily multi-source discovery (Apollo, Prospeo, Google Maps, g4wb harvest), enrichment (Prospeo, GetLeads, MillionVerifier), AI qualification (GPT-5-nano), website verification, email validation, deduplication, outreach feed.
+
+**Daily cron (06:00 UTC):** lead-gen-daily-pipeline — discovers 50-100 new leads/day, enriches, validates, dedupes, outputs to outreach feed CSV.
+**Weekly cron (Sunday 02:00 UTC):** lead-gen-weekly-deep-harvest — lookalike expansion (Exa, Parallel, Apollo), keyword mining (Prospeo industry sweep), Google Maps deep sweep.
+
+**Key scripts:**
+- icp_config.yaml — full ICP spec for martial arts/sportswear OEM
+- daily_lead_gen_pipeline.sh — daily multi-source pipeline (patched for graceful missing API key handling)
+- merge_dedup.py — multi-source merge & deduplication (patched for g4wb dict format)
+- qualify_leads.py — GPT-5-nano ICP qualification
+- verify_websites.py — website liveness + martial arts keyword check
+- validate_emails.py — MillionVerifier email validation
+- feed_pipeline.py — leads.csv + Smartlead feed
+- weekly_deep_harvest.sh + weekly_harvest_lib.sh — modular weekly harvest
+
+**g4wb_company_harvest.json:** 2756 companies harvested (array of objects with company_name, website, country, category, emails[], phones[], social{instagram,facebook,linkedin})
+
+## Daily Closing Campaign — Rotates 6 Hot Leads
+**Cron:** daily-closing-campaign (09:00 UTC / 14:00 PKT)
+**Rotation (by day of month % 6):**
+1. L183 Shudokan (Judo/Karate/Taekwondo, Spain) — IG @shudokan.roje, WA +34 661 571 463, info@shudokan.es
+2. L132 Alvaro Campeão (HOT — negotiating, UAE)
+3. L026 Brazilian Fight (Brazil)
+4. L3372 TOWASAN
+5. L964 Uzbekistan Kurash Federation (info@ukf.uz)
+6. L965 Uzbekistan Kurash Federation (ukf.kurash@gmail.com)
+
+**Escalation sequence per lead:** Day 1 value-led proposal → Day 2 IG story reply → Day 3 video call offer → Day 4 breakup/archive → repeat next cycle.
+**Stop condition:** SIGNED PO + DEPOSIT RECEIVED (detected in leads.csv status).
 
 ## MANDATORY: NVIDIA API Access (read `references/nvidia-api-access.md`)
 **The published "40 RPM" is NOT what this key gets** — measured against this account: 429s at 8 RPM and at 5 RPM; the sustainable rate is **~3 successful RPM**. Never assume a rate above that.
