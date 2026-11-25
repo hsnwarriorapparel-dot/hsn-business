@@ -137,7 +137,7 @@ rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 idx = {h: i for i, h in enumerate(hdr)}
 iE, iS, iW, iN, iC, iCi = (idx['Email'], idx['Status'], idx['Website'],
-                           idx['Name'], idx['Country'], idx['City'])
+                           idx['Name'], idx['Country'], idx.get('City', -1))
 
 first_seen = {}
 for r in rows[1:]:
@@ -251,7 +251,7 @@ for r in rows[1:]:
     seen_emails.add(e)
     rtype = (r[idx['Type']] if 'Type' in idx and idx['Type'] < len(r) else '') or ''
     scored.append((score, r[0], name, e, (r[iC] if len(r) > iC else '') or '',
-                   kind, fresh, (r[iCi] if len(r) > iCi else '') or '', dom,
+                   kind, fresh, (r[iCi] if iCi >= 0 and len(r) > iCi else '') or '', dom,
                    'buyer company' if rtype.startswith('Buyer company') else ''))
 
 scored.sort(key=lambda x: (-x[0], int(re.sub(r'\D', '', x[1]) or 0)))

@@ -73,33 +73,56 @@ gmail_tab = next(p for p in pages if 'mail.google.com' in p.get('url', '') and p
 ig_tab = next(p for p in pages if 'instagram.com' in p.get('url', '') and p['type'] == 'page')
 ```
 
-### Send DM via Profile (WORKING)
+### Send DM via Profile (WORKING - verified 2026-11-24 Shudokan)
 1. **Navigate to profile**: `Page.navigate` to `https://www.instagram.com/{username}/`
 2. **Click Message button**: CDP click at coordinates (x=843, y=244) - found via `getBoundingClientRect()` on button with text "Message"
 3. **Type message**: `document.querySelector('[role="textbox"]').innerText = message`
-4. **Click Send**: CDP click at coordinates (x=1142, y=725) - found on Send button
+4. **Send via Enter key**: Dispatch `KeyboardEvent('keydown'/'keyup', {key: 'Enter', keyCode: 13, bubbles: true})` on the composer - more reliable than finding Send button
+
+### Send DM via Search + Thread (UNRELIABLE)
+- Search in DM inbox filters existing conversations, not new users
+- Split-view thread panel composer not reliably accessible via CDP
+- Max 3 attempts then STOP and manual send from phone (see browser-send-mechanics.md)
+
+### Working Selectors (verified 2026-11-24)
+- Message button on profile: `button:has-text('Message')` or `[role='button']:has-text('Message')`
+- Composer: `div[role='textbox'][contenteditable='true']` (first visible)
+- Send: Enter key event on composer (bypasses Send button lookup)
 
 ### Limitations
 - Profile URL mapping for new leads: need to guess username from club name
 - Search in DM inbox filters existing conversations, not new users
 - Split-view thread panel composer not reliably accessible via CDP
 
-## WhatsApp Automation (PARTIAL - 10/day)
+## WhatsApp Automation (WORKING - 10/day)
 
 ### Tab Discovery
 ```python
 wa_tab = next(p for p in pages if 'web.whatsapp.com' in p.get('url', '') and p['type'] == 'page')
 ```
 
-### Send Message
-1. **Search contact**: `document.querySelector('[data-testid="chat-list-search"]').value = phone`
-2. **Click result**: CDP click at approximate position (x=400, y=300)
-3. **Type message**: `document.querySelector('[data-testid="conversation-compose-box-input"]').innerText = message`
-4. **Click Send**: `document.querySelector('[data-testid="compose-btn-send"]').click()`
+### Method 1: Direct URL Navigation (WORKING - verified 2026-11-24 Shudokan)
+1. **Navigate to direct chat URL**: `https://web.whatsapp.com/send?phone={country_code}{number}&text={urlencoded_message}`
+2. **Wait for chat to load**: Message input appears with `aria-label="Type a message to +{formatted_number}"`
+3. **Press Enter**: Dispatch `KeyboardEvent('keydown'/'keyup', {key: 'Enter', keyCode: 13, bubbles: true})` on the composer
+4. **Verify**: Check thread for message with timestamp
+
+### Method 2: Search + Click (UNRELIABLE for unsaved contacts)
+1. **Search contact**: `document.querySelector('[aria-label="Search or start a new chat"]').value = phone`
+2. **Click result**: CDP click on chat row (requires scrollIntoView first - see whatsapp-web-cdp.md)
+3. **Type message**: Use `textContent` setter on prototype (see whatsapp-web-cdp.md)
+4. **Click Send**: `[data-testid="compose-btn-send"]` / `span[data-icon="send"]`
+
+### Working Selectors (verified 2026-11-24)
+- Search input: `input[aria-label="Search or start a new chat"]`
+- Message composer: `div[contenteditable="true"][data-tab="10"]`
+- Composer aria-label: `"Type a message to +{number}"` - verify against lead phone
+- Send: Enter key on composer (bypasses Send button lookup)
 
 ### Limitations
 - Contact search needs phone format normalization (strip spaces, add country code)
 - Chat list search may not find unsaved contacts reliably
+- Direct URL method is preferred for cold contacts
 
 ## React Button Handling (CRITICAL)
 
