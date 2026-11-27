@@ -77,9 +77,12 @@ def update_status(lead_id, new_status, prepend=False):
 def already_sent(lid):
     rows = load()
     idx = {h: i for i, h in enumerate(rows[0])}
+    status_key = 'Status' if 'Status' in idx else ('status' if 'status' in idx else None)
     for r in rows[1:]:
         if r and r[0] == lid:
-            return 'email sent' in (r[idx['Status']] or '').lower()
+            if status_key is None:
+                return False
+            return 'email sent' in (r[idx[status_key]] or '').lower()
     return False
 
 
@@ -105,6 +108,7 @@ if args.limit:
 
 _rows0 = load()
 _idx0 = {h: i for i, h in enumerate(_rows0[0])}
+_status_key = 'Status' if 'Status' in _idx0 else ('status' if 'status' in _idx0 else None)
 
 # DAILY QUOTA GUARD (2026-11-05): the user's hard limit is 100 cold emails per
 # calendar day ACROSS every sender. The 09:00 system-cron (daily_automation_full.py)
@@ -139,7 +143,7 @@ except Exception:
 # day tag.
 _today_sent = 0
 for _r in _rows0[1:]:
-    _st = (_r[_idx0['Status']] if _idx0['Status'] < len(_r) else '') or ''
+    _st = (_r[_idx0[_status_key]] if _status_key and _idx0[_status_key] < len(_r) else '') or ''
     for _part in _st.split('|'):
         if 'email sent' in _part.lower() and DAY in _part:
             _today_sent += 1
@@ -191,7 +195,7 @@ if _remaining <= 0:
 def _is_sent(lid):
     for _r in _rows0[1:]:
         if _r and _r[0] == lid:
-            _st = (_r[_idx0['Status']] if _idx0['Status'] < len(_r) else '') or ''
+            _st = (_r[_idx0[_status_key]] if _status_key and _idx0[_status_key] < len(_r) else '') or ''
             for _part in _st.split('|'):
                 if 'email sent' in _part.lower() and DAY in _part:
                     return True
@@ -237,10 +241,15 @@ if lock_ok:
 
 rows = load()
 idx = {h: i for i, h in enumerate(rows[0])}
-iE, iN, iC, iCi, iS = (idx['Email'], idx['Name'], idx['Country'], idx['City'], idx['Status'])
+
+def _c(key):
+    """Case-insensitive column lookup."""
+    return idx[key] if key in idx else (idx[key.lower()] if key.lower() in idx else -1)
+
+iE, iN, iC, iCi, iS = _c('Email'), _c('Name'), _c('Country'), _c('City'), _c('Status')
 iI = idx
-iT = idx['Type'] if 'Type' in idx else -1
-iPA = idx['Profile Analysis'] if 'Profile Analysis' in idx else -1
+iT = _c('Type')
+iPA = _c('Profile Analysis')
 meta = {r[0]: r for r in rows[1:] if r and r[0] in ids}
 
 # GMAIL TAB LOCK (2026-11-07): the chain-pitch engine (20:25) and the

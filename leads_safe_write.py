@@ -175,10 +175,14 @@ def read_rows():
     if not rows:
         return rows
     hdr = rows[0]
+    # Support both 'Email' and 'email' column names
     try:
         ei = hdr.index('Email')
     except ValueError:
-        return rows
+        try:
+            ei = hdr.index('email')
+        except ValueError:
+            return rows
     clean = [hdr]
     for r in rows[1:]:
         # A row with a non-contactable email is NOT dropped - it is kept
@@ -197,12 +201,9 @@ def read_rows():
 def write_rows(rows):
     """Write leads.csv. Refuses to write a file without a header.
 
-    The header row's Email cell holds the literal text 'Email'. If any
-    future filter is applied without checking for the header, that row
-    is read as an address and the header is deleted - which silently
-    turns every later read into an off-by-one. Guard it here.
+    The header row's first cell should be the ID column ('Lead ID' or 'id').
     """
-    if not rows or not rows[0] or rows[0][0] != 'Lead ID':
+    if not rows or not rows[0] or rows[0][0] not in ('Lead ID', 'id'):
         raise ValueError('refusing to write leads.csv without a header row '
                          '(first row was %r)' % (rows[0][:2] if rows else None))
     fd, tmp = tempfile.mkstemp(dir='/home/ubuntu', suffix='.csv.tmp')
@@ -225,7 +226,11 @@ def add_rows(new_rows, retries=3):
     try:
         with open(CSV, newline='', encoding='utf-8-sig') as f:
             _hdr = next(csv.reader(f))
-        _ei = _hdr.index('Email')
+        # Support both 'Email' and 'email'
+        try:
+            _ei = _hdr.index('Email')
+        except ValueError:
+            _ei = _hdr.index('email')
         keep = []
         # 'dropped' is gone: a row with an undeliverable address is
         # CLEARED, never dropped. The old branch could never fire but it
@@ -233,10 +238,10 @@ def add_rows(new_rows, retries=3):
         # reads like leads are being lost when nothing was.
         cleared = 0
         for r in new_rows:
-            # NEVER touch the header row. Its Email cell contains the
-            # literal text 'Email', which the guard would read as an
-            # address and DROP - deleting the header from leads.csv.
-            if r and r[0] and r[0] == 'Lead ID':
+            # NEVER touch the header row. Its first cell contains the
+            # literal text 'Lead ID' or 'id', which the guard would read as an
+            # ID and DROP - deleting the header from leads.csv.
+            if r and r[0] and r[0] in ('Lead ID', 'id'):
                 keep.append(r)
                 continue
             # An EMPTY email is not a bad email - a phone-only lead is
@@ -278,7 +283,11 @@ def add_rows(new_rows, retries=3):
             if new_rows and new_rows[0] and new_rows[0][0]:
                 try:
                     _hdr = rows[0]
-                    _ii = _hdr.index('Lead ID')
+                    # Support both 'Lead ID' and 'id'
+                    try:
+                        _ii = _hdr.index('Lead ID')
+                    except ValueError:
+                        _ii = _hdr.index('id')
                     _used = set()
                     for r in rows[1:]:
                         if r and len(r) > _ii and r[_ii]:
@@ -333,9 +342,12 @@ def update_row(lead_id, field, value, marker=None, append=False,
             rows = read_rows()
             hdr = rows[0]
             idx = {h: i for i, h in enumerate(hdr)}
+            # Case-insensitive field lookup (CSV header is 'status', callers pass 'Status')
+            fi = idx.get(field)
+            if fi is None:
+                fi = idx.get(field.lower())
             for r in rows[1:]:
                 if r and r[0] == lead_id:
-                    fi = idx.get(field)
                     if fi is not None and fi < len(r):
                         if prepend:
                             cur = (r[fi] or '').strip(' |')
@@ -347,11 +359,13 @@ def update_row(lead_id, field, value, marker=None, append=False,
                                 r[fi] = (cur.rstrip(' |') + ' | ' + value)[:250]
                         else:
                             r[fi] = value
-                    if marker is not None and 'Status' in idx:
-                        si = idx['Status']
-                        cur = r[si] if si < len(r) else ''
-                        if marker not in cur:
-                            r[si] = (cur.rstrip(' |') + ' | ' + marker)[:250]
+                    if marker is not None:
+                        status_key = 'Status' if 'Status' in idx else ('status' if 'status' in idx else None)
+                        if status_key is not None:
+                            si = idx[status_key]
+                            cur = r[si] if si < len(r) else ''
+                            if marker not in cur:
+                                r[si] = (cur.rstrip(' |') + ' | ' + marker)[:250]
                     write_rows(rows)
                     return True
             return False

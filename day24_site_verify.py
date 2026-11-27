@@ -34,15 +34,15 @@ def norm_email(e):
 rows = list(csv.DictReader(open(CSV, newline='', encoding='utf-8-sig')))
 cands = []
 for r in rows:
-    st = (r.get('Status') or '').lower()
-    e = norm_email(r.get('Email') or '')
+    st = (r.get('status') or '').lower()
+    e = norm_email(r.get('email') or '')
     if not e:
         continue
     if 'email sent' in st or 'failed' in st or 'excluded' in st or 're-hunt' in st:
         continue
     if any(m in st for m in ('follow-up', 'hot lead', 'negotiat', 'sample quote', 'awaiting', 'replied')):
         continue
-    if not (r.get('Website') or '').strip():
+    if not (r.get('website') or '').strip():
         continue
     cands.append(r)
 
@@ -50,13 +50,13 @@ print('candidates with website:', len(cands), flush=True)
 
 
 def check(r):
-    site = r['Website'].strip()
+    site = r['website'].strip()
     if not site.startswith('http'):
         site = 'https://' + site
     base = site.rstrip('/')
     urls = [base, base + '/contact', base + '/contact-us', base + '/kontakt',
             base + '/impressum', base + '/about', base + '/']
-    e = norm_email(r['Email'])
+    e = norm_email(r['email'])
     found = False
     pages = 0
     for u in urls:
@@ -77,7 +77,7 @@ def check(r):
             break
         if pages >= 3:
             break
-    return (r['Lead ID'], r['Name'][:40], e, r['Website'][:60],
+    return (r['id'], r['name'][:40], e, r['website'][:60],
             'ON-SITE' if found else 'not-on-site', pages)
 
 

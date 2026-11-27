@@ -136,8 +136,20 @@ if os.path.exists(VERIFY):
 rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 hdr = rows[0]
 idx = {h: i for i, h in enumerate(hdr)}
-iE, iS, iW, iN, iC, iCi = (idx['Email'], idx['Status'], idx['Website'],
-                           idx['Name'], idx['Country'], idx.get('City', -1))
+# Map old column names to new ones
+iE = idx.get('email', idx.get('Email', -1))
+iS = idx.get('status', idx.get('Status', -1))
+iW = idx.get('website', idx.get('Website', -1))
+iN = idx.get('name', idx.get('Name', -1))
+iC = idx.get('country', idx.get('Country', -1))
+iCi = idx.get('city', idx.get('City', -1))
+iType = idx.get('type', idx.get('Type', -1))
+
+# Validate required columns exist
+for col_name, col_idx in [('email', iE), ('status', iS), ('website', iW), ('name', iN), ('country', iC)]:
+    if col_idx == -1:
+        print(f"ERROR: Required column '{col_name}' not found in CSV. Available: {hdr}")
+        sys.exit(1)
 
 first_seen = {}
 for r in rows[1:]:
@@ -249,7 +261,7 @@ for r in rows[1:]:
              else 1 if '2026-10-29' in st else 1 if '2026-10-28' in st else 0)
     score += fresh * 2
     seen_emails.add(e)
-    rtype = (r[idx['Type']] if 'Type' in idx and idx['Type'] < len(r) else '') or ''
+    rtype = (r[iType] if iType >= 0 and iType < len(r) else '') or ''
     scored.append((score, r[0], name, e, (r[iC] if len(r) > iC else '') or '',
                    kind, fresh, (r[iCi] if iCi >= 0 and len(r) > iCi else '') or '', dom,
                    'buyer company' if rtype.startswith('Buyer company') else ''))

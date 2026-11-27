@@ -1,53 +1,61 @@
-☀️ HSN MORNING BRIEFING — Thursday, 26 November 2026
+☀️ HSN MORNING BRIEFING — Friday, 27 November 2026
 
 ========================================
 
 📊 YOUR PIPELINE
-• Total leads tracked: 5839
-• USA batch (Day 5): 208
-• 🔥 HOT leads: 2
-   - Uzbekistan Kurash Federation (L964)
-   - Uzbekistan Kurash Federation (gmail) (L965)
+• Total leads tracked: 0
+• USA batch (Day 5): 0
 
 📰 BUSINESS NEWS (24h)
-• [Textile/Export] Abercrombie raises annual sales, profit forecast on strong apparel demand - ET Retail
-  https://news.google.com/rss/articles/CBMi1AFBVV95cUxPcDViMXhrME80Yml5VmJZcWVEV0pxQkQ0NlhpcVR4RkNzRXgxNUFURXpBWkNpenQtREROQkhPdkFnR1ctblBCUXBRdFFuUE9VZkRsZmVmVGJLZXVwS1R0MENCTEtwUGNyT3RyU1ZXb0hKd1RtdDZiSkVjWnRCTGFqQnRNTEtGV2NLMEN1SUdwWEhvYlJaMHEwTjJvSWNKaTByeEs4Q3lJQ25TRjlYTW1ET2dDdVJGaHhNbFVPeEtlT0xJMmZxSnZScU9oelBzUEhubmVwTA?oc=5
-• [Textile/Export] US Tariffs on India: Fresh Levies Loom as Trade Deal Awaits Clarity
+• [Textile/Export] AGOA: Africa’s exporters gain breathing space but face an uncertain future - New African Magazine
   https://news.google.com/rss/articles/CBMi2wFBVV95cUxOakdGSXJJZVdmUFBmbUZmWjI0VmtlQjhGMTlpY1d3eDhwZkdaV0dzdUdOQ3BJRWp4VEIyWG1PdHl2TTNhTDg5UkhJNW41Z3NzWkdYMWpVdkk2cmVFU1F6c3lvSFU4NnFwck1IX3Zmdkw5c0paUEkzelNXSGxaeWtsejhERjYwNlEybEZqVE4zQW1GNXVfOWRYWC1laC14eU1HRFBSUEtSYnI3bF95Y1JIYTdsWXRTcll0RXZ0MmljUjBwUXNJUzk5bUlkbEVvcW43eDJERzNrbVU2Q2c?oc=5
-• [Textile/Export] EU-Indonesia deal promises duty-free exports - Ecotextile News
-  https://news.google.com/rss/articles/CBMi2wFBVV95cUxPMTdRcjBCam16a3JtUUlVTkx6VmhOM01lMUVrMDZoSkI4ZlJCSTJMZjJLSl9DbFZ4MXhELUFYUTVBaWk5Z2QyM21IbXJEZTEzbTFSRW1EekJiNnJiY3M4OU9QdmdacmlRVTF6TGJ2OTFZMVEybTRvS1dma0tockI1Mm83Qks3YWdLWWwybG1qTWZxOWQzUzJhRGlta0tsTVdtWjMwOG02VHdQT2pKUk1sQWMycWlLSXJYUmEzcWJvU0NQM3Y4OFc5NVk3aHc1WUd6MDdHb1RqWUtpZkk?oc=5
-• [Textile/Export] Polyester Air Textured Yarns Market To 2035: Sportswear and Circular Textiles Drive Growth - News and Statistics
-  https://news.google.com/rss/articles/CBMi1gFBVV95cUxOUWh0T2p4cWExYldrUEpGWVQ1Y1pvbzFYZ0I2WV9IM1dPMnd6eHlpanV0Y21IZGJqUER4QVZCUkRTMHBVOU9RX2FsNlF2eE9ZS1JOOXB0ZXNFWXoyVm12akM3NVZyOTFmbktOQ1ZhbUtfa0p2cFg1and6V2doemNPUlZqZHotbkRValQxaU42WHIxMjJxRDJFWWNHLV9KbWowNnVpTXJkeVRBZnhyU21PUUVTVDZid0NLbXRfSlBNVGZVQ1Z6TDUwd3IwWDRMMGwwX0t1WkRB0gHbAUFVX3lxTE5qbFpsTktZQnlVRG50a3hHdE5OTEhBV3ZiTDRiaW9vZmFDTm9fYk5ubUlTZmlmdV9KSEZ5TlBPUlllSVpmczhTcXJlT0NpQkd5aHlsZ3d1a09KdDdzSU8tXzE1aHVCd0Rqb2JnN1BlNkFXS0J5VDlnMVJKOGh3MENjOUllNHdYSy1WVVFha1Y0OG8zWTlLb1JNOHRDd2QwMjhiUkZLMGhlWGtzbld0Wk10SlJITTNUSE4zZnRvZ1pMMkF1TU01cmptdW9XSVVTOWstdEFMZnRvclRVQQ?oc=5
-• [Textile/Export] India’s Apparel Export Share Slips Despite Global Shift Away From China: BCG-CII Report - KNN India
-  https://news.google.com/rss/articles/CBMinAFBVV95cUxOTFhPNHdfNm1VVVJsV3U2R3FFd1l1dWZ5Nl9rc2I4QkdWOERJdUlSZ1NlR25RWXFyeHE0SkdnYW9oSVMxampCenVpNmVXZ2dRY3MtUHZBZUFNaGswUmhYeG1JNmZzU2NoMTVpbTh2cW9SRVdMVW5OQUN1cGtWTF8taloyUmRtVkpmNGNGMGdyS3BuRVd3Mkd5MkFOUTc?oc=5
-• [Textile/Export] India’s textile and apparel exports need over 20% annual growth to hit $100 billion by FY31: BCG-CII report
-  https://news.google.com/rss/articles/CBMingJBVV95cUxPM3piU0FLSk1ORnAzZzVIelhVa0x2eW03RTdhOFVwc1NybllRN1ZWcW1Ja0x2NFJXUXJiSWljZlo2Rno5dWV5VUJvcUE5b19kdEtmOE5ZV0QxWldERXBDNGRvd1AxQmlPUUp5Rmh0eFoySmZjTzF2RnEzMUFtODRhRDkzczhYNXJYR05ZaUVLTGxFSHJVcXkzaHluSDE1Y2lrNW1nUC1SeV8zbnd5UVdUd2JJbHNQSzNKa3JlQnYxT2Y5ejJxYlRPSUg1d2hzUXQ2MGNkSzZDRUszVFE2bEFPa0txQXJneFBGX1lJMWNGLWwzS2ZOQUVCS2RuSF91dXZBc0xTLUdoSmRJZFVaY3NlamFqLUx0TVBrR3BHenp30gGjAkFVX3lxTE5pV1VtdFFIaDd3U180UDU5MlBLdUVaNzEybkhSc2pMWnVfbF9oWE1md09BRkJUcXN1WEV0Rk1JeVZOT0E2a0tUT04xYU8wZEg4TFhHZHZnU3N0YXBuU2M0bzB0RXU5UUFzWHFmS1Jac090YUNJWXVvUEktWkc4YUZHeTdoUFdiU2xJTXczQlYySDNYcl9mbExZX3RxWmxqWlhlcTlrM0NSSXZjanBGdXlrOE44dGRhUjU2QWJMMDNiWDBkT2FFQkZmWWdCVWFkeU1wMmwzWXRuYV9TeGo0OGpNTjlCRDlzT1puYmJuSl9yZ04yOThLZ3k1ZTVNa3ROMEw1cFQzRTRSU0FTTFA3ZjdTV0hoN2RvYVJ1NGstZExaMF84bw?oc=5
+• [Textile/Export] Vietnam seeks US trade deal as tariffs threaten clothing, footwear exports
+  https://news.google.com/rss/articles/CBMivgFBVV95cUxQTHNsdXJxek0xQmZmeUtqQlpfZHVhd2hZYU1uZkU0NFM4ZU56QzVhMkNwNkhWYVNWUjZjdDFWNlAzazVvZTE1TXVXVnMwTkp0Nk9QV3dETUNuWUJJeVdiMldlOGtjTG9hMTN3RzVURDJsbVFUeFJzQ3NISzBmWTdvak9mRTJxUDZGUk1hcV9lSkJoZ1RtYWRFWTdOYVlhRFRvT0xuZnJiZk5XeXJmVklMaDNWVlc1cjlsaWV6WWlB0gG-AUFVX3lxTFBMc2x1cnF6TTFCZmZ5S2pCWl9kdWF3aFlhTW5mRTQ0UzhlTnpDNWEyQ3A2SFZhU1ZSNmN0MVY2UDNrNW9lMTVNdVdWczBOSnQ2T1BXd0RNQ25ZQkl5V2IyV2U4a2NMb2ExM3dHNVREMmxtUVR4UnNDc0hLMGZZN29qT2ZFMnFQNkZSTWFxX2VKQmhnVG1hZEVZN05hWWFEVG9PTG5mcmJmTld5cmZWSUxoM1ZWVzVyOWxpZXpZaUE?oc=5
+• [Textile/Export] Vietnam Pushes For Quick US Trade Deal As New Tariff Threat Looms - Arise News
+  https://news.google.com/rss/articles/CBMid0FVX3lxTE9CNUpwQktmWFZQVHVfdkFfSXRSM2tIZGpFNnBMZzI0Y3o4eFBUeG1BMGl1RkpDWTZUSmR0LV9ZVlBDMGRJMXh1cktvdVFNbDlCbHhSVU1ubUpHYkV6UklNbUxvZHBtQ0NDMmlacENiOUZFbEpDQzYw?oc=5
+• [Textile/Export] 25% vs 17%: The Economic Stakes of Trump's Tariff Proposal for India-US Trade Relations- Expert View by Spherical Insights - Spherical Insights
+  https://news.google.com/rss/articles/CBMiygFBVV95cUxNSjc4d1lNYUlXaWM3UWx4SlZDTGQtRGJwYmVkejl3ZkJ3QmJET1YyaW9TUEQ5cG82eUNSeGllZ0kwYUNrVVhKbFZuY2lWSEw2cXV0bjVaeE50cWsySGxZMzU3REdGMmhfbkY4LS1NYmpDWGVHMk84LWl0XzBuaUZoYklKT2ZmazFwTVk2WGJ0VFN4MThVUmVVOThSVmZXdHk2RW04MG1CVzZwMG8zTjNWM01FN09LTDhZdWNXRGNOaEhiSUJBeUdqc0RB?oc=5
+• [Textile/Export] Trump Tariff on Indonesia Still Lower than Competitors: Govt - Jakarta Globe
+  https://news.google.com/rss/articles/CBMiswFBVV95cUxNN3o2ekF4b2FFNzNsTlBpeDRjQzdyN21tYk1YajVQZGRUbjFpcjFXNnZEM2xKSDMwbWIxZ2V1SmlTdFBMbnl1ZGpab25aVXp4MnNZUG5XSnBNVEVRYjdhb2xPSWhlbmU3OXhCR3Rtb2xjeEZscTVYX2Y5Y2xuRUpvWmJ3TTRjaHhYMmJ0Z2xYOGRRV3BuUnl2NUUwbjJCSHJQU05aNGtjTU9hbW5JMGNoTWQ5NA?oc=5
+• [Textile/Export] | ₹485 cr funding: Can Style Union reach 450 stores by 2030?
+  https://news.google.com/rss/articles/CBMimAFBVV95cUxNbTd1QjRUdzRBMnhaN0Nia19xV181VUNRUW1TNXFWNXY5V1JuMjY1V1RBRW9sQUFsT3R1LUVxLWxhSW9GRm9rWkV2dWpfVl9GeWthSzJ2bmdFczg3amd3cHVlZWo2UmI5d2Uwem5YRWVVM3V2Ty1IRC1oQ2tOQUlvUlI3YVItUi1keVJlaHpPNF9rRU04TUFheQ?oc=5
 
 💻 HACKER NEWS — top of the morning
+• Holy shit holy shit holy shit holy shit: The magnitude of what’s now happening (1970 points)
+• 1Password Security Incident (1626 points)
+• Tell HN: Happy Thanksgiving (563 points)
+• Intel One Mono font (2023) (448 points)
+• Nextcloud Office Desktop app (393 points)
+• AMD-specific fork of llama.cpp (265 points)
+• Moat: OpenRouter replacement (242 points)
+• OpenAI may be in cost control mode (237 points)
 
 🛠️ NEW TOOLS & LAUNCHES
+• Show HN: Show HN: DataFluxor – SEO, Etsy Research and Scraping via API and MCP
+• Show HN: Show HN: Isekai Boys – a free browser otome game with over 100 love interests
+• Show HN: Show HN: Linux of AI, score and prove how locked-in your AI stack is
+• Show HN: Show HN: SonoJS – A collection of reusable React components and UI blocks
+• Show HN: Show HN: Dailydev – do you still know the code you ship now that AI writes it?
 
 📈 MARKET & PRICING
-• ICE cotton extends recovery, March future settles higher - Fibre2Fashion
-• | India's man-made yarn prices ease, wedding season offers hope - Fibre2Fashion
-• Times Dhandho: Roomy styles beat denim blues; margins still tight - The Times of India
+• | North India cotton yarn prices steady amid weak demand - Fibre2Fashion
+• Boeings, more cotton imports, nothing could stop US tariff - The Business Standard
+• | Vietnam's $49 bn export goal meets a 12.5% US duty: What's next? - Fibre2Fashion
 
 💡 TIPS & TRICKS
-• Ask for the logo early - clients who send logos are 3x more likely to order
-• When quoting, always give 2-3 options (budget/premium) - choice increases conversion
 • Post the same product photo on IG 3-4 weeks apart - audiences grow and forget
+• Reply to leads within 5 minutes when possible - first responder wins 78% of B2B deals
+• Ask for the logo early - clients who send logos are 3x more likely to order
 
 🎯 WHAT YOU NEED TO KNOW TODAY
-• Pipeline: 5839 total leads | USA 1019/2161 emailed, 1051 still open | global ammo 1 leads ready to email
-• 12 tracker rows carry a reply/HOT marker (includes declines, auto-acks and STOP rows - see the HUMAN reply line below for the real count)
-• HUMAN business replies on the board: 5 (L183 Shudokan, L1376 Boxeo El Rayo - MMA, Muay-Thai, Defensa Personal, L3372 TOWASAN Karate Schulen) - reply is DRAFT-ONLY until the user says send
-• Polite declines / closed accounts (do NOT follow up): 2 (L3018 Las Vegas Martial Arts Academy, L3024 Unity Martial Arts Academy - Taekwondo Studio)
-• Session health NOT verified this run (sweep file is 33037 min old)
+• No human business reply markers in the tracker - every recent Gmail/IG reply is an auto-ack, an out-of-office or a bounce
+• Session health NOT verified this run (sweep file is 34477 min old)
 • go4WorldBusiness: profile IS live and logged in (hsnwarriorapparel_9, Junior Member) but 0 products added (verified live 2026-11-03) - list products so buyers can find us
+• SECURITY: TradeWheel emailed the account password in plaintext - change it and reuse a unique password
 
 🎯 TODAY'S MOVES
 • Re-link WhatsApp Web from your phone (QR screen is up) - that unlocks the 10/day WA quota
-• 1 leads have a valid email and no send marker - fire the next 100-email wave tonight (20:00 UTC / 1 AM PKT)
+• Ammo is dry - run another Maps/Exa hunt before the next wave
 • USA emails continue in US business hours (7 PM - 1 AM PKT)
 • Check Alvaro's sample order status - he is the closest to payment
 • Add products to the go4WorldBusiness profile (0 listed = invisible to buyers)
