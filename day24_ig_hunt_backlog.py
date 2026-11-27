@@ -32,7 +32,21 @@ def fetch(url, timeout=10):
 
 rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 idx = {h: i for i, h in enumerate(rows[0])}
-iIG, iLINK, iW, iS = idx['IG Username'], idx['IG Profile Link'], idx['Website'], idx['Status']
+# Map script-expected names to actual CSV headers
+col_map = {
+    'IG Username': 'instagram_handle',
+    'IG Profile Link': 'instagram_handle',
+    'Website': 'website',
+    'Status': 'status',
+}
+iIG = idx.get(col_map['IG Username'])
+iLINK = idx.get(col_map['IG Profile Link'])
+iW = idx.get(col_map['Website'])
+iS = idx.get(col_map['Status'])
+if None in (iIG, iLINK, iW, iS):
+    missing = [k for k, v in col_map.items() if idx.get(v) is None]
+    print(f"Missing columns: {missing}", flush=True)
+    sys.exit(1)
 
 targets = []
 for r in rows[1:]:

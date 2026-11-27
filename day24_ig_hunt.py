@@ -35,8 +35,23 @@ def fetch(url, timeout=10):
 
 rows = list(csv.reader(open(CSV, encoding='utf-8-sig', errors='replace')))
 idx = {h: i for i, h in enumerate(rows[0])}
-iIG, iLINK, iW, iS, iN = (idx['IG Username'], idx['IG Profile Link'], idx['Website'],
-                          idx['Status'], idx['Name'])
+# Map script-expected names to actual CSV headers
+col_map = {
+    'IG Username': 'instagram_handle',
+    'IG Profile Link': 'instagram_handle',  # same column, will write '@handle' + link
+    'Website': 'website',
+    'Status': 'status',
+    'Name': 'name',
+}
+iIG = idx.get(col_map['IG Username'])
+iLINK = idx.get(col_map['IG Profile Link'])
+iW = idx.get(col_map['Website'])
+iS = idx.get(col_map['Status'])
+iN = idx.get(col_map['Name'])
+if None in (iIG, iLINK, iW, iS, iN):
+    missing = [k for k, v in col_map.items() if idx.get(v) is None]
+    print(f"Missing columns: {missing}", flush=True)
+    sys.exit(1)
 
 # targets: wave leads (today) + any lead still missing a handle
 wave_ids = set(l.strip() for l in open('/home/ubuntu/day24_wave.txt') if l.strip())

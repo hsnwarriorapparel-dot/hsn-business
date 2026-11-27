@@ -66,8 +66,23 @@ def update_status(lead_id, new_status):
 
 rows = load()
 idx = {h: i for i, h in enumerate(rows[0])}
-iIG, iS, iN, iC = idx['IG Username'], idx['Status'], idx['Name'], idx['Country']
-iE = idx['Email']
+# Map script-expected names to actual CSV headers
+col_map = {
+    'IG Username': 'instagram_handle',
+    'Status': 'status',
+    'Name': 'name',
+    'Country': 'country',
+    'Email': 'email',
+}
+iIG = idx.get(col_map['IG Username'])
+iS = idx.get(col_map['Status'])
+iN = idx.get(col_map['Name'])
+iC = idx.get(col_map['Country'])
+iE = idx.get(col_map['Email'])
+if None in (iIG, iS, iN, iC, iE):
+    missing = [k for k, v in col_map.items() if idx.get(v) is None]
+    print(f"Missing columns: {missing}", flush=True)
+    sys.exit(1)
 # Lead ID -> row (for the email-local-part identity signal below)
 rows_by_id = {r[0]: r for r in rows[1:] if r and r[0]}
 wave_ids = set(l.strip() for l in open('/home/ubuntu/day24_wave.txt') if l.strip())

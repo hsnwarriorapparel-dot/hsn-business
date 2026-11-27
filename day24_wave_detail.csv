@@ -1,4 +1,9 @@
 Lead ID,Name,Email,Country,City,Score,Kind,Fresh,Domain
+LTEST003,Gracie Barra Houston,houston@graciebarra.com,United States,,80,site-domain-match,0,graciebarra.com
+LTEST001,Houston Boxing Academy,info@houstonboxingacademy.com,United States,,72,site-domain-match,0,houstonboxingacademy.com
+LTEST002,Elite MMA Houston,contact@elitemmahouston.com,United States,,72,site-domain-match,0,elitemmahouston.com
+LTEST004,Champions Boxing Club,info@championsboxingclub.com,United States,,72,site-domain-match,0,championsboxingclub.com
+LTEST005,Texas Martial Arts Center,info@texasmartialartscenter.com,United States,,72,site-domain-match,0,texasmartialartscenter.com
 L964,Uzbekistan Kurash Federation,info@ukf.uz,Uzbekistan,,72,site-domain-match,0,ukf.uz
 L026,Brazilian Fight Lisboa,brazilian.fight.lisboa@gmail.com,Portugal,,38,webmail-name-match,0,gmail.com
 L132,Alvaro Campeao,alvarotdcampeao@gmail.com,Portugal,,38,webmail-name-match,0,gmail.com
