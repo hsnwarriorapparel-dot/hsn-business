@@ -71,17 +71,45 @@ def read_leads():
     with open(CSV, newline='', encoding='utf-8-sig') as f:
         rows = list(csv.reader(f))
     hdr = rows[0]
+    # Map expected columns to actual CSV headers
+    col_map = {
+        'Type': 'source',  # use source as proxy for type
+        'Status': 'status',
+        'Lead ID': 'id',
+        'Name': 'name',
+        'Email': 'email',
+        'Phone': 'whatsapp_number',
+        'Website': 'website',
+        'Profile Analysis': 'notes',  # fallback
+        'Country': 'country',
+    }
+    # Check which mapped columns exist
     idx = {h: i for i, h in enumerate(hdr)}
+    mapped_idx = {}
+    for expected, actual in col_map.items():
+        if actual in idx:
+            mapped_idx[expected] = idx[actual]
+        else:
+            mapped_idx[expected] = None
     out = []
     for r in rows[1:]:
         if not r:
             continue
-        out.append({h: (r[i] if i < len(r) else '') for h, i in idx.items()})
-    return hdr, out
+        lead_dict = {}
+        for expected, actual_idx in mapped_idx.items():
+            if actual_idx is not None and actual_idx < len(r):
+                lead_dict[expected] = r[actual_idx]
+            else:
+                lead_dict[expected] = ''
+        # Also include all original columns
+        for h, i in idx.items():
+            lead_dict[h] = r[i] if i < len(r) else ''
+        out.append(lead_dict)
+    return hdr, out, mapped_idx
 
 
 def main():
-    hdr, leads = read_leads()
+    hdr, leads, mapped_idx = read_leads()
     wb = Workbook()
 
     # ---------------- 1. Leads ----------------
@@ -93,26 +121,29 @@ def main():
     style_header(ws)
     autosize(ws, maxw=44)
     ws.auto_filter.ref = ws.dimensions
-    # colour the rows that matter
-    i_type = hdr.index('Type') + 1
-    i_stat = hdr.index('Status') + 1
-    for row in range(2, ws.max_row + 1):
-        t = (ws.cell(row=row, column=i_type).value or '')
-        s = (ws.cell(row=row, column=i_stat).value or '')
-        if 'REPLIED' in s:
-            for c in range(1, len(hdr) + 1):
-                ws.cell(row=row, column=c).fill = REPLY_FILL
-        elif str(t).startswith('Buyer company'):
-            for c in range(1, len(hdr) + 1):
-                ws.cell(row=row, column=c).fill = BUYER_FILL
+    # colour the rows that matter - use mapped 'Type' (source) and 'Status'
+    # Type is mapped from 'source' column
+    i_type = mapped_idx.get('Type')
+    i_stat = mapped_idx.get('Status')
+    if i_type is not None and i_stat is not None:
+        for row in range(2, ws.max_row + 1):
+            t = (ws.cell(row=row, column=i_type + 1).value or '')
+            s = (ws.cell(row=row, column=i_stat + 1).value or '')
+            if 'REPLIED' in s:
+                for c in range(1, len(hdr) + 1):
+                    ws.cell(row=row, column=c).fill = REPLY_FILL
+            elif str(t).startswith('Buyer company') or str(t).startswith('g4wb'):
+                for c in range(1, len(hdr) + 1):
+                    ws.cell(row=row, column=c).fill = BUYER_FILL
 
     # ---------------- 2. Buyer Companies ----------------
     ws = wb.create_sheet('Buyer Companies')
     bh = ['Lead ID', 'Company', 'Contact', 'Phone', 'Country', 'Website',
           'Trade', 'Status', 'Next action']
     ws.append(bh)
+    # Type is mapped from 'source' - buyer companies have source starting with 'g4wb'
     buyers = [l for l in leads
-              if str(l.get('Type', '')).startswith('Buyer company')]
+              if str(l.get('Type', '')).startswith('Buyer company') or str(l.get('Type', '')).startswith('g4wb')]
     for l in buyers:
         st = l.get('Status', '')
         if 'INQUIRY SENT' in st:
@@ -286,7 +317,8 @@ def main():
             cc[c][2] += 1
         if 'REPLIED' in l.get('Status', ''):
             cc[c][3] += 1
-        if str(l.get('Type', '')).startswith('Buyer company'):
+        # Type is mapped from 'source' - buyer companies have source starting with 'g4wb'
+        if str(l.get('Type', '')).startswith('Buyer company') or str(l.get('Type', '')).startswith('g4wb'):
             cc[c][4] += 1
     for c, v in sorted(cc.items(), key=lambda kv: -kv[1][0]):
         ws.append([c] + v)
